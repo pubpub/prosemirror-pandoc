@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "downlevelIteration": true,
+        "outDir": "dist",
+        "lib": ["es6", "dom"]
+    },
+    "include": ["./**/*.ts"],
+    "exclude": ["node_modules"]
+}

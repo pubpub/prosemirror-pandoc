@@ -42,11 +42,11 @@ interface Machine {
 
 interface SearchPosition {
     state: State;
-    nodes: Node[];
+    nodeCount: number;
 }
 
 // A simple recursive-descent parser to turn expressions like `(Space | Str)+` into syntax trees
-export const parseRegexp = (str: string): RegExp => {
+export const parseRegExp = (str: string): RegExp => {
     str = str.trim();
     // Remove spaces around choice separators
     str = str.replace(/\s*\|\s*/g, "|");
@@ -94,20 +94,20 @@ export const parseRegexp = (str: string): RegExp => {
         }
         return {
             type: separator === " " ? "sequence" : "choice",
-            children: separated.map(parseRegexp),
+            children: separated.map(parseRegExp),
         };
     } else if (str.endsWith("+")) {
         return {
             type: "oneOrMore",
-            child: parseRegexp(str.slice(0, str.length - 1)),
+            child: parseRegExp(str.slice(0, str.length - 1)),
         };
     } else if (str.endsWith("*")) {
         return {
             type: "zeroOrMore",
-            child: parseRegexp(str.slice(0, str.length - 1)),
+            child: parseRegExp(str.slice(0, str.length - 1)),
         };
     } else if (str.startsWith("(") && str.endsWith(")")) {
-        return parseRegexp(str.slice(1, str.length - 1));
+        return parseRegExp(str.slice(1, str.length - 1));
     }
     return { type: "identifier", identifier: str };
 };
@@ -184,19 +184,18 @@ const createAcceptanceMachine = (expr: RegExp): Machine => {
     return { startState, acceptState };
 };
 
-export const accepts = (regexpString: string, nodes: Node[]): boolean => {
-    const regexp = parseRegexp(regexpString);
+export const acceptNodes = (regexpString: string, nodes: Node[]): number => {
+    const regexp = parseRegExp(regexpString);
     const { startState, acceptState } = createAcceptanceMachine(regexp);
-    const positions: SearchPosition[] = [{ state: startState, nodes: nodes }];
+    const positions: SearchPosition[] = [{ state: startState, nodeCount: 0 }];
     const discoveredPositions: SearchPosition[] = [];
+    const acceptedNodeCounts = [];
 
     const maybePushPosition = (p: SearchPosition) => {
         const hasAlreadyDiscoveredPosition = discoveredPositions.some(
             discoveredPosition =>
                 discoveredPosition.state === p.state &&
-                // Every nodes array is a subset of nodes like nodes.slice(k)
-                // So it suffices to check whether two node arrays are the same length
-                discoveredPosition.nodes.length === p.nodes.length
+                discoveredPosition.nodeCount === p.nodeCount
         );
         if (!hasAlreadyDiscoveredPosition) {
             positions.push(p);
@@ -205,20 +204,20 @@ export const accepts = (regexpString: string, nodes: Node[]): boolean => {
 
     while (positions.length > 0) {
         const position = positions.shift();
-        const { state, nodes } = position;
+        const { state, nodeCount } = position;
+        const currentNode = nodes[nodeCount];
+        const successors = state.getSuccessors(currentNode);
         discoveredPositions.push(position);
-        const [firstNode, ...restNodes] = nodes;
-        const successors = state.getSuccessors(firstNode);
+        if (state === acceptState) {
+            acceptedNodeCounts.push(nodeCount);
+        }
         for (const successor of successors) {
-            const nextNodes = state.consumesNode() ? restNodes : nodes;
-            const reachedAccept = successor === acceptState;
-            const usedAllNodes = nextNodes.length === 0;
-            if (reachedAccept && usedAllNodes) {
-                return true;
-            }
-            maybePushPosition({ state: successor, nodes: nextNodes });
+            const nextNodeCount = state.consumesNode()
+                ? nodeCount + 1
+                : nodeCount;
+            maybePushPosition({ state: successor, nodeCount: nextNodeCount });
         }
     }
 
-    return false;
+    return acceptedNodeCounts.reduce((a, b) => Math.max(a, b), 0);
 };

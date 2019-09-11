@@ -261,7 +261,6 @@ const parsePlain = (n: { c: any[] }): Plain => {
 };
 
 const parsePara = (n: { c: any[] }): Para => {
-    console.log("para", n.c);
     const inline = n.c;
     return {
         type: "Para",

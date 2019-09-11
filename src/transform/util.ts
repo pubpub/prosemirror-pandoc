@@ -1,4 +1,17 @@
-import { Str, Space } from "../types";
+import { Attr, Str, Space } from "../types";
+
+export const createAttr = (...args): Attr => {
+    if (args.length === 1) {
+        return {
+            identifier: "",
+            classes: [],
+            properties: args[0],
+        };
+    } else {
+        const [identifier, classes, properties] = args;
+        return { identifier, classes, properties };
+    }
+};
 
 export const textFromStrSpace = (nodes: (Str | Space)[]) => {
     let text = "";
@@ -12,13 +25,20 @@ export const textFromStrSpace = (nodes: (Str | Space)[]) => {
     return text;
 };
 
-export const textToStrSpace = (text: string): (Str | Space)[] => {
-    const words = text.split(" ");
-    return words.reduce((acc: (Str | Space)[], next: string, index: number) => {
-        const addedHere: any[] = [{ type: "Str", content: next }];
-        if (index !== words.length - 1) {
-            addedHere.push({ type: "Space" });
+export const intersperse = <T>(
+    arr: T[],
+    intersperseFn: (index?: number) => T
+): T[] =>
+    arr.reduce((accumulated: T[], next: T, index: number): T[] => {
+        const added: T[] = [next];
+        if (index !== arr.length - 1) {
+            added.push(intersperseFn(index));
         }
-        return [...acc, ...addedHere];
+        return [...accumulated, ...added];
     }, []);
-};
+
+export const textToStrSpace = (text: string): (Str | Space)[] =>
+    intersperse<Str | Space>(
+        text.split(" ").map(word => ({ type: "Str", content: word })),
+        () => ({ type: "Space" })
+    );

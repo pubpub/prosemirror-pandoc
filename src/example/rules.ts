@@ -22,6 +22,7 @@ import {
 import {
     contentTransformer,
     textTransformer,
+    listTransformer,
 } from "../transform/basicTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
@@ -57,11 +58,26 @@ rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
 rules.transform("CodeBlock", "code_block", textTransformer);
 rules.transform("BlockQuote", "blockquote", contentTransformer);
 
-// Use a listTransformer to take care of OrderedList
-// rules.transform("OrderedList", "ordered_list", listTransformer("list_item"));
-
-// Same with BulletList!
-// rules.transform("BulletList", "bullet_list", listTransformer("list_item"));
+// Use a listTransformer to take care of OrderedList and BulletList
+const ensureFirstElementIsParagraph = listItem => {
+    if (
+        listItem.children.length === 0 ||
+        listItem.children[0].type !== "paragraph"
+    ) {
+        listItem.children.unshift({ type: "paragraph", children: [] });
+    }
+    return listItem;
+};
+rules.transform(
+    "OrderedList",
+    "ordered_list",
+    listTransformer("list_item", ensureFirstElementIsParagraph)
+);
+rules.transform(
+    "BulletList",
+    "bullet_list",
+    listTransformer("list_item", ensureFirstElementIsParagraph)
+);
 
 // What even is a DefinitionList? I don't know, so we're going to turn it into a BulletList.
 // rules.pandocProjection("DefinitionList", "bullet_list", {

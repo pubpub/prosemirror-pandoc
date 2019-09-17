@@ -45,7 +45,49 @@ export const textTransformer = (pdNodeName, pmNodeName) => {
  * A transformer appropriate for converting between Pandoc OrderedLists and BulletLists and the
  * equivalent types in a Prosemirror schema -- basically, anything like an <ol> or a <ul>.
  */
-export const listTransformer = (pmInnerNodeName: string) => (
-    pdNodeName: string,
-    pmNodeName: string
-) => {};
+export const listTransformer = (
+    pmInnerNodeName: string,
+    processListItem: <N>(n: N) => N = x => x
+) => (pdNodeName, pmNodeName) => {
+    return {
+        fromPandoc: (node, { transform }) => {
+            const children = node.content.map(blocks => {
+                return processListItem({
+                    type: pmInnerNodeName,
+                    children: transform(blocks).asArray(),
+                });
+            });
+            const hasOrder =
+                node.listAttributes &&
+                typeof node.listAttributes.startNumber === "number";
+            const attrs = hasOrder
+                ? { order: node.listAttributes.startNumber }
+                : {};
+            return {
+                type: pmNodeName,
+                attrs,
+                children,
+            };
+        },
+        fromProsemirror: (node, { transform }) => {
+            const content = node.children.map(listItem =>
+                transform(listItem).asArray()
+            );
+            const additionalAttributes =
+                typeof node.attrs.order === "number"
+                    ? {
+                          listAttributes: {
+                              startNumber: node.attrs.order,
+                              listNumberStyle: "DefaultStyle",
+                              listNumberDelim: "DefaultDelim",
+                          },
+                      }
+                    : {};
+            return {
+                type: pdNodeName,
+                content,
+                ...additionalAttributes,
+            };
+        },
+    };
+};

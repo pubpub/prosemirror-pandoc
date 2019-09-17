@@ -3,7 +3,7 @@ import rules from "../../example/rules";
 
 import { fromPandoc } from "../transformer";
 import { createAttr } from "../util";
-import { Header } from "../../types";
+import { Header, OrderedList, BulletList } from "../../types";
 
 describe("fromPandoc", () => {
     it("transforms a simple string", () => {
@@ -182,5 +182,225 @@ describe("fromPandoc", () => {
         expect(fromPandoc({ type: "HorizontalRule" }, rules)).toEqual({
             type: "horizontal_rule",
         });
+    });
+
+    it("transforms an OrderedList into an ordered_list", () => {
+        const input: OrderedList = {
+            type: "OrderedList",
+            listAttributes: {
+                startNumber: 2,
+                listNumberDelim: "DefaultDelim",
+                listNumberStyle: "DefaultStyle",
+            },
+            content: [
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "One" },
+                        ],
+                    },
+                ],
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "Two" },
+                        ],
+                    },
+                ],
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "Three" },
+                        ],
+                    },
+                ],
+            ],
+        };
+        const expectedOutput = {
+            type: "ordered_list",
+            attrs: {
+                order: 2,
+            },
+            children: [
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item One" }],
+                        },
+                    ],
+                },
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item Two" }],
+                        },
+                    ],
+                },
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item Three" }],
+                        },
+                    ],
+                },
+            ],
+        };
+        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
+    });
+
+    it("transforms an BulletList into an bullet_list", () => {
+        const input: BulletList = {
+            type: "BulletList",
+            content: [
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "One" },
+                        ],
+                    },
+                ],
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "Two" },
+                        ],
+                    },
+                ],
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "Three" },
+                        ],
+                    },
+                ],
+            ],
+        };
+        const expectedOutput = {
+            type: "bullet_list",
+            attrs: {},
+            children: [
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item One" }],
+                        },
+                    ],
+                },
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item Two" }],
+                        },
+                    ],
+                },
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item Three" }],
+                        },
+                    ],
+                },
+            ],
+        };
+        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
+    });
+
+    it("uses the processListItem argument of listTransformer to process list items", () => {
+        // The PubPub prosemirror schema demands that the first element in a list_item
+        // be a paragraph. We enforce that using a processListItem function, which we test here.
+        const input: BulletList = {
+            type: "BulletList",
+            content: [
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            { type: "Str", content: "Item" },
+                            { type: "Space" },
+                            { type: "Str", content: "One" },
+                        ],
+                    },
+                ],
+                [
+                    {
+                        type: "BlockQuote",
+                        content: [
+                            {
+                                type: "Para",
+                                content: [
+                                    { type: "Str", content: "Item" },
+                                    { type: "Space" },
+                                    { type: "Str", content: "Two" },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            ],
+        };
+        const expectedOutput = {
+            type: "bullet_list",
+            attrs: {},
+            children: [
+                {
+                    type: "list_item",
+                    children: [
+                        {
+                            type: "paragraph",
+                            children: [{ type: "text", text: "Item One" }],
+                        },
+                    ],
+                },
+                {
+                    type: "list_item",
+                    children: [
+                        // This is the added paragraph we expect to see.
+                        { type: "paragraph", children: [] },
+                        {
+                            type: "blockquote",
+                            children: [
+                                {
+                                    type: "paragraph",
+                                    children: [
+                                        { type: "text", text: "Item Two" },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
     });
 });

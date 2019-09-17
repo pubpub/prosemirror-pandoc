@@ -29,6 +29,8 @@ const assignFluent = <T>(
         const method = methods[key];
         Object.defineProperty(target, key, {
             value: () => fluentizer(method(target)),
+            configurable: true,
+            writable: false,
         });
     });
     return target as FluentType<T>;

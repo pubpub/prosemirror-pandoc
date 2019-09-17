@@ -3,18 +3,18 @@
  * correspondences between Pandoc elements with a content property and
  * Prosemirror elements with a children property
  */
-export const contentTransformer = (pdNodeName: string, pmNodeName: string) => {
+export const contentTransformer = (pdNodeName, pmNodeName) => {
     return {
-        fromPandoc: (node: { content: any[] }, { fromPandoc }) => {
+        fromPandoc: (node, { transform }) => {
             return {
                 type: pmNodeName,
-                children: node.content.map(fromPandoc),
+                children: transform(node.content),
             };
         },
-        fromProsemirror: (node: { children: any[] }, { fromProsemirror }) => {
+        fromProsemirror: (node, { transform }) => {
             return {
                 type: pdNodeName,
-                content: node.children.map(fromProsemirror),
+                content: transform(node.children),
             };
         },
     };
@@ -24,9 +24,9 @@ export const contentTransformer = (pdNodeName: string, pmNodeName: string) => {
  * A transformer that converts between Pandoc elements with string content and Prosemirror
  * elements that accept {type: 'text', text: string}[] as their children.
  */
-export const textTransformer = (pdNodeName: string, pmNodeName: string) => {
+export const textTransformer = (pdNodeName, pmNodeName) => {
     return {
-        fromPandoc: (node: { content: string }) => {
+        fromPandoc: node => {
             return {
                 type: pmNodeName,
                 children: [
@@ -37,7 +37,7 @@ export const textTransformer = (pdNodeName: string, pmNodeName: string) => {
                 ],
             };
         },
-        fromProsemirror: (node: { children: { text: string }[] }) => {
+        fromProsemirror: node => {
             return {
                 type: pdNodeName,
                 content: node.children.join(""),
@@ -50,6 +50,7 @@ export const textTransformer = (pdNodeName: string, pmNodeName: string) => {
  * A transformer appropriate for converting between Pandoc OrderedLists and BulletLists and the
  * equivalent types in a Prosemirror schema -- basically, anything like an <ol> or a <ul>.
  */
-export const listTransformer = (pmInnerNodeName: string) => (pdNodeName: string, pmNodeName: string) => {
-    
-}
+// export const listTransformer = (pmInnerNodeName: string) => (
+//     pdNodeName: string,
+//     pmNodeName: string
+// ) => {};

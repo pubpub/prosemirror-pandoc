@@ -1,6 +1,10 @@
 import { Attr, Str, Space } from "../types";
 
-export const createAttr = (...args): Attr => {
+type CreateAttr =
+    | ((properties: {}) => Attr)
+    | ((identifier: string, classes?: string[], properties?: {}) => Attr);
+
+export const createAttr: CreateAttr = (...args): Attr => {
     if (args.length === 1) {
         return {
             identifier: "",
@@ -8,7 +12,7 @@ export const createAttr = (...args): Attr => {
             properties: args[0],
         };
     } else {
-        const [identifier, classes, properties] = args;
+        const [identifier, classes = [], properties = {}] = args;
         return { identifier, classes, properties };
     }
 };
@@ -25,20 +29,43 @@ export const textFromStrSpace = (nodes: (Str | Space)[]) => {
     return text;
 };
 
-export const intersperse = <T>(
-    arr: T[],
-    intersperseFn: (index?: number) => T
-): T[] =>
-    arr.reduce((accumulated: T[], next: T, index: number): T[] => {
-        const added: T[] = [next];
-        if (index !== arr.length - 1) {
-            added.push(intersperseFn(index));
-        }
-        return [...accumulated, ...added];
-    }, []);
+export const intersperse = (
+    arr: any[],
+    intersperseFn: (index?: number) => any
+): any[] =>
+    (Array.isArray(arr) ? arr : [arr]).reduce(
+        (accumulated: any[], next: any, index: number): any[] => {
+            const added: any[] = [next];
+            if (index !== (Array.isArray(arr) ? arr : [arr]).length - 1) {
+                added.push(intersperseFn(index));
+            }
+            return [...accumulated, ...added];
+        },
+        []
+    );
 
 export const textToStrSpace = (text: string): (Str | Space)[] =>
-    intersperse<Str | Space>(
+    intersperse(
         text.split(" ").map(word => ({ type: "Str", content: word })),
         () => ({ type: "Space" })
     );
+
+export const asArray = <T>(item: T | T[]): T[] => {
+    return Array.isArray(item) ? item : [item];
+};
+
+export const asNode = <T>(item: T | T[]): T => {
+    return Array.isArray(item) ? item[0] : item;
+};
+
+export const flatten = <T>(input: (T | T[])[]) => {
+    return input.reduce(
+        (arr: T[], next: T | T[]) => {
+            if (Array.isArray(next)) {
+                return [...arr, ...next];
+            }
+            return [...arr, next];
+        },
+        [] as T[]
+    );
+};

@@ -1,52 +1,49 @@
 /**
  * Implements a state-machine like token acceptor.
  */
-interface Node {
-    type: string;
-}
-
 interface Identifier {
     type: "identifier";
     identifier: string;
 }
 interface OneOrMore {
     type: "oneOrMore";
-    child: RegExp;
+    child: Expr;
 }
 interface ZeroOrMore {
     type: "zeroOrMore";
-    child: RegExp;
+    child: Expr;
 }
 interface Sequence {
     type: "sequence";
-    children: RegExp[];
+    children: Expr[];
 }
 interface Choice {
     type: "choice";
-    children: RegExp[];
+    children: Expr[];
 }
 
-type RegExp = Identifier | OneOrMore | ZeroOrMore | Sequence | Choice;
+export type IdentifierMatch<Node> = (id: string) => (node: Node) => boolean;
+export type Expr = Identifier | OneOrMore | ZeroOrMore | Sequence | Choice;
 
-interface State {
-    addSuccessor: (s: State) => void;
-    getSuccessors: (n: Node) => State[];
+interface State<Node> {
+    addSuccessor: (s: State<Node>) => void;
+    getSuccessors: (n: Node) => State<Node>[];
     consumesNode: () => boolean;
     debugValue: string;
 }
 
-interface Machine {
-    startState: State;
-    acceptState: State;
+interface Machine<Node> {
+    startState: State<Node>;
+    acceptState: State<Node>;
 }
 
-interface SearchPosition {
-    state: State;
+interface SearchPosition<Node> {
+    state: State<Node>;
     nodeCount: number;
 }
 
 // A simple recursive-descent parser to turn expressions like `(Space | Str)+` into syntax trees
-export const parseRegExp = (str: string): RegExp => {
+export const parseExpr = (str: string): Expr => {
     str = str.trim();
     // Remove spaces around choice separators
     str = str.replace(/\s*\|\s*/g, "|");
@@ -94,31 +91,31 @@ export const parseRegExp = (str: string): RegExp => {
         }
         return {
             type: separator === " " ? "sequence" : "choice",
-            children: separated.map(parseRegExp),
+            children: separated.map(parseExpr),
         };
     } else if (str.endsWith("+")) {
         return {
             type: "oneOrMore",
-            child: parseRegExp(str.slice(0, str.length - 1)),
+            child: parseExpr(str.slice(0, str.length - 1)),
         };
     } else if (str.endsWith("*")) {
         return {
             type: "zeroOrMore",
-            child: parseRegExp(str.slice(0, str.length - 1)),
+            child: parseExpr(str.slice(0, str.length - 1)),
         };
     } else if (str.startsWith("(") && str.endsWith(")")) {
-        return parseRegExp(str.slice(1, str.length - 1));
+        return parseExpr(str.slice(1, str.length - 1));
     }
     return { type: "identifier", identifier: str };
 };
 
-const state = (
+const state = <Node>(
     guard?: (n: Node) => boolean,
     debugValue: string = "NoDebugValue"
-): State => {
-    const successors: Set<State> = new Set();
+): State<Node> => {
+    const successors: Set<State<Node>> = new Set();
 
-    const addSuccessor = (s: State) => {
+    const addSuccessor = (s: State<Node>) => {
         successors.add(s);
     };
 
@@ -139,25 +136,29 @@ const state = (
     };
 };
 
-const createAcceptanceMachine = (expr: RegExp): Machine => {
+const createAcceptanceMachine = <Node>(
+    expr: Expr,
+    matcher: IdentifierMatch<Node>
+): Machine<Node> => {
     const startState = state();
     const acceptState = state();
 
     if (expr.type === "identifier") {
-        const identifierState = state(
-            (n: Node) => n.type === expr.identifier,
-            "IDState"
-        );
+        const identifierState = state(matcher(expr.identifier));
         startState.addSuccessor(identifierState);
         identifierState.addSuccessor(acceptState);
     } else if (expr.type === "choice") {
-        const choiceMachines = expr.children.map(createAcceptanceMachine);
+        const choiceMachines = expr.children.map(x =>
+            createAcceptanceMachine(x, matcher)
+        );
         choiceMachines.forEach(machine => {
             startState.addSuccessor(machine.startState);
             machine.acceptState.addSuccessor(acceptState);
         });
     } else if (expr.type === "sequence") {
-        const sequenceMachines = expr.children.map(createAcceptanceMachine);
+        const sequenceMachines = expr.children.map(x =>
+            createAcceptanceMachine(x, matcher)
+        );
         const finalAcceptState = sequenceMachines.reduce(
             (intermediateAcceptState, nextMachine) => {
                 intermediateAcceptState.addSuccessor(nextMachine.startState);
@@ -167,13 +168,13 @@ const createAcceptanceMachine = (expr: RegExp): Machine => {
         );
         finalAcceptState.addSuccessor(acceptState);
     } else if (expr.type === "zeroOrMore") {
-        const innerMachine = createAcceptanceMachine(expr.child);
+        const innerMachine = createAcceptanceMachine(expr.child, matcher);
         startState.addSuccessor(innerMachine.startState);
         innerMachine.acceptState.addSuccessor(acceptState);
         startState.addSuccessor(acceptState);
         acceptState.addSuccessor(startState);
     } else if (expr.type === "oneOrMore") {
-        const innerMachine = createAcceptanceMachine(expr.child);
+        const innerMachine = createAcceptanceMachine(expr.child, matcher);
         startState.addSuccessor(innerMachine.startState);
         innerMachine.acceptState.addSuccessor(acceptState);
         acceptState.addSuccessor(startState);
@@ -184,14 +185,22 @@ const createAcceptanceMachine = (expr: RegExp): Machine => {
     return { startState, acceptState };
 };
 
-export const acceptNodes = (regexpString: string, nodes: Node[]): number => {
-    const regexp = parseRegExp(regexpString);
-    const { startState, acceptState } = createAcceptanceMachine(regexp);
-    const positions: SearchPosition[] = [{ state: startState, nodeCount: 0 }];
-    const discoveredPositions: SearchPosition[] = [];
+export const acceptNodes = <Node>(
+    expr: Expr,
+    nodes: Node[],
+    matchTest: IdentifierMatch<Node>
+): number => {
+    const { startState, acceptState } = createAcceptanceMachine(
+        expr,
+        matchTest
+    );
+    const positions: SearchPosition<Node>[] = [
+        { state: startState, nodeCount: 0 },
+    ];
+    const discoveredPositions: SearchPosition<Node>[] = [];
     const acceptedNodeCounts = [];
 
-    const maybePushPosition = (p: SearchPosition) => {
+    const maybePushPosition = (p: SearchPosition<Node>) => {
         const hasAlreadyDiscoveredPosition = discoveredPositions.some(
             discoveredPosition =>
                 discoveredPosition.state === p.state &&
@@ -220,4 +229,32 @@ export const acceptNodes = (regexpString: string, nodes: Node[]): number => {
     }
 
     return acceptedNodeCounts.reduce((a, b) => Math.max(a, b), 0);
+};
+
+export const expressionAcceptsMultiple = (expr: Expr): boolean => {
+    if (expr.type === "identifier") {
+        return false;
+    } else if (expr.type === "sequence") {
+        return true;
+    } else if (expr.type === "oneOrMore") {
+        return true;
+    } else if (expr.type === "zeroOrMore") {
+        return true;
+    } else if (expr.type === "choice") {
+        return expr.children.some(child => expressionAcceptsMultiple(child));
+    }
+};
+
+export const willAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
+    if (expr.type === "identifier") {
+        return expr.identifier === id;
+    } else if (expr.type === "sequence") {
+        return false;
+    } else if (expr.type === "choice") {
+        return expr.children.some(child =>
+            willAlwaysMatchSingleIdentifier(child, id)
+        );
+    } else {
+        return willAlwaysMatchSingleIdentifier(expr.child, id);
+    }
 };

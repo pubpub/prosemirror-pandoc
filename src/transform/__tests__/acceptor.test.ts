@@ -1,19 +1,22 @@
 /* global describe, it, expect */
-import { acceptNodes, parseRegExp } from "../acceptor";
+import { acceptNodes, parseExpr } from "../nodeExpression";
 
-// Utility node creator
-const n = (s: string) => ({ type: s });
+interface Node {
+    type: string;
+}
+
+const n = (s: string): Node => ({ type: s });
 
 describe("parseRegexp", () => {
     it("handles a simple identifier", () => {
-        expect(parseRegExp("Foo")).toEqual({
+        expect(parseExpr("Foo")).toEqual({
             type: "identifier",
             identifier: "Foo",
         });
     });
 
     it("handles a sequence of identifiers", () => {
-        expect(parseRegExp("Foo Bar Baz")).toEqual({
+        expect(parseExpr("Foo Bar Baz")).toEqual({
             type: "sequence",
             children: [
                 {
@@ -33,7 +36,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles zero-or-more quantifiers (*)", () => {
-        expect(parseRegExp("Foo*")).toEqual({
+        expect(parseExpr("Foo*")).toEqual({
             type: "zeroOrMore",
             child: {
                 type: "identifier",
@@ -43,7 +46,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles zero-or-more quantifiers (*) in context", () => {
-        expect(parseRegExp("Foo Bar* Baz")).toEqual({
+        expect(parseExpr("Foo Bar* Baz")).toEqual({
             type: "sequence",
             children: [
                 {
@@ -66,7 +69,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles one-or-more quantifiers (+)", () => {
-        expect(parseRegExp("Foo+")).toEqual({
+        expect(parseExpr("Foo+")).toEqual({
             type: "oneOrMore",
             child: {
                 type: "identifier",
@@ -76,7 +79,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles one-or-more quantifiers (+) in context", () => {
-        expect(parseRegExp("Foo Bar Baz+")).toEqual({
+        expect(parseExpr("Foo Bar Baz+")).toEqual({
             type: "sequence",
             children: [
                 {
@@ -99,7 +102,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles a choice of identifiers", () => {
-        expect(parseRegExp("Foo | Bar | Baz")).toEqual({
+        expect(parseExpr("Foo | Bar | Baz")).toEqual({
             type: "choice",
             children: [
                 {
@@ -119,11 +122,11 @@ describe("parseRegexp", () => {
     });
 
     it("throws an error when there is an ambiguous mix of sequence and choice markers", () => {
-        expect(() => parseRegExp("Foo | Bar Baz")).toThrow();
+        expect(() => parseExpr("Foo | Bar Baz")).toThrow();
     });
 
     it("handles grouped choices and sequences", () => {
-        expect(parseRegExp("Foo (Bar | Baz)")).toEqual({
+        expect(parseExpr("Foo (Bar | Baz)")).toEqual({
             type: "sequence",
             children: [
                 {
@@ -148,7 +151,7 @@ describe("parseRegexp", () => {
     });
 
     it("handles grouped choices and sequences with quantifiers", () => {
-        expect(parseRegExp("(Foo Bar)+ (Bar | Baz)*")).toEqual({
+        expect(parseExpr("(Foo Bar)+ (Bar | Baz)*")).toEqual({
             type: "sequence",
             children: [
                 {
@@ -189,7 +192,7 @@ describe("parseRegexp", () => {
 
     it("handles a very complicated expression", () => {
         expect(
-            parseRegExp("(Foo Bar+ (Qux* | Baz))+ (Bar* | (Baz Foo))*")
+            parseExpr("(Foo Bar+ (Qux* | Baz))+ (Bar* | (Baz Foo))*")
         ).toEqual({
             type: "sequence",
             children: [
@@ -263,7 +266,7 @@ describe("parseRegexp", () => {
 
     it("normalizes odd spacing and extra parens from an expression", () => {
         expect(
-            parseRegExp(
+            parseExpr(
                 "    ((Foo Bar+ ((Qux* |Baz))   )+ ( (Bar)* |  (Baz Foo))*   ) "
             )
         ).toEqual({
@@ -339,86 +342,87 @@ describe("parseRegexp", () => {
 });
 
 describe("accepts", () => {
+    const acceptExpr = (pattern, nodes) =>
+        acceptNodes(parseExpr(pattern), nodes, (str: string) => (node: Node) =>
+            node.type === str
+        );
+
     it("accepts an empty node array where expected", () => {
-        expect(acceptNodes("Foo*", [])).toEqual(0);
+        expect(acceptExpr("Foo*", [])).toEqual(0);
     });
 
     it("handles an array of empty nodes", () => {
-        expect(acceptNodes("Foo", [])).toEqual(0);
+        expect(acceptExpr("Foo", [])).toEqual(0);
     });
 
     it("accepts a simple identifier", () => {
-        expect(acceptNodes("Foo", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo", [n("Foo")])).toEqual(1);
     });
 
     it("rejects a mismatched identifier", () => {
-        expect(acceptNodes("Foo", [n("Bar")])).toEqual(0);
+        expect(acceptExpr("Foo", [n("Bar")])).toEqual(0);
     });
 
     it("accepts a sequence of identifiers", () => {
-        expect(acceptNodes("Foo Bar", [n("Foo"), n("Bar")])).toEqual(2);
+        expect(acceptExpr("Foo Bar", [n("Foo"), n("Bar")])).toEqual(2);
     });
 
     it("rejects a sequence of mismatched identifiers", () => {
-        expect(acceptNodes("Foo Bar", [n("Foo"), n("Baz")])).toEqual(0);
+        expect(acceptExpr("Foo Bar", [n("Foo"), n("Baz")])).toEqual(0);
     });
 
     it("accepts a choice of identifiers", () => {
-        expect(acceptNodes("Foo | Bar", [n("Foo")])).toEqual(1);
-        expect(acceptNodes("Foo | Bar", [n("Bar")])).toEqual(1);
+        expect(acceptExpr("Foo | Bar", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo | Bar", [n("Bar")])).toEqual(1);
     });
 
     it("rejects a mismatched choice of identifiers", () => {
-        expect(acceptNodes("Foo | Bar", [n("Baz")])).toEqual(0);
-        expect(acceptNodes("Foo | Bar", [n("Qux")])).toEqual(0);
+        expect(acceptExpr("Foo | Bar", [n("Baz")])).toEqual(0);
+        expect(acceptExpr("Foo | Bar", [n("Qux")])).toEqual(0);
     });
 
     it("accepts zero or more identifiers", () => {
-        expect(acceptNodes("Foo*", [])).toEqual(0);
-        expect(acceptNodes("Foo*", [n("Foo")])).toEqual(1);
-        expect(acceptNodes("Foo*", [n("Foo"), n("Foo")])).toEqual(2);
-        expect(acceptNodes("Foo*", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
+        expect(acceptExpr("Foo*", [])).toEqual(0);
+        expect(acceptExpr("Foo*", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo*", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo*", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
     });
 
     it("accepts one or more identifiers", () => {
-        expect(acceptNodes("Foo+", [])).toEqual(0);
-        expect(acceptNodes("Foo+", [n("Foo")])).toEqual(1);
-        expect(acceptNodes("Foo+", [n("Foo"), n("Foo")])).toEqual(2);
-        expect(acceptNodes("Foo+", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
+        expect(acceptExpr("Foo+", [])).toEqual(0);
+        expect(acceptExpr("Foo+", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo+", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo+", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
     });
 
     it("returns a correct value when there are leftover nodes", () => {
-        expect(acceptNodes("Foo+", [n("Bar")])).toEqual(0);
-        expect(acceptNodes("Foo Foo", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
+        expect(acceptExpr("Foo+", [n("Bar")])).toEqual(0);
+        expect(acceptExpr("Foo Foo", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
             2
         );
     });
 
     it("accepts a sequence of multiple identifiers", () => {
-        expect(acceptNodes("Foo+ Bar*", [n("Foo"), n("Foo")])).toEqual(2);
-        expect(
-            acceptNodes("Foo+ Bar*", [n("Foo"), n("Foo"), n("Bar")])
-        ).toEqual(3);
-        expect(acceptNodes("Foo+ Bar*", [n("Foo"), n("Bar")])).toEqual(2);
+        expect(acceptExpr("Foo+ Bar*", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo+ Bar*", [n("Foo"), n("Foo"), n("Bar")])).toEqual(
+            3
+        );
+        expect(acceptExpr("Foo+ Bar*", [n("Foo"), n("Bar")])).toEqual(2);
     });
 
     it("handles a sequence of multiple identifiers with quantifiers", () => {
-        expect(
-            acceptNodes("Foo+ Bar*", [n("Foo"), n("Foo"), n("Baz")])
-        ).toEqual(2);
-        expect(acceptNodes("Foo+ Bar*", [n("Bar")])).toEqual(0);
+        expect(acceptExpr("Foo+ Bar*", [n("Foo"), n("Foo"), n("Baz")])).toEqual(
+            2
+        );
+        expect(acceptExpr("Foo+ Bar*", [n("Bar")])).toEqual(0);
     });
 
     it("accepts a combination of choices and sequences", () => {
         expect(
-            acceptNodes("(Foo | Bar) (Bar Baz)+", [
-                n("Foo"),
-                n("Bar"),
-                n("Baz"),
-            ])
+            acceptExpr("(Foo | Bar) (Bar Baz)+", [n("Foo"), n("Bar"), n("Baz")])
         ).toEqual(3);
         expect(
-            acceptNodes("(Foo | Bar) (Bar Baz)+", [
+            acceptExpr("(Foo | Bar) (Bar Baz)+", [
                 n("Foo"),
                 n("Bar"),
                 n("Baz"),
@@ -430,14 +434,10 @@ describe("accepts", () => {
 
     it("handles a combination of choices and sequences that matches some nodes", () => {
         expect(
-            acceptNodes("(Foo | Bar) (Bar Baz)+", [
-                n("Qux"),
-                n("Bar"),
-                n("Baz"),
-            ])
+            acceptExpr("(Foo | Bar) (Bar Baz)+", [n("Qux"), n("Bar"), n("Baz")])
         ).toEqual(0);
         expect(
-            acceptNodes("(Foo | Bar) (Bar Baz)+", [
+            acceptExpr("(Foo | Bar) (Bar Baz)+", [
                 n("Foo"),
                 n("Bar"),
                 n("Baz"),
@@ -448,7 +448,7 @@ describe("accepts", () => {
 
     it("handles a combination of quantifiers", () => {
         expect(
-            acceptNodes("(Foo | Bar)* (Bar Baz)+ Qux", [
+            acceptExpr("(Foo | Bar)* (Bar Baz)+ Qux", [
                 n("Foo"),
                 n("Bar"),
                 n("Bar"),
@@ -464,7 +464,7 @@ describe("accepts", () => {
 
     it("handles nodes that might be swallowed by a greedy quantifier", () => {
         expect(
-            acceptNodes("(Foo | Bar)* Bar", [
+            acceptExpr("(Foo | Bar)* Bar", [
                 n("Foo"),
                 n("Bar"),
                 n("Bar"),
@@ -476,7 +476,7 @@ describe("accepts", () => {
 
     it("handles an unnecessarily complicated expression", () => {
         expect(
-            acceptNodes("(Foo | Bar)* Baz (Bar | Qux | Baz)+ Qux", [
+            acceptExpr("(Foo | Bar)* Baz (Bar | Qux | Baz)+ Qux", [
                 n("Foo"),
                 n("Bar"),
                 n("Baz"),

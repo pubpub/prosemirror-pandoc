@@ -3,6 +3,25 @@
  * See https://hackage.haskell.org/package/pandoc-types-1.17.6/docs/Text-Pandoc-Definition.html
  */
 
+export interface ProsemirrorNode {
+    type: string;
+    children?: ProsemirrorNode[];
+    text?: string;
+    attrs?: { [key: string]: string | number | null | undefined };
+}
+
+export interface ProsemirrorDoc {
+    children: ProsemirrorNode[];
+}
+
+export interface ProsemirrorContentNode extends ProsemirrorNode {
+    text: string;
+}
+
+export interface ProsemirrorContentNode extends ProsemirrorNode {
+    children: ProsemirrorNode[];
+}
+
 export type BlockNodeType =
     | "Plain"
     | "Para"

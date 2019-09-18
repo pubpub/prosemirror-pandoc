@@ -1,5 +1,5 @@
-import { Node as PandocBaseNode, ProsemirrorNode } from "../types";
-import { ProsemirrorFluent, PandocFluent, prosemirrorFluent } from "./fluent";
+import { Node as PandocBaseNode } from "../types";
+import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
     acceptNodes,
     expressionAcceptsMultiple,
@@ -7,7 +7,6 @@ import {
     Expr,
     IdentifierMatch,
 } from "./nodeExpression";
-import { asArray } from "./util";
 
 interface MinimalType {
     type: string;
@@ -17,7 +16,7 @@ type TransformerFn<From, To> = (
     from: From | From[]
 ) => To extends PandocBaseNode ? PandocFluent : ProsemirrorFluent;
 
-interface TransformContext<From, To> {
+export interface TransformContext<From, To> {
     transform: TransformerFn<From, To>;
     rules: Rule<From, To>[];
     resource: (url: string) => string;
@@ -55,7 +54,7 @@ interface Rule<FromFluent, To> {
     acceptsMultiple: boolean;
 }
 
-interface RuleSet<PDNode, PMNode> {
+export interface RuleSet<PDNode, PMNode> {
     fromPandoc: Rule<PDNode, PMNode>[];
     fromProsemirror: Rule<PMNode, PDNode>[];
 }
@@ -199,7 +198,7 @@ const createRule = <From, To>(
     };
 };
 
-const findRuleForElements = <From extends MinimalType, To>(
+export const getTransformRuleForElements = <From extends MinimalType, To>(
     rules: Rule<From, To>[],
     nodes: From[],
     matchTest: IdentifierMatch<From>
@@ -217,65 +216,4 @@ const findRuleForElements = <From extends MinimalType, To>(
             .slice(0, 3)
             .join(", ") + (nodes.length > 3 ? "..." : "")}`
     );
-};
-
-const matchPandocNode = (identifier: string) => (
-    node: PandocBaseNode
-): boolean => {
-    return identifier === node.type;
-};
-
-const fromPandocInner = <
-    PDNode extends PandocBaseNode,
-    PMNode extends ProsemirrorNode
->(
-    elementOrArray: PDNode | PDNode[],
-    context: TransformContext<PDNode, PMNode>
-): ProsemirrorFluent => {
-    const { rules } = context;
-    const elements = asArray(elementOrArray);
-    const transformed: PMNode[] = [];
-    let ptr = 0;
-    while (ptr < elements.length) {
-        const remaining = elements.slice(ptr);
-        const { rule, acceptedCount } = findRuleForElements(
-            rules,
-            remaining,
-            matchPandocNode
-        );
-        const addition = asArray(
-            rule.acceptsMultiple
-                ? rule.transform(
-                      elements.slice(ptr, ptr + acceptedCount),
-                      context
-                  )
-                : rule.transform(elements[ptr], context)
-        );
-        for (const element of addition) {
-            if (Array.isArray(element)) {
-                for (const subelement of element) {
-                    transformed.push(subelement);
-                }
-            } else {
-                transformed.push(element);
-            }
-        }
-        ptr += acceptedCount;
-    }
-    return prosemirrorFluent(transformed);
-};
-
-export const fromPandoc = <
-    PDNode extends PandocBaseNode,
-    PMNode extends ProsemirrorNode
->(
-    elementOrArray: PDNode | PDNode[],
-    rules: RuleSet<PDNode, PMNode>
-): ProsemirrorFluent => {
-    const context = {
-        rules: rules.fromPandoc,
-        resource: x => x,
-        transform: el => fromPandocInner(el, context),
-    };
-    return context.transform(elementOrArray);
 };

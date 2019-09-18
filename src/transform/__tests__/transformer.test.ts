@@ -1,7 +1,7 @@
 /* global describe, it, expect */
 import rules from "../../example/rules";
 
-import { fromPandoc } from "../transformer";
+import { fromPandoc } from "../fromPandoc";
 import { createAttr } from "../util";
 import { Header, OrderedList, BulletList } from "../../types";
 
@@ -404,7 +404,7 @@ describe("fromPandoc", () => {
         expect(fromPandoc(input, rules).asNode()).toEqual(expectedOutput);
     });
 
-    it("usess the pandocPassThroughTransformer to ignore SmallCaps", () => {
+    it("uses the pandocPassThroughTransformer to ignore SmallCaps", () => {
         expect(
             fromPandoc(
                 {

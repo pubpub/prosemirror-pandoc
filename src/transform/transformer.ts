@@ -233,41 +233,36 @@ const fromPandocInner = <
     context: TransformContext<PDNode, PMNode>
 ): ProsemirrorFluent => {
     const { rules } = context;
-    if (Array.isArray(elementOrArray)) {
-        const elements = elementOrArray;
-        const transformed: PMNode[] = [];
-        let ptr = 0;
-        while (ptr < elements.length) {
-            const remaining = elements.slice(ptr);
-            const { rule, acceptedCount } = findRuleForElements(
-                rules,
-                remaining,
-                matchPandocNode
-            );
-            const addition = asArray(
-                rule.acceptsMultiple
-                    ? rule.transform(
-                          elements.slice(ptr, ptr + acceptedCount),
-                          context
-                      )
-                    : rule.transform(elements[ptr], context)
-            );
-            for (const element of addition) {
-                if (Array.isArray(element)) {
-                    for (const subelement of element) {
-                        transformed.push(subelement);
-                    }
-                } else {
-                    transformed.push(element);
+    const elements = asArray(elementOrArray);
+    const transformed: PMNode[] = [];
+    let ptr = 0;
+    while (ptr < elements.length) {
+        const remaining = elements.slice(ptr);
+        const { rule, acceptedCount } = findRuleForElements(
+            rules,
+            remaining,
+            matchPandocNode
+        );
+        const addition = asArray(
+            rule.acceptsMultiple
+                ? rule.transform(
+                      elements.slice(ptr, ptr + acceptedCount),
+                      context
+                  )
+                : rule.transform(elements[ptr], context)
+        );
+        for (const element of addition) {
+            if (Array.isArray(element)) {
+                for (const subelement of element) {
+                    transformed.push(subelement);
                 }
+            } else {
+                transformed.push(element);
             }
-            ptr += acceptedCount;
         }
-        return prosemirrorFluent(transformed);
+        ptr += acceptedCount;
     }
-    const element = elementOrArray;
-    const { rule } = findRuleForElements(rules, [element], matchPandocNode);
-    return prosemirrorFluent(rule.transform(element, context));
+    return prosemirrorFluent(transformed);
 };
 
 export const fromPandoc = <

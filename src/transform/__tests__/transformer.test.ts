@@ -87,7 +87,7 @@ describe("fromPandoc", () => {
                     ],
                 },
                 rules
-            )
+            ).asNode()
         ).toEqual({
             type: "paragraph",
             children: [
@@ -106,7 +106,7 @@ describe("fromPandoc", () => {
                     content: "hello_world()",
                 },
                 rules
-            )
+            ).asNode()
         ).toEqual({ type: "code_block", text: "hello_world()" });
     });
 
@@ -139,7 +139,7 @@ describe("fromPandoc", () => {
                     ],
                 },
                 rules
-            )
+            ).asNode()
         ).toEqual({
             type: "blockquote",
             children: [
@@ -168,7 +168,7 @@ describe("fromPandoc", () => {
                 { type: "Str", content: "One" },
             ],
         };
-        expect(fromPandoc(header, rules)).toEqual({
+        expect(fromPandoc(header, rules).asNode()).toEqual({
             type: "heading",
             attrs: {
                 level: 1,
@@ -179,7 +179,7 @@ describe("fromPandoc", () => {
     });
 
     it("transforms a HorizontalRule into a horizontal_rule", () => {
-        expect(fromPandoc({ type: "HorizontalRule" }, rules)).toEqual({
+        expect(fromPandoc({ type: "HorizontalRule" }, rules).asNode()).toEqual({
             type: "horizontal_rule",
         });
     });
@@ -260,7 +260,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
+        expect(fromPandoc(input, rules).asNode()).toEqual(expectedOutput);
     });
 
     it("transforms an BulletList into an bullet_list", () => {
@@ -332,7 +332,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
+        expect(fromPandoc(input, rules).asNode()).toEqual(expectedOutput);
     });
 
     it("uses the processListItem argument of listTransformer to process list items", () => {
@@ -401,7 +401,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        expect(fromPandoc(input, rules)).toEqual(expectedOutput);
+        expect(fromPandoc(input, rules).asNode()).toEqual(expectedOutput);
     });
 
     it("usess the pandocPassThroughTransformer to ignore SmallCaps", () => {
@@ -426,7 +426,7 @@ describe("fromPandoc", () => {
                     ],
                 },
                 rules
-            )
+            ).asNode()
         ).toEqual({
             type: "paragraph",
             children: [

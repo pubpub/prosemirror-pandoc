@@ -1,3 +1,5 @@
+import { Block, Inline, DefinitionList, Para, Plain } from "../types";
+
 /*
  * A transformer appropriate for simple container nodes. Typically, these  are
  * correspondences between Pandoc elements with a content property and
@@ -90,4 +92,73 @@ export const listTransformer = (
             };
         },
     };
+};
+
+/**
+ * A one-way transformer that takes the cursed DefinitionList and turns it into an unordered list.
+ */
+export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
+    node: DefinitionList,
+    { transform }
+) => {
+    const { terms, definitions } = node;
+    const pairedValues: {
+        term: Inline;
+        definition: Block[];
+    }[] = terms.reduce((arr, term, index) => {
+        const definition = definitions[index] || [];
+        return [...arr, { term, definition }];
+    }, []);
+    const children = pairedValues.map(value => {
+        const { term } = value;
+        const blocks = [...value.definition];
+        const firstBlock = blocks[0];
+        let prependableBlock: Para | Plain;
+        if (
+            firstBlock &&
+            (firstBlock.type === "Para" || firstBlock.type === "Plain")
+        ) {
+            prependableBlock = firstBlock as (Para | Plain);
+        } else {
+            prependableBlock = { type: "Para", content: [] };
+            blocks.unshift(prependableBlock);
+        }
+        prependableBlock.content.unshift({
+            type: "Strong",
+            content: [term, { type: "Str", content: ":" }, { type: "Space" }],
+        });
+        return {
+            type: pmInnerNodeName,
+            children: transform(blocks).asArray(),
+        };
+    });
+    return {
+        type: pmOuterNodeName,
+        children,
+    };
+};
+
+/**
+ * A transformer that does type -> type conversion for simple leaf nodes
+ */
+export const bareLeafTransformer = (pdNodeName, pmNodeName) => {
+    return {
+        fromPandoc: () => {
+            return {
+                type: pmNodeName,
+            };
+        },
+        fromProsemirror: () => {
+            return {
+                type: pdNodeName,
+            };
+        },
+    };
+};
+
+/**
+ * A one-way transformer that ignores a Pandoc node and passes its children through.
+ */
+export const pandocPassThroughTransformer = (node, { transform }) => {
+    return transform(node.content).asArray();
 };

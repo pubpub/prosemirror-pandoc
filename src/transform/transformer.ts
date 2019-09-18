@@ -199,7 +199,7 @@ const createRule = <From, To>(
     };
 };
 
-const findRuleForElements = <From, To>(
+const findRuleForElements = <From extends MinimalType, To>(
     rules: Rule<From, To>[],
     nodes: From[],
     matchTest: IdentifierMatch<From>
@@ -211,6 +211,12 @@ const findRuleForElements = <From, To>(
             return { rule, acceptedCount };
         }
     }
+    throw new Error(
+        `Could not find rule for nodes: ${nodes
+            .map(n => n.type)
+            .slice(0, 3)
+            .join(", ") + (nodes.length > 3 ? "..." : "")}`
+    );
 };
 
 const matchPandocNode = (identifier: string) => (

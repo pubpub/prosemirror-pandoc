@@ -403,4 +403,36 @@ describe("fromPandoc", () => {
         };
         expect(fromPandoc(input, rules)).toEqual(expectedOutput);
     });
+
+    it("usess the pandocPassThroughTransformer to ignore SmallCaps", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Para",
+                    content: [
+                        {
+                            type: "Str",
+                            content: "Hello,",
+                        },
+                        { type: "Space" },
+                        {
+                            type: "SmallCaps",
+                            content: [
+                                { type: "Str", content: "small" },
+                                { type: "Space" },
+                                { type: "Str", content: "caps" },
+                            ],
+                        },
+                    ],
+                },
+                rules
+            )
+        ).toEqual({
+            type: "paragraph",
+            children: [
+                { type: "text", text: "Hello, " },
+                { type: "text", text: "small caps" },
+            ],
+        });
+    });
 });

@@ -6,7 +6,6 @@ import {
     Str,
     Space,
     Header,
-    HorizontalRule,
     LineBlock,
     ProsemirrorNode,
     ProsemirrorContentNode,
@@ -23,7 +22,9 @@ import {
     contentTransformer,
     textTransformer,
     listTransformer,
-} from "../transform/basicTransformers";
+    bareLeafTransformer,
+    pandocPassThroughTransformer,
+} from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
 
@@ -68,70 +69,18 @@ const ensureFirstElementIsParagraph = listItem => {
     }
     return listItem;
 };
+
 rules.transform(
     "OrderedList",
     "ordered_list",
     listTransformer("list_item", ensureFirstElementIsParagraph)
 );
+
 rules.transform(
     "BulletList",
     "bullet_list",
     listTransformer("list_item", ensureFirstElementIsParagraph)
 );
-
-// What even is a DefinitionList? I don't know, so we're going to turn it into a BulletList.
-// rules.pandocProjection("DefinitionList", "bullet_list", {
-//     before: (pandocNode: DefinitionList): BulletList => {
-//         const { definitions, terms } = pandocNode;
-//         const length = Math.max(definitions.length, terms.length);
-//         const pandocBlocksBlocks: Block[][] = [];
-//         for (let i = 0; i < length; i++) {
-//             const definition = definitions[i];
-//             const term = terms[i];
-//             pandocBlocksBlocks.push(
-//                 definition.reduce(
-//                     (
-//                         { hasPushedDefinition, accumulatedBlocks },
-//                         definitionBlock
-//                     ): {
-//                         accumulatedBlocks: Block[];
-//                         hasPushedDefinition: boolean;
-//                     } => {
-//                         if (
-//                             !hasPushedDefinition &&
-//                             definitionBlock &&
-//                             Array.isArray(definitionBlock.content)
-//                         ) {
-//                             return {
-//                                 accumulatedBlocks: [
-//                                     ...accumulatedBlocks,
-//                                     [
-//                                         { type: "Emph", content: [term] },
-//                                         { type: "Space" },
-//                                         ...definitionBlock.content,
-//                                     ],
-//                                 ],
-//                                 hasPushedDefinition: true,
-//                             };
-//                         }
-//                         return {
-//                             hasPushedDefinition,
-//                             accumulatedBlocks: [
-//                                 ...accumulatedBlocks,
-//                                 definitionBlock,
-//                             ],
-//                         };
-//                     },
-//                     { hasPushedDefinition: false, accumulatedBlocks: [] }
-//                 ).accumulatedBlocks
-//             );
-//         }
-//         return {
-//             type: "BulletList",
-//             content: pandocBlocksBlocks,
-//         };
-//     },
-// });
 
 // Tranform headers
 rules.transform("Header", "heading", {
@@ -158,18 +107,7 @@ rules.transform("Header", "heading", {
 });
 
 // Transform horizontal rules
-rules.transform("HorizontalRule", "horizontal_rule", {
-    fromPandoc: () => {
-        return {
-            type: "horizontal_rule",
-        };
-    },
-    fromProsemirror: (): HorizontalRule => {
-        return {
-            type: "HorizontalRule",
-        };
-    },
-});
+rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
 
 // Specify all nodes that are equivalent to Prosemirror marks
 // rules.transform("Emph", "em", nodeMarkTransformer);
@@ -179,7 +117,7 @@ rules.transform("HorizontalRule", "horizontal_rule", {
 // rules.transform("Subscript", "sub", nodeMarkTransformer);
 
 // We don't support small caps right now
-// rules.transform("SmallCaps", passThroughTransformer);
+rules.fromPandoc("SmallCaps", pandocPassThroughTransformer);
 
 // Tell the transformer how to deal with typical content-level nodes
 rules.fromPandoc("(Str | Space)+", (nodes: (Str | Space)[]) => {

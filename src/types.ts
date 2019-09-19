@@ -3,10 +3,29 @@
  * See https://hackage.haskell.org/package/pandoc-types-1.17.6/docs/Text-Pandoc-Definition.html
  */
 
+interface ProsemirrorNodeDefinition {
+    content?: string;
+    attrs?: { [key: string]: any };
+    group?: string;
+    defining?: boolean;
+}
+
+interface ProsemirrorMarkDefinition {}
+
+export interface ProsemirrorSchema {
+    nodes: { [name: string]: ProsemirrorNodeDefinition };
+    marks: { [name: string]: ProsemirrorMarkDefinition };
+}
+
 export interface ProsemirrorNode {
     type: string;
     children?: ProsemirrorNode[];
     text?: string;
+    attrs?: { [key: string]: string | number | null | undefined };
+}
+
+export interface ProsemirrorMark {
+    type: string;
     attrs?: { [key: string]: string | number | null | undefined };
 }
 
@@ -22,7 +41,7 @@ export interface ProsemirrorContentNode extends ProsemirrorNode {
     children: ProsemirrorNode[];
 }
 
-export type BlockNodeType =
+export type PandocBlockNodeType =
     | "Plain"
     | "Para"
     | "LineBlock"
@@ -38,7 +57,7 @@ export type BlockNodeType =
     | "Div"
     | "Null";
 
-export type InlineNodeType =
+export type PandocInlineNodeType =
     | "Str"
     | "Emph"
     | "Strong"
@@ -64,19 +83,19 @@ export interface Doc {
     meta: {};
 }
 
-export type NodeType = BlockNodeType | InlineNodeType;
+export type PandocNodeType = PandocBlockNodeType | PandocInlineNodeType;
 
-export interface Node {
-    type: NodeType;
+export interface PandocNode {
+    type: PandocNodeType;
     content?: any[] | string;
 }
 
-export interface Block extends Node {
-    type: BlockNodeType;
+export interface Block extends PandocNode {
+    type: PandocBlockNodeType;
 }
 
-export interface Inline extends Node {
-    type: InlineNodeType;
+export interface Inline extends PandocNode {
+    type: PandocInlineNodeType;
 }
 
 export type Alignment =

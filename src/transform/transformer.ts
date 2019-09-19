@@ -1,4 +1,4 @@
-import { Node as PandocBaseNode } from "../types";
+import { PandocNode, ProsemirrorMark, ProsemirrorSchema } from "../types";
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
     acceptNodes,
@@ -14,12 +14,13 @@ interface MinimalType {
 
 type TransformerFn<From, To> = (
     from: From | From[]
-) => To extends PandocBaseNode ? PandocFluent : ProsemirrorFluent;
+) => To extends PandocNode ? PandocFluent : ProsemirrorFluent;
 
 export interface TransformContext<From, To> {
     transform: TransformerFn<From, To>;
     rules: Rule<From, To>[];
     resource: (url: string) => string;
+    marksMap: Map<To, ProsemirrorMark[]>;
 }
 
 type TransformDefinition<From, To> = (
@@ -57,6 +58,7 @@ interface Rule<FromFluent, To> {
 export interface RuleSet<PDNode, PMNode> {
     fromPandoc: Rule<PDNode, PMNode>[];
     fromProsemirror: Rule<PMNode, PDNode>[];
+    prosemirrorSchema: ProsemirrorSchema;
 }
 
 export interface BuildRuleset<
@@ -75,6 +77,11 @@ export interface BuildRuleset<
     fromProsemirror: (
         pmPattern: string,
         transformDefinition: TransformDefinition<PMNode, PDNode>
+    ) => void;
+    transformToMark: (
+        pdPattern: string,
+        targetMark: string,
+        getMarkAttrs?: (n: PDNode) => {}
     ) => void;
     finish: () => RuleSet<PDNode, PMNode>;
 }
@@ -122,11 +129,12 @@ export const buildRuleset = <
     PDNode extends MinimalType,
     PMNode extends MinimalType
 >(
-    prosemirrorSchema
+    prosemirrorSchema: ProsemirrorSchema
 ): BuildRuleset<PDNode, PMNode> => {
     const ruleset: RuleSet<PDNode, PMNode> = {
         fromPandoc: [],
         fromProsemirror: [],
+        prosemirrorSchema,
     };
 
     const transform = <PDType extends PDNode, PMType extends PMNode>(
@@ -150,6 +158,20 @@ export const buildRuleset = <
         ruleset.fromPandoc.push(createRule(parseExpr(pdPattern), transformFn));
     };
 
+    const transformToMark = <PDType extends PDNode, PMType extends PMNode>(
+        pdPattern: string,
+        targetMark: string,
+        getMarkAttrs: (n: PDType) => {} = () => ({})
+    ) => {
+        ruleset.fromPandoc.push(
+            createPandocToMarkRule(
+                parseExpr(pdPattern),
+                targetMark,
+                getMarkAttrs
+            )
+        );
+    };
+
     const fromProsemirror = <PMType extends PMNode, PDType extends PDNode>(
         pdPattern: string,
         transformFn: TransformDefinition<PMType, PDType>
@@ -164,7 +186,13 @@ export const buildRuleset = <
         return ruleset;
     };
 
-    return { transform, fromPandoc, fromProsemirror, finish };
+    return {
+        transform,
+        fromPandoc,
+        fromProsemirror,
+        transformToMark: transformToMark,
+        finish,
+    };
 };
 
 const createBidirectionalRules = <
@@ -196,6 +224,22 @@ const createRule = <From, To>(
         transform,
         acceptsMultiple: expressionAcceptsMultiple(expression),
     };
+};
+
+const createPandocToMarkRule = <From, To>(
+    expression: Expr,
+    targetMark: string,
+    getMarkAttrs: (node: From) => {}
+): Rule<From, To> => {
+    const transform = (pandocNode, { transform }) => {
+        return transform(pandocNode.contents, [
+            {
+                type: targetMark,
+                attrs: getMarkAttrs(pandocNode),
+            },
+        ]);
+    };
+    return createRule(expression, transform);
 };
 
 export const getTransformRuleForElements = <From extends MinimalType, To>(

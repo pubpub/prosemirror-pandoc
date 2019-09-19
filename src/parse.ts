@@ -2,7 +2,7 @@ import {
     Alignment,
     Attr,
     Block,
-    BlockNodeType,
+    PandocBlockNodeType,
     BlockQuote,
     BulletList,
     CitationMode,
@@ -16,7 +16,7 @@ import {
     Header,
     Image,
     Inline,
-    InlineNodeType,
+    PandocInlineNodeType,
     LineBlock,
     Link,
     ListAttributes,
@@ -216,7 +216,7 @@ const parseSpan = (n: { c: [any, any[]] }): Span => {
     };
 };
 
-export const parseInline = (n: { t: InlineNodeType; c: any }): Inline => {
+export const parseInline = (n: { t: PandocInlineNodeType; c: any }): Inline => {
     switch (n.t) {
         case "Str":
             return parseStr(n);
@@ -381,7 +381,7 @@ const parseTable = (n: {
     };
 };
 
-export const parseBlock = (n: { t: BlockNodeType; c: any }): Block => {
+export const parseBlock = (n: { t: PandocBlockNodeType; c: any }): Block => {
     switch (n.t) {
         case "Plain":
             return parsePlain(n);

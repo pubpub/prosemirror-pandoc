@@ -1,4 +1,4 @@
-import { Attr, Str, Space } from "../types";
+import { Attr, Str, Space, ProsemirrorMark } from "../types";
 
 type CreateAttr =
     | ((properties: {}) => Attr)
@@ -58,14 +58,21 @@ export const asNode = <T>(item: T | T[]): T => {
     return Array.isArray(item) ? item[0] : item;
 };
 
-export const flatten = <T>(input: (T | T[])[]) => {
+export const flatten = <T>(input: T | (T | T[])[]): T[] => {
+    if (!Array.isArray(input)) {
+        return [input];
+    }
     return input.reduce(
         (arr: T[], next: T | T[]) => {
             if (Array.isArray(next)) {
-                return [...arr, ...next];
+                return [...arr, ...flatten(next)];
             }
             return [...arr, next];
         },
         [] as T[]
-    );
+    ) as T[];
 };
+
+export const compareMarks = (first: ProsemirrorMark, second: ProsemirrorMark) =>
+    // Tell no one what you saw here
+    JSON.stringify(first) === JSON.stringify(second);

@@ -1,6 +1,6 @@
 import { nodes, marks } from "./schema";
 import {
-    Node as PandocBaseNode,
+    PandocNode,
     Image,
     Plain,
     Str,
@@ -28,7 +28,7 @@ import {
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
 
-const rules: BuildRuleset<PandocBaseNode, ProsemirrorNode> = buildRuleset({
+const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
     marks,
 });
@@ -110,7 +110,7 @@ rules.transform("Header", "heading", {
 rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
 
 // Specify all nodes that are equivalent to Prosemirror marks
-// rules.transform("Emph", "em", nodeMarkTransformer);
+rules.transformToMark("Emph", "em");
 // rules.transform("Strong", "strong", nodeMarkTransformer);
 // rules.transform("Strikeout", "strike", nodeMarkTransformer);
 // rules.transform("Superscript", "sup", nodeMarkTransformer);

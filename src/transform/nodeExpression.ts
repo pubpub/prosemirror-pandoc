@@ -13,6 +13,13 @@ interface ZeroOrMore {
     type: "zeroOrMore";
     child: Expr;
 }
+interface Range {
+    type: "range";
+    lowerBound: number;
+    upperBound: number | null;
+    child: Expr;
+}
+
 interface Sequence {
     type: "sequence";
     children: Expr[];
@@ -23,7 +30,14 @@ interface Choice {
 }
 
 export type IdentifierMatch<Node> = (id: string) => (node: Node) => boolean;
-export type Expr = Identifier | OneOrMore | ZeroOrMore | Sequence | Choice;
+
+export type Expr =
+    | Identifier
+    | OneOrMore
+    | ZeroOrMore
+    | Sequence
+    | Choice
+    | Range;
 
 interface State<Node> {
     addSuccessor: (s: State<Node>) => void;
@@ -57,13 +71,23 @@ export const parseExpr = (str: string): Expr => {
     let separators = [];
     // Keep track of open and close parens
     let parenCount = 0;
+    // Keep track of open and close curlies
+    let curlyCount = 0;
     for (let ptr = 0; ptr < str.length; ++ptr) {
         const char = str.charAt(ptr);
         if (char === "(") {
             ++parenCount;
         } else if (char === ")") {
             --parenCount;
-        } else if (parenCount === 0 && (char === "|" || char === " ")) {
+        } else if (char === "{") {
+            ++curlyCount;
+        } else if (char === "}") {
+            --curlyCount;
+        } else if (
+            parenCount === 0 &&
+            curlyCount === 0 &&
+            (char === "|" || char === " ")
+        ) {
             if (separator && separator !== char) {
                 throw new Error(
                     "Please surround mixed separators with parentheses!" +
@@ -92,6 +116,25 @@ export const parseExpr = (str: string): Expr => {
         return {
             type: separator === " " ? "sequence" : "choice",
             children: separated.map(parseExpr),
+        };
+    } else if (str.endsWith("}")) {
+        let ptr = str.length - 1;
+        while (str.charAt(ptr) !== "{") {
+            ptr--;
+        }
+        const rangeStrs = str.slice(ptr + 1, str.length - 1).split(",");
+        const hasTwo = rangeStrs.length === 2;
+        const range = rangeStrs.map(str => parseInt(str.trim()));
+        const [lowerBound, upperBound] = range;
+        return {
+            type: "range",
+            lowerBound,
+            upperBound: hasTwo
+                ? isNaN(upperBound)
+                    ? null
+                    : upperBound
+                : lowerBound,
+            child: parseExpr(str.slice(0, ptr)),
         };
     } else if (str.endsWith("+")) {
         return {
@@ -167,6 +210,41 @@ const createAcceptanceMachine = <Node>(
             startState
         );
         finalAcceptState.addSuccessor(acceptState);
+    } else if (expr.type === "range") {
+        const { lowerBound, upperBound, child } = expr;
+        if (
+            (upperBound !== null && upperBound < lowerBound) ||
+            (lowerBound === 0 && upperBound === 0) ||
+            lowerBound < 0
+        ) {
+            throw new Error(`Invalid range: [${lowerBound},${upperBound}]`);
+        }
+        const make = () => createAcceptanceMachine(child, matcher);
+        const machines: Machine<Node>[] = [];
+        const machineCount = Math.max(
+            1,
+            upperBound !== null ? upperBound : lowerBound
+        );
+        for (let i = 0; i < machineCount; i++) {
+            const machine = make();
+            machines.push(machine);
+            if (i > 0) {
+                const prev = machines[i - 1];
+                prev.acceptState.addSuccessor(machine.startState);
+            }
+            if (i + 1 >= lowerBound) {
+                machine.acceptState.addSuccessor(acceptState);
+            }
+        }
+        if (upperBound === null) {
+            const last = machines[machines.length - 1];
+            last.acceptState.addSuccessor(last.startState);
+        }
+        const first = machines[0];
+        startState.addSuccessor(first.startState);
+        if (lowerBound === 0) {
+            startState.addSuccessor(acceptState);
+        }
     } else if (expr.type === "zeroOrMore") {
         const innerMachine = createAcceptanceMachine(expr.child, matcher);
         startState.addSuccessor(innerMachine.startState);
@@ -240,6 +318,8 @@ export const expressionAcceptsMultiple = (expr: Expr): boolean => {
         return true;
     } else if (expr.type === "zeroOrMore") {
         return true;
+    } else if (expr.type === "range") {
+        return expr.upperBound === null || expr.upperBound > 1;
     } else if (expr.type === "choice") {
         return expr.children.some(child => expressionAcceptsMultiple(child));
     }
@@ -253,6 +333,11 @@ export const willAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
     } else if (expr.type === "choice") {
         return expr.children.some(child =>
             willAlwaysMatchSingleIdentifier(child, id)
+        );
+    } else if (expr.type === "range") {
+        return (
+            expr.lowerBound === 1 &&
+            willAlwaysMatchSingleIdentifier(expr.child, id)
         );
     } else {
         return willAlwaysMatchSingleIdentifier(expr.child, id);

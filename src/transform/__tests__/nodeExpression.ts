@@ -101,6 +101,42 @@ describe("parseRegexp", () => {
         });
     });
 
+    it("handles a range quantifier with a lower and upper bound", () => {
+        expect(parseExpr("(Foo){3, 5}")).toEqual({
+            type: "range",
+            lowerBound: 3,
+            upperBound: 5,
+            child: {
+                type: "identifier",
+                identifier: "Foo",
+            },
+        });
+    });
+
+    it("handles a range quantifier with only a lower bound", () => {
+        expect(parseExpr("(Foo){10,}")).toEqual({
+            type: "range",
+            lowerBound: 10,
+            upperBound: null,
+            child: {
+                type: "identifier",
+                identifier: "Foo",
+            },
+        });
+    });
+
+    it("handles an exact range quantifier", () => {
+        expect(parseExpr("(Foo){99}")).toEqual({
+            type: "range",
+            lowerBound: 99,
+            upperBound: 99,
+            child: {
+                type: "identifier",
+                identifier: "Foo",
+            },
+        });
+    });
+
     it("handles a choice of identifiers", () => {
         expect(parseExpr("Foo | Bar | Baz")).toEqual({
             type: "choice",
@@ -192,12 +228,16 @@ describe("parseRegexp", () => {
 
     it("handles a very complicated expression", () => {
         expect(
-            parseExpr("(Foo Bar+ (Qux* | Baz))+ (Bar* | (Baz Foo))*")
+            parseExpr(
+                "(Foo Bar+ (Qux* | Baz){10}){3,5} (Bar* | (Baz{6,} Foo))*"
+            )
         ).toEqual({
             type: "sequence",
             children: [
                 {
-                    type: "oneOrMore",
+                    type: "range",
+                    lowerBound: 3,
+                    upperBound: 5,
                     child: {
                         type: "sequence",
                         children: [
@@ -213,20 +253,25 @@ describe("parseRegexp", () => {
                                 },
                             },
                             {
-                                type: "choice",
-                                children: [
-                                    {
-                                        type: "zeroOrMore",
-                                        child: {
-                                            type: "identifier",
-                                            identifier: "Qux",
+                                type: "range",
+                                upperBound: 10,
+                                lowerBound: 10,
+                                child: {
+                                    type: "choice",
+                                    children: [
+                                        {
+                                            type: "zeroOrMore",
+                                            child: {
+                                                type: "identifier",
+                                                identifier: "Qux",
+                                            },
                                         },
-                                    },
-                                    {
-                                        type: "identifier",
-                                        identifier: "Baz",
-                                    },
-                                ],
+                                        {
+                                            type: "identifier",
+                                            identifier: "Baz",
+                                        },
+                                    ],
+                                },
                             },
                         ],
                     },
@@ -247,8 +292,13 @@ describe("parseRegexp", () => {
                                 type: "sequence",
                                 children: [
                                     {
-                                        type: "identifier",
-                                        identifier: "Baz",
+                                        type: "range",
+                                        lowerBound: 6,
+                                        upperBound: null,
+                                        child: {
+                                            type: "identifier",
+                                            identifier: "Baz",
+                                        },
                                     },
 
                                     {
@@ -395,6 +445,88 @@ describe("accepts", () => {
         expect(acceptExpr("Foo+", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
     });
 
+    it("accepts the number of nodes specified by a range quantifier", () => {
+        expect(acceptExpr("Foo{1,3}", [])).toEqual(0);
+        expect(acceptExpr("Foo{1,3}", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo{1,3}", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo{1,3}", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
+            3
+        );
+        expect(
+            acceptExpr("Foo{1,3}", [n("Foo"), n("Foo"), n("Foo"), n("Foo")])
+        ).toEqual(3);
+    });
+
+    it("accepts the number of nodes specified by an exact range quantifier", () => {
+        expect(acceptExpr("Foo{3}", [])).toEqual(0);
+        expect(acceptExpr("Foo{3}", [n("Foo")])).toEqual(0);
+        expect(acceptExpr("Foo{3}", [n("Foo"), n("Foo")])).toEqual(0);
+        expect(acceptExpr("Foo{3}", [n("Foo"), n("Foo"), n("Foo")])).toEqual(3);
+        expect(
+            acceptExpr("Foo{3}", [n("Foo"), n("Foo"), n("Foo"), n("Foo")])
+        ).toEqual(3);
+    });
+
+    it("accepts the number of nodes specified by an unbounded range quantifier", () => {
+        expect(acceptExpr("Foo{2,}", [])).toEqual(0);
+        expect(acceptExpr("Foo{2,}", [n("Foo")])).toEqual(0);
+        expect(acceptExpr("Foo{2,}", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo{2,}", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
+            3
+        );
+        expect(
+            acceptExpr("Foo{2,}", [n("Foo"), n("Foo"), n("Foo"), n("Foo")])
+        ).toEqual(4);
+    });
+
+    it("composes quantifiers", () => {
+        expect(acceptExpr("(Foo{2})+", [])).toEqual(0);
+        expect(acceptExpr("(Foo{2})+", [n("Foo")])).toEqual(0);
+        expect(acceptExpr("(Foo{2})+", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("(Foo{2})+", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
+            2
+        );
+        expect(
+            acceptExpr("(Foo{2})+", [n("Foo"), n("Foo"), n("Foo"), n("Foo")])
+        ).toEqual(4);
+    });
+
+    it("handles range quantifiers in a sequence", () => {
+        expect(acceptExpr("Foo Bar{1,2} Baz", [n("Foo"), n("Baz")])).toEqual(0);
+        expect(
+            acceptExpr("Foo Bar{1,2} Baz", [n("Foo"), n("Bar"), n("Baz")])
+        ).toEqual(3);
+        expect(
+            acceptExpr("Foo Bar{1,2} Baz", [
+                n("Foo"),
+                n("Bar"),
+                n("Bar"),
+                n("Baz"),
+            ])
+        ).toEqual(4);
+        expect(
+            acceptExpr("Foo Bar{1,2} Baz", [
+                n("Foo"),
+                n("Bar"),
+                n("Bar"),
+                n("Bar"),
+                n("Baz"),
+            ])
+        ).toEqual(0);
+    });
+
+    it("can use an unbounded range quantifier like a zeroOrMore", () => {
+        expect(acceptExpr("Foo{0,}", [])).toEqual(0);
+        expect(acceptExpr("Foo{0,}", [n("Foo")])).toEqual(1);
+        expect(acceptExpr("Foo{0,}", [n("Foo"), n("Foo")])).toEqual(2);
+        expect(acceptExpr("Foo{0,}", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
+            3
+        );
+        expect(
+            acceptExpr("Foo{0,}", [n("Foo"), n("Foo"), n("Foo"), n("Foo")])
+        ).toEqual(4);
+    });
+
     it("returns a correct value when there are leftover nodes", () => {
         expect(acceptExpr("Foo+", [n("Bar")])).toEqual(0);
         expect(acceptExpr("Foo Foo", [n("Foo"), n("Foo"), n("Foo")])).toEqual(
@@ -476,16 +608,21 @@ describe("accepts", () => {
 
     it("handles an unnecessarily complicated expression", () => {
         expect(
-            acceptExpr("(Foo | Bar)* Baz (Bar | Qux | Baz)+ Qux", [
+            acceptExpr("(Foo | Bar)* Baz (Bar | Qux{2,5} | Baz)+ Qux", [
                 n("Foo"),
                 n("Bar"),
                 n("Baz"),
                 n("Qux"),
+                n("Qux"),
                 n("Baz"),
+                n("Qux"),
+                n("Qux"),
+                n("Qux"),
                 n("Bar"),
                 n("Qux"),
                 n("Foo"),
+                n("Bar"),
             ])
-        ).toEqual(7);
+        ).toEqual(11);
     });
 });

@@ -162,3 +162,8 @@ export const bareLeafTransformer = (pdNodeName, pmNodeName) => {
 export const pandocPassThroughTransformer = (node, { transform }) => {
     return transform(node.content).asArray();
 };
+
+/**
+ * A transformer that returns an empty array
+ */
+export const nullTransformer = () => [];

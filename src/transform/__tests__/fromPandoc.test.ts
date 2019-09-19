@@ -6,6 +6,10 @@ import { createAttr } from "../util";
 import { Header, OrderedList, BulletList } from "../../types";
 
 describe("fromPandoc", () => {
+    it("transforms a Null into an empty array", () => {
+        expect(fromPandoc({ type: "Null" }, rules)).toEqual([]);
+    });
+
     it("transforms a simple string", () => {
         expect(
             fromPandoc(
@@ -66,6 +70,27 @@ describe("fromPandoc", () => {
                 ],
             },
         ]);
+    });
+
+    it("transforms a Para, Plain, or Div into a paragraph", () => {
+        ["Para", "Plain", "Div"].forEach((type: "Para" | "Plain" | "Div") =>
+            expect(
+                fromPandoc(
+                    {
+                        type,
+                        content: [
+                            { type: "Str", content: "Hello" },
+                            { type: "Space" },
+                            { type: "Str", content: "world!" },
+                        ],
+                    },
+                    rules
+                ).asNode()
+            ).toEqual({
+                type: "paragraph",
+                children: [{ type: "text", text: "Hello world!" }],
+            })
+        );
     });
 
     it("transforms a LineBlock into a paragraph", () => {

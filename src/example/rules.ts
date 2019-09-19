@@ -24,6 +24,7 @@ import {
     listTransformer,
     bareLeafTransformer,
     pandocPassThroughTransformer,
+    nullTransformer,
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
@@ -33,9 +34,12 @@ const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     marks,
 });
 
+// Do nothing with nothing
+rules.fromPandoc("Null", nullTransformer);
+
 // Paragraphs are paragraphs. So are "Plain", until proven otherwise.
 rules.transform(
-    "Para | Plain",
+    "Para | Div | Plain",
     "paragraph",
     contentTransformer("Para", "paragraph")
 );

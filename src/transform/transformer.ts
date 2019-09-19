@@ -161,7 +161,7 @@ export const buildRuleset = <
     const transformToMark = <PDType extends PDNode, PMType extends PMNode>(
         pdPattern: string,
         targetMark: string,
-        getMarkAttrs: (n: PDType) => {} = () => ({})
+        getMarkAttrs: (n: PDType) => {} = () => null
     ) => {
         ruleset.fromPandoc.push(
             createPandocToMarkRule(
@@ -232,10 +232,11 @@ const createPandocToMarkRule = <From, To>(
     getMarkAttrs: (node: From) => {}
 ): Rule<From, To> => {
     const transform = (pandocNode, { transform }) => {
-        return transform(pandocNode.contents, [
+        const attrs = getMarkAttrs(pandocNode);
+        return transform(pandocNode.content, [
             {
                 type: targetMark,
-                attrs: getMarkAttrs(pandocNode),
+                ...(attrs && Object.keys(attrs).length > 0 ? { attrs } : {}),
             },
         ]);
     };

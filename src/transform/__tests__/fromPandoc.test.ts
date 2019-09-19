@@ -435,4 +435,234 @@ describe("fromPandoc", () => {
             ],
         });
     });
+
+    it("performs a simple transformation from nodes to Prosemirror marks", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Para",
+                    content: [
+                        {
+                            type: "Strong",
+                            content: [
+                                { type: "Str", content: "Hello" },
+                                { type: "Space" },
+                                { type: "Str", content: "world!" },
+                            ],
+                        },
+                    ],
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "paragraph",
+            children: [
+                {
+                    type: "text",
+                    marks: [{ type: "strong" }],
+                    text: "Hello world!",
+                },
+            ],
+        });
+    });
+
+    it("transforms nested inline nodes into multiple Prosemirror marks", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Para",
+                    content: [
+                        {
+                            type: "Emph",
+                            content: [
+                                {
+                                    type: "Strong",
+                                    content: [
+                                        { type: "Str", content: "Hello" },
+                                        { type: "Space" },
+                                        { type: "Str", content: "world!" },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "paragraph",
+            children: [
+                {
+                    type: "text",
+                    marks: [{ type: "strong" }, { type: "em" }],
+                    text: "Hello world!",
+                },
+            ],
+        });
+    });
+
+    it("ignores doubly-nested marks", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Para",
+                    content: [
+                        {
+                            type: "Emph",
+                            content: [
+                                {
+                                    type: "Strong",
+                                    content: [
+                                        {
+                                            type: "Emph",
+                                            content: [
+                                                {
+                                                    type: "Str",
+                                                    content: "Hello",
+                                                },
+                                                { type: "Space" },
+                                                {
+                                                    type: "Str",
+                                                    content: "world!",
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Str",
+                                            content: "Hello",
+                                        },
+                                        { type: "Space" },
+                                        {
+                                            type: "Str",
+                                            content: "again!",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "paragraph",
+            children: [
+                {
+                    type: "text",
+                    marks: [{ type: "em" }, { type: "strong" }],
+                    text: "Hello world!",
+                },
+                {
+                    type: "text",
+                    marks: [{ type: "strong" }, { type: "em" }],
+                    text: "Hello again!",
+                },
+            ],
+        });
+    });
+
+    it("handles a complicated nodes -> marks nesting situation", () => {
+        expect(
+            fromPandoc(
+                [
+                    {
+                        type: "Para",
+                        content: [
+                            {
+                                type: "Strong",
+                                content: [
+                                    {
+                                        type: "Subscript",
+                                        content: [
+                                            {
+                                                type: "Str",
+                                                content: "Hello",
+                                            },
+                                        ],
+                                    },
+                                    { type: "Space" },
+                                    { type: "Str", content: "world!" },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        type: "BlockQuote",
+                        content: [
+                            {
+                                type: "Para",
+                                content: [
+                                    {
+                                        type: "Strikeout",
+                                        content: [
+                                            { type: "Str", content: "What's" },
+                                            { type: "Space" },
+                                            {
+                                                type: "Emph",
+                                                content: [
+                                                    {
+                                                        type: "Str",
+                                                        content: "up?",
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                rules
+            ).asArray()
+        ).toEqual([
+            {
+                type: "paragraph",
+                children: [
+                    {
+                        type: "text",
+                        marks: [{ type: "sub" }, { type: "strong" }],
+                        text: "Hello",
+                    },
+                    {
+                        type: "text",
+                        marks: [{ type: "strong" }],
+                        text: " world!",
+                    },
+                ],
+            },
+            {
+                type: "blockquote",
+                children: [
+                    {
+                        type: "paragraph",
+                        children: [
+                            {
+                                type: "text",
+                                marks: [{ type: "strike" }],
+                                text: "What's ",
+                            },
+                            {
+                                type: "text",
+                                marks: [{ type: "em" }, { type: "strike" }],
+                                text: "up?",
+                            },
+                        ],
+                    },
+                ],
+            },
+        ]);
+    });
+
+    it("gracefully handles marks that cannot be applied", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Strong",
+                    content: [{ type: "HorizontalRule" }],
+                },
+                rules
+            ).asNode()
+        ).toEqual({ type: "horizontal_rule" });
+    });
 });

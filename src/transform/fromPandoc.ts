@@ -25,41 +25,43 @@ const nodeAcceptsMarks = (node: ProsemirrorNode, schema: ProsemirrorSchema) => {
     return definition.group === "inline";
 };
 
-const applyMarksToNode = (
-    pm: ProsemirrorFluent,
+const dedupeMarks = (marks: ProsemirrorMark[]): ProsemirrorMark[] => {
+    const collected: ProsemirrorMark[] = [];
+    for (const mark of marks) {
+        if (!collected.some(existingMark => compareMarks(existingMark, mark))) {
+            collected.push(mark);
+        }
+    }
+    return collected;
+};
+
+const applyMarksToNodes = (
+    nodes: ProsemirrorNode[],
     schema: ProsemirrorSchema,
     marksMap: Map<ProsemirrorNode, ProsemirrorMark[]>
-): ProsemirrorFluent => {
+): ProsemirrorNode[] => {
     const applyInner = (
         node: ProsemirrorNode,
         appliedMarks: ProsemirrorMark[],
         pendingMarks: ProsemirrorMark[]
     ): ProsemirrorNode => {
-        const marksAtNode = (marksMap.get(node) || []).filter(
-            newMark =>
-                appliedMarks.some(appliedMark =>
-                    compareMarks(newMark, appliedMark)
-                ) ||
-                pendingMarks.some(pendingMark =>
-                    compareMarks(newMark, pendingMark)
-                )
-        );
-        const cumulativeMarks = [...pendingMarks, ...marksAtNode];
-        const acceptHere = nodeAcceptsMarks(node, schema);
+        const marksAtNode = marksMap.get(node) || [];
+        const cumulativeMarks = dedupeMarks([...pendingMarks, ...marksAtNode]);
+        const acceptMarksHere = nodeAcceptsMarks(node, schema);
         const marksProps =
-            acceptHere && cumulativeMarks.length > 0
+            acceptMarksHere && cumulativeMarks.length > 0
                 ? { marks: cumulativeMarks }
                 : {};
-        if (!node.children && !acceptHere && marksAtNode.length > 0) {
+        if (!node.children && !acceptMarksHere && marksAtNode.length > 0) {
             console.warn(
                 `Dropping marks at leaf node ${node.type}. This node should probably have group="inline".`
             );
         }
         const nextAppliedMarks = [
             ...appliedMarks,
-            ...(acceptHere ? marksAtNode : []),
+            ...(acceptMarksHere ? marksAtNode : []),
         ];
-        const nextPendingMarks = acceptHere ? [] : cumulativeMarks;
+        const nextPendingMarks = acceptMarksHere ? [] : cumulativeMarks;
         const childrenProps = node.children
             ? {
                   children: node.children.map(child =>
@@ -73,9 +75,8 @@ const applyMarksToNode = (
             ...childrenProps,
         };
     };
-    return prosemirrorFluent(
-        pm.asArray().map(node => applyInner(node, [], []))
-    );
+
+    return nodes.map(node => applyInner(node, [], []));
 };
 
 const fromPandocInner = (
@@ -83,6 +84,9 @@ const fromPandocInner = (
     context: TransformContext<PandocNode, ProsemirrorNode>,
     marks: ProsemirrorMark[]
 ): ProsemirrorFluent => {
+    if (!elementOrArray) {
+        return prosemirrorFluent([]);
+    }
     const { rules, marksMap } = context;
     const elements = asArray(elementOrArray);
     const transformed: ProsemirrorNode[] = [];
@@ -122,10 +126,12 @@ export const fromPandoc = (
             fromPandocInner(element, context, marks),
         marksMap: new Map(),
     };
-    const prosemirror = context.transform(elementOrArray);
-    return applyMarksToNode(
-        prosemirror,
-        rules.prosemirrorSchema,
-        context.marksMap
+    const nodes = context.transform(elementOrArray);
+    return prosemirrorFluent(
+        applyMarksToNodes(
+            nodes.asArray(),
+            rules.prosemirrorSchema,
+            context.marksMap
+        )
     );
 };

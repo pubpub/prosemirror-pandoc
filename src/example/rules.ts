@@ -111,10 +111,10 @@ rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
 
 // Specify all nodes that are equivalent to Prosemirror marks
 rules.transformToMark("Emph", "em");
-// rules.transform("Strong", "strong", nodeMarkTransformer);
-// rules.transform("Strikeout", "strike", nodeMarkTransformer);
-// rules.transform("Superscript", "sup", nodeMarkTransformer);
-// rules.transform("Subscript", "sub", nodeMarkTransformer);
+rules.transformToMark("Strong", "strong");
+rules.transformToMark("Strikeout", "strike");
+rules.transformToMark("Superscript", "sup");
+rules.transformToMark("Subscript", "sub");
 
 // We don't support small caps right now
 rules.fromPandoc("SmallCaps", pandocPassThroughTransformer);

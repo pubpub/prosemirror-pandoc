@@ -1,9 +1,9 @@
 /* global describe, it, expect */
-import rules from "../../example/rules";
+import rules from "../../../example/rules";
 
-import { fromPandoc } from "../fromPandoc";
-import { createAttr } from "../util";
-import { Header, OrderedList, BulletList } from "../../types";
+import { fromPandoc } from "..";
+import { createAttr } from "../../util";
+import { Header, OrderedList, BulletList } from "../../../types";
 
 describe("fromPandoc", () => {
     it("transforms a Null into an empty array", () => {

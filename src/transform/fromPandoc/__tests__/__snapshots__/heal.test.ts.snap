@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`healNaiveTokenList heals a real-world example of a misplaced image element 1`] = `"O(doc) O*(bullet_list) O(list_item) O(paragraph) O(text) C(text) C(paragraph) C(list_item) O*(list_item) C(list_item) C(bullet_list) O(image) C(image) O*(bullet_list) O*(list_item) C(list_item) O(list_item) O(paragraph) O(text) C(text) C(paragraph) C(list_item) C(bullet_list) C(doc)"`;
+
+exports[`healNaiveTokenList heals a real-world example of a misplaced image element that is less dire 1`] = `"O(doc) O(bullet_list) O(list_item) O(paragraph) O(text) C(text) C(paragraph) O*(paragraph) O(text) C(text) C(paragraph) O(image) C(image) O*(paragraph) O(text) C(text) C(paragraph) C(list_item) O(list_item) O(paragraph) O(text) C(text) C(paragraph) C(list_item) C(bullet_list) C(doc)"`;

@@ -2,7 +2,6 @@ import {
     Alignment,
     Attr,
     Block,
-    PandocBlockNodeType,
     BlockQuote,
     BulletList,
     CitationMode,
@@ -11,12 +10,12 @@ import {
     CodeBlock,
     DefinitionList,
     Div,
+    Doc,
     Emph,
     Format,
     Header,
     Image,
     Inline,
-    PandocInlineNodeType,
     LineBlock,
     Link,
     ListAttributes,
@@ -26,6 +25,7 @@ import {
     MathType,
     Note,
     OrderedList,
+    PandocJson,
     Para,
     Plain,
     Quoted,
@@ -41,8 +41,6 @@ import {
     Superscript,
     Table,
     Target,
-    Doc,
-    PandocJson,
 } from "./types";
 
 const unwrapEnum = <T>(instance: { t: T }): T => {
@@ -84,6 +82,10 @@ const unwrapListAttributes = (
         listNumberStyle: unwrapEnum<ListNumberStyle>(listNumberStyle),
         listNumberDelim: unwrapEnum<ListNumberDelim>(listNumberDelim),
     };
+};
+
+const parseAtom = (n: { t }) => {
+    return { type: n.t };
 };
 
 const parseStr = (n: { c: string }): Str => {
@@ -212,7 +214,7 @@ const parseSpan = (n: { c: [any, any[]] }): Span => {
     };
 };
 
-export const parseInline = (n: { t: PandocInlineNodeType; c: any }): Inline => {
+export const parseInline = (n: { t: Inline["type"]; c: any }): Inline => {
     switch (n.t) {
         case "Str":
             return parseStr(n);
@@ -232,7 +234,7 @@ export const parseInline = (n: { t: PandocInlineNodeType; c: any }): Inline => {
         case "Space":
         case "SoftBreak":
         case "LineBreak":
-            return { type: n.t };
+            return parseAtom(n);
         case "Math":
             return parseMath(n);
         case "RawInline":
@@ -285,7 +287,7 @@ const parseRawBlock = (n: { c: [any, string] }): RawBlock => {
     const [format, content] = n.c;
     return {
         type: "RawBlock",
-        format,
+        format: unwrapFormat(format),
         content,
     };
 };
@@ -369,7 +371,7 @@ const parseTable = (n: {
     };
 };
 
-export const parseBlock = (n: { t: PandocBlockNodeType; c: any }): Block => {
+export const parseBlock = (n: { t: Block["type"]; c: any }): Block => {
     switch (n.t) {
         case "Plain":
             return parsePlain(n);
@@ -393,7 +395,7 @@ export const parseBlock = (n: { t: PandocBlockNodeType; c: any }): Block => {
             return parseHeader(n);
         case "HorizontalRule":
         case "Null":
-            return { type: n.t };
+            return parseAtom(n);
         case "Div":
             return parseDiv(n);
         case "Table":

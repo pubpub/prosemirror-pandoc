@@ -24,10 +24,10 @@ import {
     bareLeafTransformer,
     pandocPassThroughTransformer,
     nullTransformer,
+    definitionListTransformer,
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
-import { loadPandocFromString } from "../load";
 
 const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
@@ -39,10 +39,12 @@ rules.fromPandoc("Null", nullTransformer);
 
 // Paragraphs are paragraphs. So are "Plain", until proven otherwise.
 rules.transform(
-    "Para | Div | Plain",
+    "Para | Plain",
     "paragraph",
     contentTransformer("Para", "paragraph")
 );
+
+rules.fromPandoc("Div", pandocPassThroughTransformer);
 
 // I'm not really sure what a LineBlock is, but let's just call it a single paragraph
 // with some hard breaks thrown in.
@@ -84,6 +86,11 @@ rules.transform(
     "BulletList",
     "bullet_list",
     listTransformer("list_item", ensureFirstElementIsParagraph)
+);
+
+rules.fromPandoc(
+    "DefinitionList",
+    definitionListTransformer("bullet_list", "list_item")
 );
 
 // Tranform headers

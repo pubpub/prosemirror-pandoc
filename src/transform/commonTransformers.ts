@@ -1,6 +1,5 @@
 import {
     Block,
-    Inline,
     DefinitionList,
     Para,
     Plain,

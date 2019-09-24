@@ -3,7 +3,15 @@ import rules from "../../../example/rules";
 
 import { fromPandoc } from "..";
 import { createAttr } from "../../util";
-import { Header, OrderedList, BulletList } from "../../../types";
+import {
+    Header,
+    OrderedList,
+    BulletList,
+    Div,
+    Para,
+    Plain,
+    DefinitionList,
+} from "../../../types";
 
 describe("fromPandoc", () => {
     it("transforms a Null into an empty array", () => {
@@ -73,20 +81,38 @@ describe("fromPandoc", () => {
     });
 
     it("transforms a Para, Plain, or Div into a paragraph", () => {
-        ["Para", "Plain", "Div"].forEach((type: "Para" | "Plain" | "Div") =>
-            expect(
-                fromPandoc(
-                    {
-                        type,
-                        content: [
-                            { type: "Str", content: "Hello" },
-                            { type: "Space" },
-                            { type: "Str", content: "world!" },
-                        ],
-                    },
-                    rules
-                ).asNode()
-            ).toEqual({
+        const blockOne: Para = {
+            type: "Para",
+            content: [
+                { type: "Str", content: "Hello" },
+                { type: "Space" },
+                { type: "Str", content: "world!" },
+            ],
+        };
+        const blockTwo: Plain = {
+            type: "Plain",
+            content: [
+                { type: "Str", content: "Hello" },
+                { type: "Space" },
+                { type: "Str", content: "world!" },
+            ],
+        };
+        const blockThree: Div = {
+            type: "Div",
+            attr: createAttr(""),
+            content: [
+                {
+                    type: "Para",
+                    content: [
+                        { type: "Str", content: "Hello" },
+                        { type: "Space" },
+                        { type: "Str", content: "world!" },
+                    ],
+                },
+            ],
+        };
+        [blockOne, blockTwo, blockThree].forEach(block =>
+            expect(fromPandoc(block, rules).asNode()).toEqual({
                 type: "paragraph",
                 children: [{ type: "text", text: "Hello world!" }],
             })
@@ -129,6 +155,7 @@ describe("fromPandoc", () => {
                 {
                     type: "CodeBlock",
                     content: "hello_world()",
+                    attr: createAttr(""),
                 },
                 rules
             ).asNode()
@@ -286,6 +313,82 @@ describe("fromPandoc", () => {
             ],
         };
         expect(fromPandoc(input, rules).asNode()).toEqual(expectedOutput);
+    });
+
+    it("transforms a DefinitionList into a bullet_list", () => {
+        const input: DefinitionList = {
+            type: "DefinitionList",
+            entries: [
+                {
+                    term: [
+                        { type: "Str", content: "A" },
+                        { type: "Space" },
+                        { type: "Str", content: "term" },
+                    ],
+                    definitions: [
+                        [
+                            {
+                                type: "Para",
+                                content: [
+                                    { type: "Str", content: "Definition" },
+                                    { type: "Space" },
+                                    { type: "Str", content: "One" },
+                                ],
+                            },
+                            {
+                                type: "Para",
+                                content: [
+                                    { type: "Str", content: "Paragraph" },
+                                    { type: "Space" },
+                                    { type: "Str", content: "B" },
+                                ],
+                            },
+                        ],
+                        [
+                            {
+                                type: "BlockQuote",
+                                content: [
+                                    {
+                                        type: "Para",
+                                        content: [
+                                            {
+                                                type: "Str",
+                                                content: "Inside",
+                                            },
+                                            { type: "Space" },
+                                            {
+                                                type: "Str",
+                                                content: "Blockquote",
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                type: "Para",
+                                content: [
+                                    { type: "Str", content: "Paragraph" },
+                                    { type: "Space" },
+                                    { type: "Str", content: "D" },
+                                ],
+                            },
+                        ],
+                    ],
+                },
+                {
+                    term: [{ type: "Str", content: "Mercifully" }],
+                    definitions: [
+                        [
+                            {
+                                type: "Para",
+                                content: [{ type: "Str", content: "simple." }],
+                            },
+                        ],
+                    ],
+                },
+            ],
+        };
+        expect(fromPandoc(input, rules)).toMatchSnapshot();
     });
 
     it("transforms an BulletList into an bullet_list", () => {
@@ -682,6 +785,8 @@ describe("fromPandoc", () => {
     it("gracefully handles marks that cannot be applied", () => {
         expect(
             fromPandoc(
+                // This is incorrectly typed -- that's okay
+                // @ts-ignore
                 {
                     type: "Strong",
                     content: [{ type: "HorizontalRule" }],

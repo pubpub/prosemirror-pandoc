@@ -29,66 +29,13 @@ export interface ProsemirrorMark {
     attrs?: { [key: string]: string | number | null | undefined };
 }
 
-export type PandocBlockNodeType =
-    | "Plain"
-    | "Para"
-    | "LineBlock"
-    | "CodeBlock"
-    | "RawBlock"
-    | "BlockQuote"
-    | "OrderedList"
-    | "BulletList"
-    | "DefinitionList"
-    | "Header"
-    | "HorizontalRule"
-    | "Table"
-    | "Div"
-    | "Null";
-
-export type PandocInlineNodeType =
-    | "Str"
-    | "Emph"
-    | "Strong"
-    | "Strikeout"
-    | "Superscript"
-    | "Subscript"
-    | "SmallCaps"
-    | "Quoted"
-    | "Cite"
-    | "Code"
-    | "Space"
-    | "SoftBreak"
-    | "LineBreak"
-    | "Math"
-    | "RawInline"
-    | "Link"
-    | "Image"
-    | "Note"
-    | "Span";
-
 export interface PandocJson {
     meta: {};
     blocks: {}[];
 }
-
 export interface Doc {
     blocks: Block[];
     meta: {};
-}
-
-export type PandocNodeType = PandocBlockNodeType | PandocInlineNodeType;
-
-export interface PandocNode {
-    type: PandocNodeType;
-    content?: any[] | string;
-}
-
-export interface Block extends PandocNode {
-    type: PandocBlockNodeType;
-}
-
-export interface Inline extends PandocNode {
-    type: PandocInlineNodeType;
 }
 
 export type Alignment =
@@ -148,52 +95,52 @@ export interface Citation {
 /* ~~~ Block-level definitions ~~~ */
 
 /* Plain text, not a paragraph */
-export interface Plain extends Block {
+export interface Plain {
     type: "Plain";
     content: Inline[];
 }
 
 /* Paragraph */
-export interface Para extends Block {
+export interface Para {
     type: "Para";
     content: Inline[];
 }
 
 /* Multiple non-breaking lines */
-export interface LineBlock extends Block {
+export interface LineBlock {
     type: "LineBlock";
     content: Inline[][];
 }
 
 /* Code block (literal) with attributes */
-export interface CodeBlock extends Block {
+export interface CodeBlock {
     type: "CodeBlock";
     attr: Attr;
     content: string;
 }
 
 /* Raw block */
-export interface RawBlock extends Block {
+export interface RawBlock {
     type: "RawBlock";
     format: Format;
     content: string;
 }
 
 /* Block quote (list of blocks) */
-export interface BlockQuote extends Block {
+export interface BlockQuote {
     type: "BlockQuote";
     content: Block[];
 }
 
 /* Ordered list (attributes and a list of items, each a list of blocks) */
-export interface OrderedList extends Block {
+export interface OrderedList {
     type: "OrderedList";
     listAttributes: ListAttributes;
     content: Block[][];
 }
 
 /* Bullet list (list of items, each a list of blocks) */
-export interface BulletList extends Block {
+export interface BulletList {
     type: "BulletList";
     content: Block[][];
 }
@@ -201,7 +148,7 @@ export interface BulletList extends Block {
 /* Definition list
  Each list item is a pair consisting of a term (a list of inlines)
  and one or more definitions (each a list of blocks) */
-export interface DefinitionList extends Block {
+export interface DefinitionList {
     type: "DefinitionList";
     entries: {
         term: Inline[];
@@ -210,7 +157,7 @@ export interface DefinitionList extends Block {
 }
 
 /* Header - level (integer) and text (inlines) */
-export interface Header extends Block {
+export interface Header {
     type: "Header";
     level: number;
     attr: Attr;
@@ -218,14 +165,14 @@ export interface Header extends Block {
 }
 
 /* Horizontal rule */
-export interface HorizontalRule extends Block {
+export interface HorizontalRule {
     type: "HorizontalRule";
 }
 
 /* Table, with caption, column alignments (required),
  relative column widths (0 = default), column headers (each a list of blocks),
  and rows (each a list of lists of blocks) */
-export interface Table extends Block {
+export interface Table {
     type: "Table";
     caption: Inline[];
     alignments: Alignment[];
@@ -235,113 +182,129 @@ export interface Table extends Block {
 }
 
 /* Generic block container with attributes */
-export interface Div extends Block {
+export interface Div {
     type: "Div";
     attr: Attr;
     content: Block[];
 }
 
 /* Nothing */
-export interface Null extends Block {
+export interface Null {
     type: "Null";
 }
+
+export type Block =
+    | Plain
+    | Para
+    | LineBlock
+    | CodeBlock
+    | RawBlock
+    | BlockQuote
+    | OrderedList
+    | BulletList
+    | DefinitionList
+    | Header
+    | HorizontalRule
+    | Table
+    | Div
+    | Null;
 
 /* ~~~ Inline-level definitions ~~~ */
 
 /* Text (string) */
-export interface Str extends Inline {
+export interface Str {
     type: "Str";
     content: string;
 }
 
 /* Emphasized text (list of inlines) */
-export interface Emph extends Inline {
+export interface Emph {
     type: "Emph";
     content: Inline[];
 }
 
 /* Strongly emphasized text (list of inlines) */
-export interface Strong extends Inline {
+export interface Strong {
     type: "Strong";
     content: Inline[];
 }
 
 /* Strikeout text (list of inlines) */
-export interface Strikeout extends Inline {
+export interface Strikeout {
     type: "Strikeout";
     content: Inline[];
 }
 
 /* Superscripted text (list of inlines) */
-export interface Superscript extends Inline {
+export interface Superscript {
     type: "Superscript";
     content: Inline[];
 }
 
 /* Subscripted text (list of inlines) */
-export interface Subscript extends Inline {
+export interface Subscript {
     type: "Subscript";
     content: Inline[];
 }
 
 /* Small caps text (list of inlines) */
-export interface SmallCaps extends Inline {
+export interface SmallCaps {
     type: "SmallCaps";
     content: Inline[];
 }
 
 /* Quoted text (list of inlines) */
-export interface Quoted extends Inline {
+export interface Quoted {
     type: "Quoted";
     quoteType: QuoteType;
     content: Inline[];
 }
 
 /* Citation (list of inlines) */
-export interface Cite extends Inline {
+export interface Cite {
     type: "Cite";
     citations: Citation[];
     content: Inline[];
 }
 
 /* Inline code (literal) */
-export interface Code extends Inline {
+export interface Code {
     type: "Code";
     attr: Attr;
     content: string;
 }
 
 /* Inter-word space */
-export interface Space extends Inline {
+export interface Space {
     type: "Space";
 }
 
 /* Soft line break */
-export interface SoftBreak extends Inline {
+export interface SoftBreak {
     type: "SoftBreak";
 }
 
 /* Hard line break */
-export interface LineBreak extends Inline {
+export interface LineBreak {
     type: "LineBreak";
 }
 
 /* TeX math (literal) */
-export interface Math extends Inline {
+export interface Math {
     type: "Math";
     mathType: MathType;
     content: string;
 }
 
 /* Raw inline */
-export interface RawInline extends Inline {
+export interface RawInline {
     type: "RawInline";
     format: Format;
     content: string;
 }
 
 /* Hyperlink: alt text (list of inlines), target */
-export interface Link extends Inline {
+export interface Link {
     type: "Link";
     attr: Attr;
     content: Inline[];
@@ -349,7 +312,7 @@ export interface Link extends Inline {
 }
 
 /* Image: alt text (list of inlines), target */
-export interface Image extends Inline {
+export interface Image {
     type: "Image";
     attr: Attr;
     content: Inline[];
@@ -357,14 +320,37 @@ export interface Image extends Inline {
 }
 
 /* Footnote or endnote */
-export interface Note extends Inline {
+export interface Note {
     type: "Note";
     content: Block[];
 }
 
 /* Generic inline container with attributes */
-export interface Span extends Inline {
+export interface Span {
     type: "Span";
     attr: Attr;
     content: Inline[];
 }
+
+export type Inline =
+    | Str
+    | Emph
+    | Strong
+    | Strikeout
+    | Superscript
+    | Subscript
+    | SmallCaps
+    | Quoted
+    | Cite
+    | Code
+    | Space
+    | SoftBreak
+    | LineBreak
+    | Math
+    | RawInline
+    | Link
+    | Image
+    | Note
+    | Span;
+
+export type PandocNode = Block | Inline;

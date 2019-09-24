@@ -1,19 +1,47 @@
 import {
-    Doc,
-    PandocJson,
-    Table,
-    Attr,
-    Target,
-    Format,
-    ListAttributes,
-    ListNumberStyle,
-    ListNumberDelim,
     Alignment,
-    Header,
-    DefinitionList,
-    PandocBlockNodeType,
+    Attr,
     Block,
+    BlockQuote,
     BulletList,
+    CitationMode,
+    Cite,
+    Code,
+    CodeBlock,
+    DefinitionList,
+    Div,
+    Doc,
+    Emph,
+    Format,
+    Header,
+    Image,
+    Inline,
+    LineBlock,
+    Link,
+    ListAttributes,
+    ListNumberDelim,
+    ListNumberStyle,
+    Math,
+    MathType,
+    Note,
+    OrderedList,
+    PandocJson,
+    Para,
+    Plain,
+    Quoted,
+    QuoteType,
+    RawBlock,
+    RawInline,
+    SmallCaps,
+    Span,
+    Str,
+    Strikeout,
+    Strong,
+    Subscript,
+    Superscript,
+    Table,
+    Target,
+    PandocNode,
 } from "./types";
 
 const wrapEnum = <T>(instance: T): { t: T } => {
@@ -47,28 +75,240 @@ const wrapListAttributes = (listAttributes: ListAttributes) => {
     ];
 };
 
-export const emitBulletList = (bulletList: BulletList) => {
-    return {
-        t: "BulletList",
+const emitAtom = (n: PandocNode) => {
+    return { t: n.type };
+};
 
-    }
-}
-
-export const emitDefinitionList = (definitionList: DefinitionList) => {
-    const { entries } = definitionList;
+const emitStr = (str: Str) => {
+    const { content } = str;
     return {
-        t: "DefinitionList",
-        c: [entries.map(entry => {
-            const {term, definitions} = entry;
-            return [
-                term.map(emitInline),
-                definitions.map(definition => definition.map(emitBlock))
-            ]
-        })]
+        t: "Str",
+        c: content,
+    };
+};
+
+const emitSimpleInline = (
+    node: Emph | Strong | Strikeout | Superscript | Subscript | SmallCaps
+) => {
+    const { type, content } = node;
+    return {
+        t: type,
+        c: content.map(emitInline),
+    };
+};
+
+const emitQuoted = (quoted: Quoted) => {
+    const { quoteType, content } = quoted;
+    return {
+        t: "Quoted",
+        c: [wrapEnum<QuoteType>(quoteType), content.map(emitInline)],
+    };
+};
+
+const emitCite = (cite: Cite) => {
+    const { citations, content } = cite;
+    return {
+        t: "Cite",
+        c: [
+            citations.map(citation => {
+                const {
+                    citationHash,
+                    citationId,
+                    citationMode,
+                    citationNoteNum,
+                    citationPrefix,
+                    citationSuffix,
+                } = citation;
+                return {
+                    citationHash,
+                    citationId,
+                    citationMode: wrapEnum<CitationMode>(citationMode),
+                    citationNoteNum,
+                    citationPrefix: citationPrefix.map(emitInline),
+                    citationSuffic: citationSuffix.map(emitInline),
+                };
+            }),
+            content.map(emitInline),
+        ],
+    };
+};
+
+const emitCode = (code: Code) => {
+    const { attr, content } = code;
+    return {
+        t: "Code",
+        c: [wrapAttr(attr), content],
+    };
+};
+
+const emitMath = (math: Math) => {
+    const { mathType, content } = math;
+    return {
+        t: "Math",
+        c: [wrapEnum<MathType>(mathType), content],
+    };
+};
+
+const emitRawInline = (rawInline: RawInline) => {
+    const { format, content } = rawInline;
+    return {
+        t: "RawInline",
+        c: [wrapFormat(format), content],
+    };
+};
+
+const emitImage = (image: Image) => {
+    const { attr, content, target } = image;
+    return {
+        t: "Image",
+        c: [wrapAttr(attr), content.map(emitInline), wrapTarget(target)],
+    };
+};
+
+const emitLink = (link: Link) => {
+    const { attr, content, target } = link;
+    return {
+        t: "Link",
+        c: [wrapAttr(attr), content.map(emitInline), wrapTarget(target)],
+    };
+};
+
+const emitNote = (note: Note) => {
+    const { content } = note;
+    return {
+        t: "Note",
+        c: content.map(emitBlock),
+    };
+};
+
+const emitSpan = (span: Span) => {
+    const { attr, content } = span;
+    return {
+        t: "Span",
+        c: [wrapAttr(attr), content.map(emitInline)],
+    };
+};
+
+export const emitInline = (n: Inline): { t: string; c?: string | any[] } => {
+    switch (n.type) {
+        case "Str":
+            return emitStr(n);
+        case "Emph":
+        case "Strong":
+        case "Strikeout":
+        case "Superscript":
+        case "Subscript":
+        case "SmallCaps":
+            return emitSimpleInline(n);
+        case "Quoted":
+            return emitQuoted(n);
+        case "Cite":
+            return emitCite(n);
+        case "Code":
+            return emitCode(n);
+        case "Space":
+        case "SoftBreak":
+        case "LineBreak":
+            return emitAtom(n);
+        case "Math":
+            return emitMath(n);
+        case "RawInline":
+            return emitRawInline(n);
+        case "Link":
+            return emitLink(n);
+        case "Image":
+            return emitImage(n);
+        case "Note":
+            return emitNote(n);
+        case "Span":
+            return emitSpan(n);
     }
 };
 
-export const emitHeader = (header: Header) => {
+const emitPlain = (plain: Plain) => {
+    const { content } = plain;
+    return {
+        t: "Plain",
+        c: content.map(emitInline),
+    };
+};
+
+const emitPara = (para: Para) => {
+    const { content } = para;
+    return {
+        t: "Para",
+        c: content.map(emitInline),
+    };
+};
+
+const emitLineBlock = (lineBlock: LineBlock) => {
+    const { content } = lineBlock;
+    return {
+        t: "LineBlock",
+        c: content.map(line => line.map(emitInline)),
+    };
+};
+
+const emitCodeBlock = (codeBlock: CodeBlock) => {
+    const { attr, content } = codeBlock;
+    return {
+        t: "CodeBlock",
+        c: [wrapAttr(attr), content],
+    };
+};
+
+const emitRawBlock = (rawBlock: RawBlock) => {
+    const { format, content } = rawBlock;
+    return {
+        t: "RawBlock",
+        c: [wrapFormat(format), content],
+    };
+};
+
+const emitBlockQuote = (blockQuote: BlockQuote) => {
+    const { content } = blockQuote;
+    return {
+        t: "BlockQuote",
+        c: content.map(emitBlock),
+    };
+};
+
+const emitOrderedList = (orderedList: OrderedList) => {
+    const { content, listAttributes } = orderedList;
+    return {
+        t: "OrderedList",
+        c: [
+            wrapListAttributes(listAttributes),
+            content.map(entry => entry.map(emitBlock)),
+        ],
+    };
+};
+
+const emitBulletList = (bulletList: BulletList) => {
+    const { content } = bulletList;
+    return {
+        t: "BulletList",
+        c: content.map(entry => entry.map(emitBlock)),
+    };
+};
+
+const emitDefinitionList = (definitionList: DefinitionList) => {
+    const { entries } = definitionList;
+    return {
+        t: "DefinitionList",
+        c: [
+            entries.map(entry => {
+                const { term, definitions } = entry;
+                return [
+                    term.map(emitInline),
+                    definitions.map(definition => definition.map(emitBlock)),
+                ];
+            }),
+        ],
+    };
+};
+
+const emitHeader = (header: Header) => {
     const { level, attr, content } = header;
     return {
         t: "Header",
@@ -76,7 +316,7 @@ export const emitHeader = (header: Header) => {
     };
 };
 
-export const emitDiv = (div: Div) => {
+const emitDiv = (div: Div) => {
     const { attr, content } = div;
     return {
         t: "Div",
@@ -84,7 +324,7 @@ export const emitDiv = (div: Div) => {
     };
 };
 
-export const emitTable = (table: Table) => {
+const emitTable = (table: Table) => {
     const { caption, alignments, columnWidths, headers, cells } = table;
     return {
         t: "Table",
@@ -98,8 +338,8 @@ export const emitTable = (table: Table) => {
     };
 };
 
-export const emitBlock = (n: Block): {t: string, c?: any[]} => {
-    switch (n.t) {
+export const emitBlock = (n: Block): { t: string; c?: any[] } => {
+    switch (n.type) {
         case "Plain":
             return emitPlain(n);
         case "Para":
@@ -119,15 +359,16 @@ export const emitBlock = (n: Block): {t: string, c?: any[]} => {
         case "DefinitionList":
             return emitDefinitionList(n);
         case "Header":
-            return emitHeader(n as Header);
+            return emitHeader(n);
         case "HorizontalRule":
         case "Null":
-            return { t: n.type };
+            return emitAtom(n);
         case "Div":
             return emitDiv(n);
         case "Table":
-            return emitTable(n as Table);
+            return emitTable(n);
     }
+};
 
 export const emitPandocJson = (doc: Doc): PandocJson => {
     const { blocks, meta } = doc;

@@ -8,12 +8,12 @@ export const load = (fileName: string) => {
     return parsePandocJson(json);
 };
 
-export const loadPandocFromString = (
+export const callPandoc = (
     source: string,
     inputFormat: string,
     outputFormat: string = "json"
 ) => {
     return spawnSync("pandoc", ["-f", inputFormat, "-t", outputFormat], {
         input: source,
-    }).stdout.toJSON();
+    }).stdout.toString();
 };

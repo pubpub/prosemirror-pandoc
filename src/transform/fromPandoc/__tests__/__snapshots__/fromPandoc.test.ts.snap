@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fromPandoc transforms a DefinitionList into a bullet_list 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "marks": Array [
+                  Object {
+                    "type": "strong",
+                  },
+                ],
+                "text": "[object Object],[object Object],[object Object]: ",
+                "type": "text",
+              },
+              Object {
+                "text": "Definition One",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+          Object {
+            "children": Array [
+              Object {
+                "text": "Paragraph B",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+          Object {
+            "children": Array [
+              Object {
+                "children": Array [
+                  Object {
+                    "text": "Inside Blockquote",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "blockquote",
+          },
+          Object {
+            "children": Array [
+              Object {
+                "text": "Paragraph D",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+        ],
+        "type": "list_item",
+      },
+      Object {
+        "children": Array [
+          Object {
+            "children": Array [
+              Object {
+                "marks": Array [
+                  Object {
+                    "type": "strong",
+                  },
+                ],
+                "text": "[object Object]: ",
+                "type": "text",
+              },
+              Object {
+                "text": "simple.",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+        ],
+        "type": "list_item",
+      },
+    ],
+    "type": "bullet_list",
+  },
+]
+`;

@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseBlock parses an OrderedList 1`] = `
+Object {
+  "content": Array [
+    Array [
+      Object {
+        "content": Array [
+          Object {
+            "content": "One!",
+            "type": "Str",
+          },
+        ],
+        "type": "Para",
+      },
+    ],
+    Array [
+      Object {
+        "content": Array [
+          Object {
+            "content": "Two!",
+            "type": "Str",
+          },
+        ],
+        "type": "Para",
+      },
+    ],
+    Array [
+      Object {
+        "content": Array [
+          Object {
+            "content": "Three!",
+            "type": "Str",
+          },
+        ],
+        "type": "Para",
+      },
+    ],
+  ],
+  "listAttributes": Object {
+    "listNumberDelim": "Period",
+    "listNumberStyle": "Decimal",
+    "startNumber": 3,
+  },
+  "type": "OrderedList",
+}
+`;
+
+exports[`parseInline parses a Link 1`] = `
+Object {
+  "attr": Object {
+    "classes": Array [
+      "these",
+      "are",
+      "classes",
+    ],
+    "identifier": "this-is-an-identifier",
+    "properties": Object {
+      "key1": "val1",
+      "key2": "val2",
+    },
+  },
+  "content": Array [
+    Object {
+      "content": Array [
+        Object {
+          "content": "It's",
+          "type": "Str",
+        },
+        Object {
+          "type": "Space",
+        },
+        Object {
+          "content": "a",
+          "type": "Str",
+        },
+        Object {
+          "type": "Space",
+        },
+        Object {
+          "content": "link!",
+          "type": "Str",
+        },
+      ],
+      "type": "Strong",
+    },
+  ],
+  "target": Object {
+    "title": "This is a title??",
+    "url": "https://url.com",
+  },
+  "type": "Link",
+}
+`;

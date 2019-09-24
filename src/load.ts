@@ -15,5 +15,8 @@ export const callPandoc = (
 ) => {
     return spawnSync("pandoc", ["-f", inputFormat, "-t", outputFormat], {
         input: source,
-    }).stdout.toString();
+    })
+        .output.filter(x => x)
+        .map(x => x.toString())
+        .join("");
 };

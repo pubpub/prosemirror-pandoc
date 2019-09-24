@@ -1,3 +1,4 @@
+import { PANDOC_API_VERSION } from "./config";
 import {
     Alignment,
     Attr,
@@ -373,6 +374,7 @@ export const emitBlock = (n: Block): { t: string; c?: any[] } => {
 export const emitPandocJson = (doc: Doc): PandocJson => {
     const { blocks, meta } = doc;
     return {
+        "pandoc-api-version": PANDOC_API_VERSION,
         blocks: blocks.map(emitBlock),
         meta,
     };

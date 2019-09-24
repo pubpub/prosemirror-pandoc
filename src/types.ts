@@ -30,6 +30,7 @@ export interface ProsemirrorMark {
 }
 
 export interface PandocJson {
+    "pandoc-api-version": number[];
     meta: {};
     blocks: {}[];
 }

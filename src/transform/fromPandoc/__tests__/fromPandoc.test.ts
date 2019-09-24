@@ -795,4 +795,34 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({ type: "horizontal_rule" });
     });
+
+    it("handles an Image with a caption that needs to be converted to HTML by Pandoc", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Image",
+                    target: {
+                        url: "https://pubpub.org/logo.png",
+                        title: "The PubPub logo",
+                    },
+                    attr: createAttr(""),
+                    content: [
+                        {
+                            type: "Strong",
+                            content: [{ type: "Str", content: "Very" }],
+                        },
+                        { type: "LineBreak" },
+                        { type: "Str", content: "cool." },
+                    ],
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "image",
+            attrs: {
+                caption: "<p><strong>Very</strong><br />\ncool.</p>\n",
+                url: "https://pubpub.org/logo.png",
+            },
+        });
+    });
 });

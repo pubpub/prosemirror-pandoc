@@ -126,7 +126,11 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
         }
         prependableBlock.content.unshift({
             type: "Strong",
-            content: [{ type: "Str", content: term + ":" }, { type: "Space" }],
+            content: [
+                ...term,
+                { type: "Str", content: ":" },
+                { type: "Space" },
+            ],
         });
         return {
             type: pmInnerNodeName,

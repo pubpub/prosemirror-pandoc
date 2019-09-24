@@ -8,6 +8,7 @@ import {
     LineBlock,
     ProsemirrorNode,
     Inline,
+    Doc,
 } from "../types";
 import {
     textFromStrSpace,
@@ -28,6 +29,8 @@ import {
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
+import { emitPandocJson } from "../emit";
+import { callPandoc } from "../load";
 
 const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
@@ -143,15 +146,31 @@ rules.fromProsemirror("text", (node: ProsemirrorNode) =>
 
 // ~~~ Rules for images ~~~ //
 
-// rules.fromPandoc("Image", (node: Image, { resource, transform }) => {
-//     return {
-//         type: "image",
-//         attrs: {
-//             url: resource(node.target.url),
-//             // TODO(ian): is there anything we can do about the image size here?
-//         },
-//     };
-// });
+const pandocToHtmlString = (nodes: Inline[]) => {
+    if (nodes.length === 0) {
+        return "";
+    }
+    const document: Doc = {
+        blocks: [{ type: "Para", content: nodes }],
+        meta: {},
+    };
+    const pandocJson = JSON.stringify(emitPandocJson(document));
+    console.log("pandocJson", pandocJson);
+    const htmlString = callPandoc(pandocJson, "json", "html");
+    console.log("htmlString", htmlString);
+    return htmlString;
+};
+
+rules.fromPandoc("Image", (node: Image, { resource }) => {
+    return {
+        type: "image",
+        attrs: {
+            url: resource(node.target.url),
+            caption: pandocToHtmlString(node.content),
+            // TODO(ian): is there anything we can do about the image size here?
+        },
+    };
+});
 
 rules.fromProsemirror("image", (node: ProsemirrorNode, { transform }) => {
     let caption = [];

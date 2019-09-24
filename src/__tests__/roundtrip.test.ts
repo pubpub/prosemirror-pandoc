@@ -5,8 +5,7 @@ import { emitPandocJson } from "../emit";
 /* global describe, it, expect */
 
 const testRoundtrip = (str: string, format: string = "markdown") => {
-    const { blocks, meta } = JSON.parse(callPandoc(str, format, "json"));
-    const json = { blocks, meta };
+    const json = JSON.parse(callPandoc(str, format, "json"));
     const pandocAst = parsePandocJson(json);
     const emittedJson = emitPandocJson(pandocAst);
     expect(json).toEqual(emittedJson);

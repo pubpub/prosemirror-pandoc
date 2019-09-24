@@ -2,13 +2,12 @@ import { nodes, marks } from "./schema";
 import {
     PandocNode,
     Image,
-    Plain,
     Str,
     Space,
     Header,
     LineBlock,
     ProsemirrorNode,
-    ProsemirrorContentNode,
+    Inline,
 } from "../types";
 import {
     textFromStrSpace,
@@ -28,6 +27,7 @@ import {
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
+import { loadPandocFromString } from "../load";
 
 const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
@@ -103,9 +103,7 @@ rules.transform("Header", "heading", {
             type: "Header",
             level: parseInt(node.attrs.level.toString()),
             attr: createAttr(node.attrs.id.toString()),
-            content: transform(node.children)
-                .asPandocInline()
-                .asArray(),
+            content: transform(node.children).asArray() as Inline[],
         };
     },
 });
@@ -132,48 +130,46 @@ rules.fromPandoc("(Str | Space)+", (nodes: (Str | Space)[]) => {
 });
 
 // Tell the transformer how to turn Prosemirror text back into Pandoc
-rules.fromProsemirror("text", (node: ProsemirrorContentNode) =>
+rules.fromProsemirror("text", (node: ProsemirrorNode) =>
     textToStrSpace(node.text)
 );
 
 // ~~~ Rules for images ~~~ //
 
-rules.fromPandoc("Image", (node: Image, { resource, transform }) => {
+// rules.fromPandoc("Image", (node: Image, { resource, transform }) => {
+//     return {
+//         type: "image",
+//         attrs: {
+//             url: resource(node.target.url),
+//             // TODO(ian): is there anything we can do about the image size here?
+//         },
+//     };
+// });
+
+rules.fromProsemirror("image", (node: ProsemirrorNode, { transform }) => {
+    let caption = [];
+    if (node.attrs.caption) {
+        const pmDoc = JSON.parse(node.attrs.caption as string);
+        const paragraphs = pmDoc.children.filter(
+            child => child.type === "paragraph"
+        );
+        const text = flatten(paragraphs.map(para => para.children));
+        caption = transform(text).asArray();
+    }
     return {
-        type: "paragraph",
-        attrs: {
-            url: resource(node.target.url),
-            caption: JSON.stringify(transform(node.content).asProsemirrorDoc()),
-            // TODO(ian): is there anything we can do about the image size here?
-        },
+        type: "Plain",
+        content: [
+            {
+                type: "Image",
+                content: caption,
+                target: {
+                    url: node.attrs.url.toString(),
+                    title: "",
+                },
+                attr: createAttr(""),
+            },
+        ],
     };
 });
-
-rules.fromProsemirror(
-    "image",
-    (
-        node: ProsemirrorContentNode,
-        { transform }
-    ): Plain & {
-        content: Image[];
-    } => {
-        return {
-            type: "Plain",
-            content: [
-                {
-                    type: "Image",
-                    content: transform(node.children)
-                        .asPandocInline()
-                        .asArray(),
-                    target: {
-                        url: node.attrs.url.toString(),
-                        title: "",
-                    },
-                    attr: createAttr(""),
-                },
-            ],
-        };
-    }
-);
 
 export default rules.finish();

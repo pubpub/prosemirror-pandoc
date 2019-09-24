@@ -1,4 +1,14 @@
-import { Block, Inline, DefinitionList, Para, Plain } from "../types";
+import {
+    Block,
+    Inline,
+    DefinitionList,
+    Para,
+    Plain,
+    Table,
+    ProsemirrorNode,
+    Alignment,
+} from "../types";
+import { flatten } from "./util";
 
 /*
  * A transformer appropriate for simple container nodes. Typically, these  are
@@ -101,17 +111,9 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
     node: DefinitionList,
     { transform }
 ) => {
-    const { terms, definitions } = node;
-    const pairedValues: {
-        term: Inline;
-        definition: Block[];
-    }[] = terms.reduce((arr, term, index) => {
-        const definition = definitions[index] || [];
-        return [...arr, { term, definition }];
-    }, []);
-    const children = pairedValues.map(value => {
-        const { term } = value;
-        const blocks = [...value.definition];
+    const children = node.entries.map(value => {
+        const { term, definitions } = value;
+        const blocks = flatten(definitions);
         const firstBlock = blocks[0];
         let prependableBlock: Para | Plain;
         if (
@@ -125,7 +127,7 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
         }
         prependableBlock.content.unshift({
             type: "Strong",
-            content: [term, { type: "Str", content: ":" }, { type: "Space" }],
+            content: [{ type: "Str", content: term + ":" }, { type: "Space" }],
         });
         return {
             type: pmInnerNodeName,
@@ -167,3 +169,67 @@ export const pandocPassThroughTransformer = (node, { transform }) => {
  * A transformer that returns an empty array
  */
 export const nullTransformer = () => [];
+
+/**
+ * A transformer that handles tables as specified by the popular prosemirror-tables package.
+ */
+export const tableTransformer = {
+    assertProsemirrorHandlerFor: [
+        "table",
+        "table_row",
+        "table_header",
+        "table_cell",
+    ],
+    fromPandoc: (node: Table, { transform }) => {
+        const { headers, cells, caption } = node;
+        const pmHeaderNode = {
+            type: "table_row",
+            children: headers.map(pdHeaderBlocks => {
+                return {
+                    type: "table_header",
+                    children: transform(pdHeaderBlocks).asArray(),
+                };
+            }),
+        };
+        const pmRowNodes = cells.map(row => {
+            return {
+                type: "table_row",
+                children: row.map(cellBlock => {
+                    return {
+                        type: "table_cell",
+                        children: transform(cellBlock).asArray(),
+                    };
+                }),
+            };
+        });
+        const table = {
+            type: "table",
+            children: [pmHeaderNode, ...pmRowNodes],
+        };
+        if (caption.length > 0) {
+            return [
+                table,
+                { type: "paragraph", children: transform(caption).asArray() },
+            ];
+        }
+        return table;
+    },
+    fromProsemirror: (node: ProsemirrorNode, { transform }): Table => {
+        const blocks: Block[][][] = node.children.map(row => {
+            return row.children.map(cell =>
+                transform(cell.children).asPandocBlock()
+            );
+        });
+        const [headers, ...cells] = blocks;
+        const columnWidths = headers.map(() => 0);
+        const alignments: Alignment[] = headers.map(() => "AlignDefault");
+        return {
+            type: "Table",
+            headers,
+            cells,
+            columnWidths,
+            alignments,
+            caption: [],
+        };
+    },
+};

@@ -42,12 +42,8 @@ import {
     Table,
     Target,
     Doc,
+    PandocJson,
 } from "./types";
-
-interface PandocJSON {
-    meta: {};
-    blocks: {}[];
-}
 
 const unwrapEnum = <T>(instance: { t: T }): T => {
     return instance.t;
@@ -323,26 +319,18 @@ const parseDefinitionList = (n: {
     c: [[any[], any[][]][]];
 }): DefinitionList => {
     const [items] = n.c;
-    const { terms, definitions } = items.reduce(
-        (current, next) => {
-            const { terms, definitions } = current;
-            const [inline, innerDefinitions] = next;
-            return {
-                terms: [...terms, inline.map(parseInline)],
-                definitions: [
-                    ...definitions,
-                    innerDefinitions.map(definition =>
-                        definition.map(parseBlock)
-                    ),
-                ],
-            };
-        },
-        { terms: [], definitions: [] }
-    );
+    const entries = items.map(item => {
+        const [term, definitions] = item;
+        return {
+            term: term.map(parseInline),
+            definitions: definitions.map(definition =>
+                definition.map(parseBlock)
+            ),
+        };
+    });
     return {
         type: "DefinitionList",
-        terms,
-        definitions,
+        entries,
     };
 };
 
@@ -357,18 +345,18 @@ const parseHeader = (n: { c: [number, any, any[]] }): Header => {
 };
 
 const parseDiv = (n: { c: [any, any[]] }): Div => {
-    const [attr, block] = n.c;
+    const [attr, blocks] = n.c;
     return {
         type: "Div",
         attr: unwrapAttr(attr),
-        content: block.map(parseBlock),
+        content: blocks.map(parseBlock),
     };
 };
 
 const parseTable = (n: {
     c: [any[], any[], number[], any[][], any[][][]];
 }): Table => {
-    const [caption, alignments, columnWidths, headers, rows] = n.c;
+    const [caption, alignments, columnWidths, headers, cells] = n.c;
     return {
         type: "Table",
         caption: caption.map(parseInline),
@@ -377,7 +365,7 @@ const parseTable = (n: {
         ),
         columnWidths,
         headers: headers.map(blocks => blocks.map(parseBlock)),
-        cells: rows.map(row => row.map(cell => cell.map(parseBlock))),
+        cells: cells.map(row => row.map(cell => cell.map(parseBlock))),
     };
 };
 
@@ -413,7 +401,7 @@ export const parseBlock = (n: { t: PandocBlockNodeType; c: any }): Block => {
     }
 };
 
-export const parsePandocJson = (json: PandocJSON): Doc => {
+export const parsePandocJson = (json: PandocJson): Doc => {
     const { blocks, meta } = json;
     return {
         blocks: blocks.map(parseBlock),

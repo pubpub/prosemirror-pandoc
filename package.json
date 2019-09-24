@@ -37,6 +37,7 @@
     "trailingComma": "es5"
   },
   "dependencies": {
+    "node-pandoc": "^0.3.0",
     "prosemirror-model": "^1.7.2"
   }
 }

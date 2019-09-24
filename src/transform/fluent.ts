@@ -1,5 +1,5 @@
 import { asNode, asArray } from "./util";
-import { ProsemirrorNode, ProsemirrorDoc, PandocNode, Inline } from "../types";
+import { ProsemirrorNode, PandocNode } from "../types";
 
 const commonFluent = { asNode, asArray };
 
@@ -12,15 +12,9 @@ type CommonFluent<T> = T & {
 
 export type ProsemirrorFluent<
     T extends ProsemirrorNode = ProsemirrorNode
-> = CommonFluent<T> & {
-    asProsemirrorDoc: () => ProsemirrorDoc;
-};
+> = CommonFluent<T>;
 
-export type PandocFluent<T extends PandocNode = PandocNode> = CommonFluent<
-    T
-> & {
-    asPandocInline: () => PandocFluent<Inline>;
-};
+export type PandocFluent<T extends PandocNode = PandocNode> = CommonFluent<T>;
 
 const assignFluent = <T>(
     target: T | FluentType<T>,
@@ -41,9 +35,6 @@ const assignFluent = <T>(
 export const pandocFluent = (node: PandocNode | PandocNode[]): PandocFluent => {
     return assignFluent<PandocFluent>(node as PandocFluent, pandocFluent, {
         ...commonFluent,
-        asPandocInline: () => {
-            throw new Error("Not implemented yet!");
-        },
     });
 };
 
@@ -52,8 +43,5 @@ export const prosemirrorFluent = (
 ): ProsemirrorFluent => {
     return assignFluent(node, prosemirrorFluent, {
         ...commonFluent,
-        asProsemirrorDoc: () => {
-            throw new Error("Not implemented yet!");
-        },
     });
 };

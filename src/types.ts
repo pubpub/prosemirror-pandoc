@@ -29,18 +29,6 @@ export interface ProsemirrorMark {
     attrs?: { [key: string]: string | number | null | undefined };
 }
 
-export interface ProsemirrorDoc {
-    children: ProsemirrorNode[];
-}
-
-export interface ProsemirrorContentNode extends ProsemirrorNode {
-    text: string;
-}
-
-export interface ProsemirrorContentNode extends ProsemirrorNode {
-    children: ProsemirrorNode[];
-}
-
 export type PandocBlockNodeType =
     | "Plain"
     | "Para"
@@ -77,6 +65,11 @@ export type PandocInlineNodeType =
     | "Image"
     | "Note"
     | "Span";
+
+export interface PandocJson {
+    meta: {};
+    blocks: {}[];
+}
 
 export interface Doc {
     blocks: Block[];
@@ -210,8 +203,10 @@ export interface BulletList extends Block {
  and one or more definitions (each a list of blocks) */
 export interface DefinitionList extends Block {
     type: "DefinitionList";
-    terms: Inline[];
-    definitions: Block[][];
+    entries: {
+        term: Inline[];
+        definitions: Block[][];
+    }[];
 }
 
 /* Header - level (integer) and text (inlines) */

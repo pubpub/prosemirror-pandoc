@@ -1,5 +1,13 @@
 /**
- * Implements a state-machine like token acceptor.
+ * Implements a regular expression-like language parser, and a finite state machine generator
+ * for evaluating lists of nodes against such an expression. For example:
+ *
+ * const expr = parseExpr("(A | B)+ C")
+ * const acceptedNodesCount = <string>acceptNodes(
+ *    expr,
+ *    ['A', 'B', 'A', 'C', 'A'],
+ *    id => str => id === str
+ * ) // === 4 because only the first four elements of the input array match the expression.
  */
 interface Identifier {
     type: "identifier";
@@ -43,7 +51,6 @@ interface State<Node> {
     addSuccessor: (s: State<Node>) => void;
     getSuccessors: (n: Node) => State<Node>[];
     consumesNode: () => boolean;
-    debugValue: string;
 }
 
 interface Machine<Node> {
@@ -152,10 +159,7 @@ export const parseExpr = (str: string): Expr => {
     return { type: "identifier", identifier: str };
 };
 
-const state = <Node>(
-    guard?: (n: Node) => boolean,
-    debugValue: string = "NoDebugValue"
-): State<Node> => {
+const state = <Node>(guard?: (n: Node) => boolean): State<Node> => {
     const successors: Set<State<Node>> = new Set();
 
     const addSuccessor = (s: State<Node>) => {
@@ -175,7 +179,6 @@ const state = <Node>(
         addSuccessor,
         getSuccessors,
         consumesNode,
-        debugValue: debugValue + `(${consumesNode()})`,
     };
 };
 

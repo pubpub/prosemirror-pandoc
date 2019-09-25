@@ -1,4 +1,9 @@
-import { PandocNode, ProsemirrorMark, ProsemirrorSchema } from "../types";
+import {
+    PandocNode,
+    ProsemirrorMark,
+    ProsemirrorSchema,
+    PANDOC_NODE_TYPES,
+} from "../types";
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
     acceptNodes,
@@ -6,6 +11,7 @@ import {
     parseExpr,
     Expr,
     IdentifierMatch,
+    willAlwaysMatchSingleIdentifier,
 } from "./nodeExpression";
 
 interface MinimalType {
@@ -29,14 +35,8 @@ type TransformDefinition<From, To> = (
 ) => To | To[];
 
 interface Transformer<PDType, PMType> {
-    fromPandoc: (
-        node: PDType,
-        context: TransformContext<PDType, PMType>
-    ) => PMType;
-    fromProsemirror: (
-        node: PMType,
-        context: TransformContext<PMType, PDType>
-    ) => PDType;
+    fromPandoc: TransformDefinition<PDType, PMType>;
+    fromProsemirror: TransformDefinition<PMType, PDType>;
 }
 
 type WrappedTransformer<
@@ -121,7 +121,26 @@ const unwrapTransformer = <
     return { transformer: wt, pdExpr, pmExpr };
 };
 
-const validateRuleset = (ruleset, prosemirrorSchema) => {
+const validateRuleset = <PDNode, PMNode>(
+    ruleset: RuleSet<PDNode, PMNode>,
+    prosemirrorSchema: ProsemirrorSchema
+) => {
+    const { fromPandoc } = ruleset;
+    const expressions = fromPandoc.map(rule => rule.expression);
+    const missingPandocTypes = PANDOC_NODE_TYPES.filter(
+        type =>
+            !expressions.some(expr =>
+                willAlwaysMatchSingleIdentifier(expr, type)
+            )
+    );
+    if (missingPandocTypes.length > 0) {
+        console.warn(
+            "Cannot find rules that are guaranteed to match on a Pandoc node of these types: " +
+                `${missingPandocTypes.join(", ")}.` +
+                " You may want to add or modify rules so that the transformer does not break" +
+                " if it encounters one of these Pandoc nodes."
+        );
+    }
     void prosemirrorSchema;
 };
 

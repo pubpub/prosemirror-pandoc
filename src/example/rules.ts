@@ -1,3 +1,5 @@
+import * as katex from "katex";
+
 import { nodes, marks } from "./schema";
 import {
     PandocNode,
@@ -9,6 +11,8 @@ import {
     ProsemirrorNode,
     Inline,
     Doc,
+    Link,
+    Math,
 } from "../types";
 import {
     textFromStrSpace,
@@ -26,6 +30,7 @@ import {
     pandocPassThroughTransformer,
     nullTransformer,
     definitionListTransformer,
+    tableTransformer,
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
@@ -108,7 +113,7 @@ rules.transform("Header", "heading", {
             children: transform(node.content).asArray(),
         };
     },
-    fromProsemirror: (node, { transform }): Header => {
+    fromProsemirror: (node: ProsemirrorNode, { transform }): Header => {
         return {
             type: "Header",
             level: parseInt(node.attrs.level.toString()),
@@ -127,6 +132,13 @@ rules.transformToMark("Strong", "strong");
 rules.transformToMark("Strikeout", "strike");
 rules.transformToMark("Superscript", "sup");
 rules.transformToMark("Subscript", "sub");
+rules.transformToMark("Code", "code");
+rules.transformToMark("Link", "link", (link: Link) => {
+    return {
+        href: link.target.url,
+        title: link.target.title,
+    };
+});
 
 // We don't support small caps right now
 rules.fromPandoc("SmallCaps", pandocPassThroughTransformer);
@@ -144,6 +156,36 @@ rules.fromProsemirror("text", (node: ProsemirrorNode) =>
     textToStrSpace(node.text)
 );
 
+// Deal with line breaks
+rules.transform("LineBreak", "hard_break", bareLeafTransformer);
+rules.fromPandoc("SoftBreak", nullTransformer);
+
+// Stuff we don't have equivalents for
+rules.fromPandoc("Span", pandocPassThroughTransformer);
+rules.fromPandoc("RawBlock", pandocPassThroughTransformer);
+rules.fromPandoc("RawInline", pandocPassThroughTransformer);
+rules.fromPandoc("Quoted", pandocPassThroughTransformer);
+
+// Tables
+rules.transform("Table", "table", tableTransformer);
+
+// Equations
+rules.fromPandoc("Math", (node: Math) => {
+    const { mathType, content } = node;
+    const isDisplay = mathType === "DisplayMath";
+    const prosemirrorType = isDisplay ? "block_equation" : "equation";
+    return {
+        type: prosemirrorType,
+        attrs: {
+            value: content,
+            html: katex.renderToString(content, {
+                displayMode: isDisplay,
+                throwOnError: false,
+            }),
+        },
+    };
+});
+
 // ~~~ Rules for images ~~~ //
 
 const pandocToHtmlString = (nodes: Inline[]) => {
@@ -155,11 +197,20 @@ const pandocToHtmlString = (nodes: Inline[]) => {
         meta: {},
     };
     const pandocJson = JSON.stringify(emitPandocJson(document));
-    console.log("pandocJson", pandocJson);
     const htmlString = callPandoc(pandocJson, "json", "html");
-    console.log("htmlString", htmlString);
     return htmlString;
 };
+
+// const htmlStringToPandoc = (htmlString: string) => {
+//     if (htmlString.length === 0) {
+//         return [];
+//     }
+//     // TODO(ian): Implement this!
+//     // const pandocAst = parsePandocJson(
+//     //     JSON.parse(callPandoc(htmlString, "html", "json"))
+//     // );
+//     return [];
+// };
 
 rules.fromPandoc("Image", (node: Image, { resource }) => {
     return {
@@ -172,22 +223,13 @@ rules.fromPandoc("Image", (node: Image, { resource }) => {
     };
 });
 
-rules.fromProsemirror("image", (node: ProsemirrorNode, { transform }) => {
-    let caption = [];
-    if (node.attrs.caption) {
-        const pmDoc = JSON.parse(node.attrs.caption as string);
-        const paragraphs = pmDoc.children.filter(
-            child => child.type === "paragraph"
-        );
-        const text = flatten(paragraphs.map(para => para.children));
-        caption = transform(text).asArray();
-    }
+rules.fromProsemirror("image", (node: ProsemirrorNode) => {
     return {
         type: "Plain",
         content: [
             {
                 type: "Image",
-                content: caption,
+                content: [],
                 target: {
                     url: node.attrs.url.toString(),
                     title: "",

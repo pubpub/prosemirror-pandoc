@@ -217,7 +217,7 @@ export const tableTransformer = {
         }
         return table;
     },
-    fromProsemirror: (node: ProsemirrorNode, { transform }): Table => {
+    fromProsemirror: (node: ProsemirrorNode, { transform }) => {
         const blocks: Block[][][] = node.children.map(row => {
             return row.children.map(cell =>
                 transform(cell.children).asPandocBlock()
@@ -227,7 +227,7 @@ export const tableTransformer = {
         const columnWidths = headers.map(() => 0);
         const alignments: Alignment[] = headers.map(() => "AlignDefault");
         return {
-            type: "Table",
+            type: "Table" as "Table", // That's Typescript, baby
             headers,
             cells,
             columnWidths,

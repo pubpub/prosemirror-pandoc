@@ -11,6 +11,7 @@ import {
     Para,
     Plain,
     DefinitionList,
+    Link,
 } from "../../../types";
 
 describe("fromPandoc", () => {
@@ -796,6 +797,28 @@ describe("fromPandoc", () => {
         ).toEqual({ type: "horizontal_rule" });
     });
 
+    it("transforms Links", () => {
+        const link: Link = {
+            type: "Link",
+            attr: createAttr(""),
+            target: {
+                url: "https://example.com",
+                title: "Hi!",
+            },
+            content: [{ type: "Str", content: "Hey!" }],
+        };
+        expect(fromPandoc(link, rules).asNode()).toEqual({
+            type: "text",
+            marks: [
+                {
+                    type: "link",
+                    attrs: { href: "https://example.com", title: "Hi!" },
+                },
+            ],
+            text: "Hey!",
+        });
+    });
+
     it("handles an Image with a caption that needs to be converted to HTML by Pandoc", () => {
         expect(
             fromPandoc(
@@ -824,5 +847,157 @@ describe("fromPandoc", () => {
                 url: "https://pubpub.org/logo.png",
             },
         });
+    });
+
+    it("transforms a Table", () => {
+        expect(
+            fromPandoc(
+                {
+                    caption: [{ type: "Str", content: "Caption!" }],
+                    type: "Table",
+                    alignments: ["AlignDefault", "AlignDefault"],
+                    columnWidths: [0, 0],
+                    headers: [
+                        [
+                            {
+                                type: "Plain",
+                                content: [{ type: "Str", content: "Apple" }],
+                            },
+                        ],
+                        [
+                            {
+                                type: "Plain",
+                                content: [{ type: "Str", content: "Rating" }],
+                            },
+                        ],
+                    ],
+                    cells: [
+                        [
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "RedDelicious",
+                                        },
+                                    ],
+                                },
+                            ],
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "Terrible",
+                                        },
+                                    ],
+                                },
+                            ],
+                        ],
+                        [
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "GrannySmith",
+                                        },
+                                    ],
+                                },
+                            ],
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "Bad",
+                                        },
+                                    ],
+                                },
+                            ],
+                        ],
+                        [
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "Jazz",
+                                        },
+                                    ],
+                                },
+                            ],
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "PrettyGood",
+                                        },
+                                    ],
+                                },
+                            ],
+                        ],
+                        [
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "Honeycrisp",
+                                        },
+                                    ],
+                                },
+                            ],
+                            [
+                                {
+                                    type: "Plain",
+                                    content: [
+                                        {
+                                            type: "Str",
+                                            content: "Perfect",
+                                        },
+                                    ],
+                                },
+                            ],
+                        ],
+                    ],
+                },
+                rules
+            )
+        ).toMatchSnapshot();
+    });
+
+    it("transforms Math (mathType=InlineMath) into an equation", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Math",
+                    mathType: "InlineMath",
+                    content: "e^{i\\pi} = -1",
+                },
+                rules
+            )
+        ).toMatchSnapshot();
+    });
+
+    it("transforms Math (mathType=DisplayMath) into a block_equation", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Math",
+                    mathType: "DisplayMath",
+                    content: "e^{i\\pi} = -1",
+                },
+                rules
+            )
+        ).toMatchSnapshot();
     });
 });

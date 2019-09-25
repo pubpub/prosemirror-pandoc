@@ -1,3 +1,5 @@
+import { tableNodes } from "prosemirror-tables";
+
 export const nodes = {
     doc: {
         content: "block+",
@@ -64,6 +66,27 @@ export const nodes = {
         inline: true,
         group: "inline",
     },
+    equation: {
+        attrs: {
+            value: { default: "" },
+            html: { default: "" },
+        },
+        group: "inline",
+    },
+    block_equation: {
+        atom: true,
+        attrs: {
+            value: { default: "" },
+            html: { default: "" },
+        },
+        inline: false,
+        group: "block",
+    },
+    ...tableNodes({
+        tableGroup: "block",
+        cellContent: "block+",
+        cellAttributes: {},
+    }),
 };
 
 export const marks = {

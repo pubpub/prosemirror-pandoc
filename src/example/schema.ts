@@ -82,6 +82,26 @@ export const nodes = {
         inline: false,
         group: "block",
     },
+    citation: {
+        atom: true,
+        attrs: {
+            value: { default: "" },
+            unstructuredValue: { default: "" },
+            count: { default: 0 },
+        },
+        inline: true,
+        group: "inline",
+    },
+    footnote: {
+        atom: true,
+        attrs: {
+            value: { default: "" },
+            structuredValue: { default: "" },
+            count: { default: 0 },
+        },
+        inline: true,
+        group: "inline",
+    },
     ...tableNodes({
         tableGroup: "block",
         cellContent: "block+",

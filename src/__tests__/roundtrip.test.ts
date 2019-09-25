@@ -1,4 +1,4 @@
-import { callPandoc } from "../load";
+import { callPandoc } from "../util";
 import { parsePandocJson } from "../parse";
 import { emitPandocJson } from "../emit";
 

@@ -10,9 +10,10 @@ import {
     LineBlock,
     ProsemirrorNode,
     Inline,
-    Doc,
     Link,
     Math,
+    Note,
+    Cite,
 } from "../types";
 import {
     textFromStrSpace,
@@ -21,7 +22,6 @@ import {
     intersperse,
     flatten,
 } from "../transform/util";
-
 import {
     contentTransformer,
     textTransformer,
@@ -32,10 +32,14 @@ import {
     definitionListTransformer,
     tableTransformer,
 } from "../transform/commonTransformers";
-
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
-import { emitPandocJson } from "../emit";
-import { callPandoc } from "../load";
+
+import {
+    pandocInlineToHtmlString,
+    htmlStringToPandocInline,
+    pandocBlocksToHtmlString,
+    htmlStringToPandocBlocks,
+} from "./util";
 
 const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
@@ -188,36 +192,12 @@ rules.fromPandoc("Math", (node: Math) => {
 
 // ~~~ Rules for images ~~~ //
 
-const pandocToHtmlString = (nodes: Inline[]) => {
-    if (nodes.length === 0) {
-        return "";
-    }
-    const document: Doc = {
-        blocks: [{ type: "Para", content: nodes }],
-        meta: {},
-    };
-    const pandocJson = JSON.stringify(emitPandocJson(document));
-    const htmlString = callPandoc(pandocJson, "json", "html");
-    return htmlString;
-};
-
-// const htmlStringToPandoc = (htmlString: string) => {
-//     if (htmlString.length === 0) {
-//         return [];
-//     }
-//     // TODO(ian): Implement this!
-//     // const pandocAst = parsePandocJson(
-//     //     JSON.parse(callPandoc(htmlString, "html", "json"))
-//     // );
-//     return [];
-// };
-
 rules.fromPandoc("Image", (node: Image, { resource }) => {
     return {
         type: "image",
         attrs: {
             url: resource(node.target.url),
-            caption: pandocToHtmlString(node.content),
+            caption: pandocInlineToHtmlString(node.content),
             // TODO(ian): is there anything we can do about the image size here?
         },
     };
@@ -238,6 +218,66 @@ rules.fromProsemirror("image", (node: ProsemirrorNode) => {
             },
         ],
     };
+});
+
+// ~~~ Rules for citations and footnotes ~~~ //
+
+rules.transform("Cite", "citation", {
+    fromPandoc: (node: Cite) => {
+        const {
+            content,
+            citations: [{ citationHash }],
+        } = node;
+        const unstructuredValue = pandocInlineToHtmlString(content);
+        return {
+            type: "citation",
+            attrs: {
+                unstructuredValue,
+                count: citationHash,
+            },
+        };
+    },
+    fromProsemirror: (node: ProsemirrorNode) => {
+        const inputHtml = (node.attrs.html ||
+            node.attrs.unstructuredValue) as string;
+        const citationNumber =
+            typeof node.attrs.count === "number"
+                ? node.attrs.count
+                : parseInt(node.attrs.count);
+        return {
+            type: "Cite",
+            content: htmlStringToPandocInline(inputHtml),
+            citations: [
+                {
+                    citationId: "",
+                    citationPrefix: [],
+                    citationSuffix: [],
+                    citationNoteNum: citationNumber,
+                    citationHash: citationNumber,
+                    citationMode: "NormalCitation",
+                },
+            ],
+        };
+    },
+});
+
+rules.transform("Note", "footnote", {
+    fromPandoc: (node: Note) => {
+        const { content } = node;
+        return {
+            type: "footnote",
+            attrs: {
+                unstructuredValue: pandocBlocksToHtmlString(content),
+            },
+        };
+    },
+    fromProsemirror: (node: ProsemirrorNode) => {
+        const noteContent = (node.attrs.unstructuredValue || "") as string;
+        return {
+            type: "Note",
+            content: htmlStringToPandocBlocks(noteContent),
+        };
+    },
 });
 
 export default rules.finish();

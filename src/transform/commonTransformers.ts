@@ -12,20 +12,20 @@ import { flatten } from "./util";
 /*
  * A transformer appropriate for simple container nodes. Typically, these  are
  * correspondences between Pandoc elements with a content property and
- * Prosemirror elements with a children property
+ * Prosemirror elements with a content property
  */
 export const contentTransformer = (pdNodeName, pmNodeName) => {
     return {
         fromPandoc: (node, { transform }) => {
             return {
                 type: pmNodeName,
-                children: transform(node.content),
+                content: transform(node.content),
             };
         },
         fromProsemirror: (node, { transform }) => {
             return {
                 type: pdNodeName,
-                content: transform(node.children),
+                content: transform(node.content),
             };
         },
     };
@@ -33,7 +33,7 @@ export const contentTransformer = (pdNodeName, pmNodeName) => {
 
 /*
  * A transformer that converts between Pandoc elements with string content and Prosemirror
- * elements that accept {type: 'text', text: string}[] as their children.
+ * elements that accept {type: 'text', text: string}[] as their content.
  */
 export const textTransformer = (pdNodeName, pmNodeName) => {
     return {
@@ -46,7 +46,7 @@ export const textTransformer = (pdNodeName, pmNodeName) => {
         fromProsemirror: node => {
             return {
                 type: pdNodeName,
-                content: node.children.join(""),
+                content: node.content.join(""),
             };
         },
     };
@@ -62,10 +62,10 @@ export const listTransformer = (
 ) => (pdNodeName, pmNodeName) => {
     return {
         fromPandoc: (node, { transform }) => {
-            const children = node.content.map(blocks => {
+            const content = node.content.map(blocks => {
                 return processListItem({
                     type: pmInnerNodeName,
-                    children: transform(blocks).asArray(),
+                    content: transform(blocks).asArray(),
                 });
             });
             const hasOrder =
@@ -77,11 +77,11 @@ export const listTransformer = (
             return {
                 type: pmNodeName,
                 attrs,
-                children,
+                content,
             };
         },
         fromProsemirror: (node, { transform }) => {
-            const content = node.children.map(listItem =>
+            const content = node.content.map(listItem =>
                 transform(listItem).asArray()
             );
             const additionalAttributes =
@@ -110,7 +110,7 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
     node: DefinitionList,
     { transform }
 ) => {
-    const children = node.entries.map(value => {
+    const content = node.entries.map(value => {
         const { term, definitions } = value;
         const blocks = flatten(definitions);
         const firstBlock = blocks[0];
@@ -134,12 +134,12 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
         });
         return {
             type: pmInnerNodeName,
-            children: transform(blocks).asArray(),
+            content: transform(blocks).asArray(),
         };
     });
     return {
         type: pmOuterNodeName,
-        children,
+        content,
     };
 };
 
@@ -162,7 +162,7 @@ export const bareLeafTransformer = (pdNodeName, pmNodeName) => {
 };
 
 /**
- * A one-way transformer that ignores a Pandoc node and passes its children through.
+ * A one-way transformer that ignores a Pandoc node and passes its content through.
  */
 export const pandocPassThroughTransformer = (node, { transform }) => {
     return transform(node.content).asArray();
@@ -187,40 +187,40 @@ export const tableTransformer = {
         const { headers, cells, caption } = node;
         const pmHeaderNode = {
             type: "table_row",
-            children: headers.map(pdHeaderBlocks => {
+            content: headers.map(pdHeaderBlocks => {
                 return {
                     type: "table_header",
-                    children: transform(pdHeaderBlocks).asArray(),
+                    content: transform(pdHeaderBlocks).asArray(),
                 };
             }),
         };
         const pmRowNodes = cells.map(row => {
             return {
                 type: "table_row",
-                children: row.map(cellBlock => {
+                content: row.map(cellBlock => {
                     return {
                         type: "table_cell",
-                        children: transform(cellBlock).asArray(),
+                        content: transform(cellBlock).asArray(),
                     };
                 }),
             };
         });
         const table = {
             type: "table",
-            children: [pmHeaderNode, ...pmRowNodes],
+            content: [pmHeaderNode, ...pmRowNodes],
         };
         if (caption.length > 0) {
             return [
                 table,
-                { type: "paragraph", children: transform(caption).asArray() },
+                { type: "paragraph", content: transform(caption).asArray() },
             ];
         }
         return table;
     },
     fromProsemirror: (node: ProsemirrorNode, { transform }) => {
-        const blocks: Block[][][] = node.children.map(row => {
-            return row.children.map(cell =>
-                transform(cell.children).asPandocBlock()
+        const blocks: Block[][][] = node.content.map(row => {
+            return row.content.map(cell =>
+                transform(cell.content).asPandocBlock()
             );
         });
         const [headers, ...cells] = blocks;

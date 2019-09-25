@@ -19,7 +19,7 @@ export interface ProsemirrorSchema {
 
 export interface ProsemirrorNode {
     type: string;
-    children?: ProsemirrorNode[];
+    content?: ProsemirrorNode[];
     text?: string;
     attrs?: { [key: string]: string | number | null | undefined };
 }

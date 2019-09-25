@@ -66,15 +66,15 @@ describe("fromPandoc", () => {
         ).toEqual([
             {
                 type: "paragraph",
-                children: [{ type: "text", text: "Hello dad!" }],
+                content: [{ type: "text", text: "Hello dad!" }],
             },
             {
                 type: "paragraph",
-                children: [{ type: "text", text: "Hello mom!" }],
+                content: [{ type: "text", text: "Hello mom!" }],
             },
             {
                 type: "paragraph",
-                children: [
+                content: [
                     { type: "text", text: "Ch-ch-ch-ch-ch-cherry bomb!" },
                 ],
             },
@@ -115,7 +115,7 @@ describe("fromPandoc", () => {
         [blockOne, blockTwo, blockThree].forEach(block =>
             expect(fromPandoc(block, rules).asNode()).toEqual({
                 type: "paragraph",
-                children: [{ type: "text", text: "Hello world!" }],
+                content: [{ type: "text", text: "Hello world!" }],
             })
         );
     });
@@ -142,7 +142,7 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "paragraph",
-            children: [
+            content: [
                 { type: "text", text: "Hello world!" },
                 { type: "hard_break" },
                 { type: "text", text: "I'm testing!" },
@@ -195,14 +195,14 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "blockquote",
-            children: [
+            content: [
                 {
                     type: "paragraph",
-                    children: [{ type: "text", text: "Lorem Ipsum?" }],
+                    content: [{ type: "text", text: "Lorem Ipsum?" }],
                 },
                 {
                     type: "paragraph",
-                    children: [
+                    content: [
                         { type: "text", text: "More like Borem Ipsum!" },
                     ],
                 },
@@ -227,7 +227,7 @@ describe("fromPandoc", () => {
                 level: 1,
                 id: "lesson-one",
             },
-            children: [{ type: "text", text: "Lesson One" }],
+            content: [{ type: "text", text: "Lesson One" }],
         });
     });
 
@@ -283,31 +283,31 @@ describe("fromPandoc", () => {
             attrs: {
                 order: 2,
             },
-            children: [
+            content: [
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item One" }],
+                            content: [{ type: "text", text: "Item One" }],
                         },
                     ],
                 },
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item Two" }],
+                            content: [{ type: "text", text: "Item Two" }],
                         },
                     ],
                 },
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item Three" }],
+                            content: [{ type: "text", text: "Item Three" }],
                         },
                     ],
                 },
@@ -431,31 +431,31 @@ describe("fromPandoc", () => {
         const expectedOutput = {
             type: "bullet_list",
             attrs: {},
-            children: [
+            content: [
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item One" }],
+                            content: [{ type: "text", text: "Item One" }],
                         },
                     ],
                 },
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item Two" }],
+                            content: [{ type: "text", text: "Item Two" }],
                         },
                     ],
                 },
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item Three" }],
+                            content: [{ type: "text", text: "Item Three" }],
                         },
                     ],
                 },
@@ -500,27 +500,27 @@ describe("fromPandoc", () => {
         const expectedOutput = {
             type: "bullet_list",
             attrs: {},
-            children: [
+            content: [
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         {
                             type: "paragraph",
-                            children: [{ type: "text", text: "Item One" }],
+                            content: [{ type: "text", text: "Item One" }],
                         },
                     ],
                 },
                 {
                     type: "list_item",
-                    children: [
+                    content: [
                         // This is the added paragraph we expect to see.
-                        { type: "paragraph", children: [] },
+                        { type: "paragraph", content: [] },
                         {
                             type: "blockquote",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [
+                                    content: [
                                         { type: "text", text: "Item Two" },
                                     ],
                                 },
@@ -558,7 +558,7 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "paragraph",
-            children: [
+            content: [
                 { type: "text", text: "Hello, " },
                 { type: "text", text: "small caps" },
             ],
@@ -585,7 +585,7 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "paragraph",
-            children: [
+            content: [
                 {
                     type: "text",
                     marks: [{ type: "strong" }],
@@ -620,7 +620,7 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "paragraph",
-            children: [
+            content: [
                 {
                     type: "text",
                     marks: [{ type: "strong" }, { type: "em" }],
@@ -675,7 +675,7 @@ describe("fromPandoc", () => {
             ).asNode()
         ).toEqual({
             type: "paragraph",
-            children: [
+            content: [
                 {
                     type: "text",
                     marks: [{ type: "em" }, { type: "strong" }],
@@ -747,7 +747,7 @@ describe("fromPandoc", () => {
         ).toEqual([
             {
                 type: "paragraph",
-                children: [
+                content: [
                     {
                         type: "text",
                         marks: [{ type: "sub" }, { type: "strong" }],
@@ -762,10 +762,10 @@ describe("fromPandoc", () => {
             },
             {
                 type: "blockquote",
-                children: [
+                content: [
                     {
                         type: "paragraph",
-                        children: [
+                        content: [
                             {
                                 type: "text",
                                 marks: [{ type: "strike" }],

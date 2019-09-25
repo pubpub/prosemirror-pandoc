@@ -19,7 +19,8 @@
     "prosemirror-tables": "^0.9.5",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "yargs": "^14.0.0"
   },
   "scripts": {
     "test": "jest"

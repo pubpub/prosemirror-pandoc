@@ -27,11 +27,11 @@ Array [
 exports[`fromPandoc transforms a DefinitionList into a bullet_list 1`] = `
 Array [
   Object {
-    "children": Array [
+    "content": Array [
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
                 "marks": Array [
                   Object {
@@ -49,7 +49,7 @@ Array [
             "type": "paragraph",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
                 "text": "Paragraph B",
                 "type": "text",
@@ -58,9 +58,9 @@ Array [
             "type": "paragraph",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Inside Blockquote",
                     "type": "text",
@@ -72,7 +72,7 @@ Array [
             "type": "blockquote",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
                 "text": "Paragraph D",
                 "type": "text",
@@ -84,9 +84,9 @@ Array [
         "type": "list_item",
       },
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
                 "marks": Array [
                   Object {
@@ -115,13 +115,13 @@ Array [
 exports[`fromPandoc transforms a Table 1`] = `
 Array [
   Object {
-    "children": Array [
+    "content": Array [
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Apple",
                     "type": "text",
@@ -133,9 +133,9 @@ Array [
             "type": "table_header",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Rating",
                     "type": "text",
@@ -150,11 +150,11 @@ Array [
         "type": "table_row",
       },
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "RedDelicious",
                     "type": "text",
@@ -166,9 +166,9 @@ Array [
             "type": "table_cell",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Terrible",
                     "type": "text",
@@ -183,11 +183,11 @@ Array [
         "type": "table_row",
       },
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "GrannySmith",
                     "type": "text",
@@ -199,9 +199,9 @@ Array [
             "type": "table_cell",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Bad",
                     "type": "text",
@@ -216,11 +216,11 @@ Array [
         "type": "table_row",
       },
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Jazz",
                     "type": "text",
@@ -232,9 +232,9 @@ Array [
             "type": "table_cell",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "PrettyGood",
                     "type": "text",
@@ -249,11 +249,11 @@ Array [
         "type": "table_row",
       },
       Object {
-        "children": Array [
+        "content": Array [
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Honeycrisp",
                     "type": "text",
@@ -265,9 +265,9 @@ Array [
             "type": "table_cell",
           },
           Object {
-            "children": Array [
+            "content": Array [
               Object {
-                "children": Array [
+                "content": Array [
                   Object {
                     "text": "Perfect",
                     "type": "text",
@@ -285,7 +285,7 @@ Array [
     "type": "table",
   },
   Object {
-    "children": Array [
+    "content": Array [
       Object {
         "text": "Caption!",
         "type": "text",

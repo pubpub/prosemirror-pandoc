@@ -52,7 +52,8 @@ const fromPandocInner = (
 
 export const fromPandoc = (
     elementOrArray: PandocNode | PandocNode[],
-    rules: RuleSet<PandocNode, ProsemirrorNode>
+    rules: RuleSet<PandocNode, ProsemirrorNode>,
+    wrapInDocument: boolean = false
 ): ProsemirrorFluent => {
     const context = {
         rules: rules.fromPandoc,
@@ -62,11 +63,16 @@ export const fromPandoc = (
         marksMap: new Map(),
     };
     const nodes = context.transform(elementOrArray);
+    const nodesWithMarks = applyMarksToNodes(
+        nodes.asArray(),
+        rules.prosemirrorSchema,
+        context.marksMap
+    );
+    if (wrapInDocument) {
+        const doc: ProsemirrorNode = { type: "doc", content: nodesWithMarks };
+        return prosemirrorFluent(heal(doc, rules.prosemirrorSchema));
+    }
     return prosemirrorFluent(
-        applyMarksToNodes(
-            nodes.asArray(),
-            rules.prosemirrorSchema,
-            context.marksMap
-        ).map(node => heal(node, rules.prosemirrorSchema))
+        nodesWithMarks.map(node => heal(node, rules.prosemirrorSchema))
     );
 };

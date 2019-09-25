@@ -19,8 +19,8 @@ export const getNaiveTokenList = (node: ProsemirrorNode) => {
 
     const visit = (node: ProsemirrorNode) => {
         tokens.push({ type: "open", node });
-        if (node.children) {
-            for (const child of node.children) {
+        if (node.content) {
+            for (const child of node.content) {
                 visit(child);
             }
         }
@@ -150,12 +150,12 @@ export const heal = (
                 ++i;
                 continue;
             }
-            const childrenProp = token.node.children ? { children: [] } : {};
-            const nextNode = { ...token.node, ...childrenProp };
+            const contentProp = token.node.content ? { content: [] } : {};
+            const nextNode = { ...token.node, ...contentProp };
             if (parentStack.length === 0) {
                 rootNode = nextNode;
             } else {
-                parentStack[parentStack.length - 1].children.push(nextNode);
+                parentStack[parentStack.length - 1].content.push(nextNode);
             }
             parentStack.push(nextNode);
         } else if (token.type === "close") {

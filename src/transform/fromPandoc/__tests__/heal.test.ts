@@ -42,11 +42,11 @@ describe("getNaiveTokenList", () => {
             stringify(
                 getNaiveTokenList({
                     type: "A",
-                    children: [
+                    content: [
                         {
                             type: "B",
-                            children: [
-                                { type: "C", children: [{ type: "D" }] },
+                            content: [
+                                { type: "C", content: [{ type: "D" }] },
                             ],
                         },
                     ],
@@ -63,14 +63,14 @@ describe("healNaiveTokenList", () => {
                 healNaiveTokenList(
                     getNaiveTokenList({
                         type: "A",
-                        children: [
+                        content: [
                             {
                                 type: "B",
-                                children: [
+                                content: [
                                     { type: "D" },
                                     {
                                         type: "C",
-                                        children: [
+                                        content: [
                                             { type: "D" },
                                             { type: "D" },
                                         ],
@@ -90,7 +90,7 @@ describe("healNaiveTokenList", () => {
     it("heals an invalid Prosemirror tree", () => {
         const naiveList = getNaiveTokenList({
             type: "A",
-            children: [{ type: "B", children: [{ type: "B" }] }],
+            content: [{ type: "B", content: [{ type: "B" }] }],
         });
         expect(
             stringify(healNaiveTokenList(naiveList, toyProsemirrorSchmea))
@@ -100,12 +100,12 @@ describe("healNaiveTokenList", () => {
     it("heals a more complicated invalid Prosemirror tree", () => {
         const naiveList = getNaiveTokenList({
             type: "A",
-            children: [
+            content: [
                 {
                     type: "B",
-                    children: [
+                    content: [
                         { type: "B" },
-                        { type: "D", children: [{ type: "C" }] },
+                        { type: "D", content: [{ type: "C" }] },
                     ],
                 },
             ],
@@ -120,26 +120,26 @@ describe("healNaiveTokenList", () => {
     it("heals a real-world example of a misplaced image element", () => {
         const naiveList = getNaiveTokenList({
             type: "doc",
-            children: [
+            content: [
                 {
                     type: "bullet_list",
-                    children: [
+                    content: [
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
-                        { type: "list_item", children: [{ type: "image" }] },
+                        { type: "list_item", content: [{ type: "image" }] },
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
@@ -155,20 +155,20 @@ describe("healNaiveTokenList", () => {
     it("heals a real-world example of a misplaced image element that is less dire", () => {
         const naiveList = getNaiveTokenList({
             type: "doc",
-            children: [
+            content: [
                 {
                     type: "bullet_list",
-                    children: [
+                    content: [
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                                 {
                                     type: "paragraph",
-                                    children: [
+                                    content: [
                                         { type: "text" },
                                         { type: "image" },
                                         { type: "text" },
@@ -178,10 +178,10 @@ describe("healNaiveTokenList", () => {
                         },
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
@@ -201,29 +201,29 @@ describe("heal", () => {
             heal(
                 {
                     type: "doc",
-                    children: [
+                    content: [
                         {
                             type: "bullet_list",
-                            children: [
+                            content: [
                                 {
                                     type: "list_item",
-                                    children: [
+                                    content: [
                                         {
                                             type: "paragraph",
-                                            children: [{ type: "text" }],
+                                            content: [{ type: "text" }],
                                         },
                                     ],
                                 },
                                 {
                                     type: "list_item",
-                                    children: [{ type: "image" }],
+                                    content: [{ type: "image" }],
                                 },
                                 {
                                     type: "list_item",
-                                    children: [
+                                    content: [
                                         {
                                             type: "paragraph",
-                                            children: [{ type: "text" }],
+                                            content: [{ type: "text" }],
                                         },
                                     ],
                                 },
@@ -235,16 +235,16 @@ describe("heal", () => {
             )
         ).toEqual({
             type: "doc",
-            children: [
+            content: [
                 {
                     type: "bullet_list",
-                    children: [
+                    content: [
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
@@ -253,13 +253,13 @@ describe("heal", () => {
                 { type: "image" },
                 {
                     type: "bullet_list",
-                    children: [
+                    content: [
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
@@ -274,20 +274,20 @@ describe("heal", () => {
             heal(
                 {
                     type: "doc",
-                    children: [
+                    content: [
                         {
                             type: "bullet_list",
-                            children: [
+                            content: [
                                 {
                                     type: "list_item",
-                                    children: [
+                                    content: [
                                         {
                                             type: "paragraph",
-                                            children: [{ type: "text" }],
+                                            content: [{ type: "text" }],
                                         },
                                         {
                                             type: "paragraph",
-                                            children: [
+                                            content: [
                                                 { type: "text" },
                                                 { type: "image" },
                                                 { type: "text" },
@@ -297,10 +297,10 @@ describe("heal", () => {
                                 },
                                 {
                                     type: "list_item",
-                                    children: [
+                                    content: [
                                         {
                                             type: "paragraph",
-                                            children: [{ type: "text" }],
+                                            content: [{ type: "text" }],
                                         },
                                     ],
                                 },
@@ -312,34 +312,34 @@ describe("heal", () => {
             )
         ).toEqual({
             type: "doc",
-            children: [
+            content: [
                 {
                     type: "bullet_list",
-                    children: [
+                    content: [
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                                 { type: "image" },
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },
                         {
                             type: "list_item",
-                            children: [
+                            content: [
                                 {
                                     type: "paragraph",
-                                    children: [{ type: "text" }],
+                                    content: [{ type: "text" }],
                                 },
                             ],
                         },

@@ -14,6 +14,7 @@ import {
     Math,
     Note,
     Cite,
+    Code,
 } from "../types";
 import {
     textFromStrSpace,
@@ -66,7 +67,7 @@ rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
     );
     return {
         type: "paragraph",
-        children: flatten(
+        content: flatten(
             intersperse(lines, () => ({
                 type: "hard_break",
             }))
@@ -80,10 +81,10 @@ rules.transform("BlockQuote", "blockquote", contentTransformer);
 // Use a listTransformer to take care of OrderedList and BulletList
 const ensureFirstElementIsParagraph = listItem => {
     if (
-        listItem.children.length === 0 ||
-        listItem.children[0].type !== "paragraph"
+        listItem.content.length === 0 ||
+        listItem.content[0].type !== "paragraph"
     ) {
-        listItem.children.unshift({ type: "paragraph", children: [] });
+        listItem.content.unshift({ type: "paragraph", content: [] });
     }
     return listItem;
 };
@@ -114,7 +115,7 @@ rules.transform("Header", "heading", {
                 level: node.level,
                 id: node.attr.identifier,
             },
-            children: transform(node.content).asArray(),
+            content: transform(node.content).asArray(),
         };
     },
     fromProsemirror: (node: ProsemirrorNode, { transform }): Header => {
@@ -122,7 +123,7 @@ rules.transform("Header", "heading", {
             type: "Header",
             level: parseInt(node.attrs.level.toString()),
             attr: createAttr(node.attrs.id.toString()),
-            content: transform(node.children).asArray() as Inline[],
+            content: transform(node.content).asArray() as Inline[],
         };
     },
 });
@@ -136,7 +137,15 @@ rules.transformToMark("Strong", "strong");
 rules.transformToMark("Strikeout", "strike");
 rules.transformToMark("Superscript", "sup");
 rules.transformToMark("Subscript", "sub");
-rules.transformToMark("Code", "code");
+
+rules.fromPandoc("Code", (node: Code) => {
+    return {
+        type: "text",
+        marks: [{ type: "code" }],
+        text: node.content,
+    };
+});
+
 rules.transformToMark("Link", "link", (link: Link) => {
     return {
         href: link.target.url,

@@ -43,7 +43,7 @@ export const applyMarksToNodes = (
             acceptMarksHere && cumulativeMarks.length > 0
                 ? { marks: cumulativeMarks }
                 : {};
-        if (!node.children && !acceptMarksHere && marksAtNode.length > 0) {
+        if (!node.content && !acceptMarksHere && marksAtNode.length > 0) {
             console.warn(
                 `Dropping marks at leaf node ${node.type}. This node should probably have group="inline".`
             );
@@ -53,9 +53,9 @@ export const applyMarksToNodes = (
             ...(acceptMarksHere ? marksAtNode : []),
         ];
         const nextPendingMarks = acceptMarksHere ? [] : cumulativeMarks;
-        const childrenProps = node.children
+        const contentProps = node.content
             ? {
-                  children: node.children.map(child =>
+                  content: node.content.map(child =>
                       applyInner(child, nextAppliedMarks, nextPendingMarks)
                   ),
               }
@@ -63,7 +63,7 @@ export const applyMarksToNodes = (
         return {
             ...node,
             ...marksProps,
-            ...childrenProps,
+            ...contentProps,
         };
     };
 

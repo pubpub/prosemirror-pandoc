@@ -15,6 +15,7 @@ import {
     Note,
     Cite,
     Code,
+    CodeBlock,
 } from "../types";
 import {
     textFromStrSpace,
@@ -25,7 +26,6 @@ import {
 } from "../transform/util";
 import {
     contentTransformer,
-    textTransformer,
     listTransformer,
     bareLeafTransformer,
     pandocPassThroughTransformer,
@@ -75,7 +75,22 @@ rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
     };
 });
 
-rules.transform("CodeBlock", "code_block", textTransformer);
+rules.transform("CodeBlock", "code_block", {
+    fromPandoc: (node: CodeBlock) => {
+        return {
+            type: "code_block",
+            content: [{ type: "text", text: node.content }],
+        };
+    },
+    fromProsemirror: (node: ProsemirrorNode): CodeBlock => {
+        return {
+            type: "CodeBlock",
+            content: node.content.map(text => text.text).join(""),
+            attr: createAttr(""),
+        };
+    },
+});
+
 rules.transform("BlockQuote", "blockquote", contentTransformer);
 
 // Use a listTransformer to take care of OrderedList and BulletList
@@ -232,17 +247,14 @@ rules.fromProsemirror("image", (node: ProsemirrorNode) => {
 // ~~~ Rules for citations and footnotes ~~~ //
 
 rules.transform("Cite", "citation", {
-    fromPandoc: (node: Cite) => {
-        const {
-            content,
-            citations: [{ citationHash }],
-        } = node;
+    fromPandoc: (node: Cite, { count }) => {
+        const { content } = node;
         const unstructuredValue = pandocInlineToHtmlString(content);
         return {
             type: "citation",
             attrs: {
                 unstructuredValue,
-                count: citationHash,
+                count: 1 + count("Cite"),
             },
         };
     },
@@ -271,12 +283,13 @@ rules.transform("Cite", "citation", {
 });
 
 rules.transform("Note", "footnote", {
-    fromPandoc: (node: Note) => {
+    fromPandoc: (node: Note, { count }) => {
         const { content } = node;
         return {
             type: "footnote",
             attrs: {
                 unstructuredValue: pandocBlocksToHtmlString(content),
+                count: 1 + count("Note"),
             },
         };
     },

@@ -50,6 +50,15 @@ const fromPandocInner = (
     return prosemirrorFluent(transformed);
 };
 
+const makeCounter = () => {
+    const countMap: Map<string, number> = new Map();
+    return (type: string) => {
+        const count = countMap.get(type) || 0;
+        countMap.set(type, count + 1);
+        return count;
+    };
+};
+
 export const fromPandoc = (
     elementOrArray: PandocNode | PandocNode[],
     rules: RuleSet<PandocNode, ProsemirrorNode>,
@@ -58,6 +67,7 @@ export const fromPandoc = (
     const context = {
         rules: rules.fromPandoc,
         resource: x => x,
+        count: makeCounter(),
         transform: (element, marks = []) =>
             fromPandocInner(element, context, marks),
         marksMap: new Map(),

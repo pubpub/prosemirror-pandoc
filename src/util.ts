@@ -10,9 +10,19 @@ export const callPandoc = (
     inputFormat: string,
     outputFormat: string = "json"
 ) => {
-    return spawnSync("pandoc", ["-f", inputFormat, "-t", outputFormat], {
-        input: source,
-    })
+    return spawnSync(
+        "pandoc",
+        [
+            "-f",
+            inputFormat,
+            "-t",
+            outputFormat,
+            "--quiet",
+        ],
+        {
+            input: source,
+        }
+    )
         .output.filter(x => x)
         .map(x => x.toString())
         .join("");

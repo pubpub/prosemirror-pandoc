@@ -26,6 +26,7 @@ export interface TransformContext<From, To> {
     transform: TransformerFn<From, To>;
     rules: Rule<From, To>[];
     resource: (url: string) => string;
+    count: (nodeType: string) => number;
     marksMap: Map<To, ProsemirrorMark[]>;
 }
 

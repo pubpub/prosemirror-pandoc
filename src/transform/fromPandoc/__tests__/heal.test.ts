@@ -45,9 +45,7 @@ describe("getNaiveTokenList", () => {
                     content: [
                         {
                             type: "B",
-                            content: [
-                                { type: "C", content: [{ type: "D" }] },
-                            ],
+                            content: [{ type: "C", content: [{ type: "D" }] }],
                         },
                     ],
                 })
@@ -70,10 +68,7 @@ describe("healNaiveTokenList", () => {
                                     { type: "D" },
                                     {
                                         type: "C",
-                                        content: [
-                                            { type: "D" },
-                                            { type: "D" },
-                                        ],
+                                        content: [{ type: "D" }, { type: "D" }],
                                     },
                                 ],
                             },

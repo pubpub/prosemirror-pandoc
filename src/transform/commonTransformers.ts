@@ -6,8 +6,32 @@ import {
     Table,
     ProsemirrorNode,
     Alignment,
+    Doc,
 } from "../types";
 import { flatten } from "./util";
+
+/*
+ * A transformer that turns Pandoc root-level documents into Prosemirror ones.
+ */
+export const docTransformer = (pdNodeName, pmNodeName) => {
+    return {
+        fromPandoc: (node: Doc, { transform }): ProsemirrorNode => {
+            const { blocks } = node;
+            return {
+                type: pmNodeName,
+                content: transform(blocks).asArray(),
+            };
+        },
+        fromProsemirror: (node: ProsemirrorNode, { transform }): Doc => {
+            const { content } = node;
+            return {
+                type: pdNodeName,
+                blocks: transform(content).asArray(),
+                meta: {},
+            };
+        },
+    };
+};
 
 /*
  * A transformer appropriate for simple container nodes. Typically, these  are

@@ -35,6 +35,7 @@ export interface PandocJson {
     blocks: {}[];
 }
 export interface Doc {
+    type: "Doc";
     blocks: Block[];
     meta: {};
 }
@@ -354,7 +355,7 @@ export type Inline =
     | Note
     | Span;
 
-export type PandocNode = Block | Inline;
+export type PandocNode = Doc | Block | Inline;
 
 export const PANDOC_NODE_TYPES = [
     "BlockQuote",
@@ -363,6 +364,7 @@ export const PANDOC_NODE_TYPES = [
     "Code",
     "CodeBlock",
     "DefinitionList",
+    "Doc",
     "Div",
     "Emph",
     "Header",

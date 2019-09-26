@@ -406,6 +406,7 @@ export const parseBlock = (n: { t: Block["type"]; c: any }): Block => {
 export const parsePandocJson = (json: PandocJson): Doc => {
     const { blocks, meta } = json;
     return {
+        type: "Doc",
         blocks: blocks.map(parseBlock),
         meta,
     };

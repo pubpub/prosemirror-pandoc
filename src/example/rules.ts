@@ -25,12 +25,13 @@ import {
     flatten,
 } from "../transform/util";
 import {
-    contentTransformer,
-    listTransformer,
     bareLeafTransformer,
-    pandocPassThroughTransformer,
-    nullTransformer,
+    contentTransformer,
     definitionListTransformer,
+    docTransformer,
+    listTransformer,
+    nullTransformer,
+    pandocPassThroughTransformer,
     tableTransformer,
 } from "../transform/commonTransformers";
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
@@ -46,6 +47,9 @@ const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
     nodes,
     marks,
 });
+
+// Top-level transformer for a doc
+rules.transform("Doc", "doc", docTransformer);
 
 // Do nothing with nothing
 rules.fromPandoc("Null", nullTransformer);

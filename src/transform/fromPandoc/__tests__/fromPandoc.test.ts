@@ -1,7 +1,7 @@
 /* global describe, it, expect */
 import rules from "../../../example/rules";
 
-import { fromPandoc } from "..";
+import { fromPandoc } from "../fromPandoc";
 import { createAttr } from "../../util";
 import {
     Header,
@@ -15,6 +15,65 @@ import {
 } from "../../../types";
 
 describe("fromPandoc", () => {
+    it("transforms a Document into a doc", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Doc",
+                    meta: {},
+                    blocks: [
+                        {
+                            type: "Para",
+                            content: [
+                                { type: "Str", content: "Hello" },
+                                { type: "Space" },
+                                { type: "Str", content: "dad!" },
+                            ],
+                        },
+                        {
+                            type: "Para",
+                            content: [
+                                { type: "Str", content: "Hello" },
+                                { type: "Space" },
+                                { type: "Str", content: "mom!" },
+                            ],
+                        },
+                        {
+                            type: "Para",
+                            content: [
+                                {
+                                    type: "Str",
+                                    content: "Ch-ch-ch-ch-ch-cherry",
+                                },
+                                { type: "Space" },
+                                { type: "Str", content: "bomb!" },
+                            ],
+                        },
+                    ],
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "doc",
+            content: [
+                {
+                    type: "paragraph",
+                    content: [{ type: "text", text: "Hello dad!" }],
+                },
+                {
+                    type: "paragraph",
+                    content: [{ type: "text", text: "Hello mom!" }],
+                },
+                {
+                    type: "paragraph",
+                    content: [
+                        { type: "text", text: "Ch-ch-ch-ch-ch-cherry bomb!" },
+                    ],
+                },
+            ],
+        });
+    });
+
     it("transforms a Null into an empty array", () => {
         expect(fromPandoc({ type: "Null" }, rules)).toEqual([]);
     });
@@ -160,7 +219,10 @@ describe("fromPandoc", () => {
                 },
                 rules
             ).asNode()
-        ).toEqual({ type: "code_block", text: "hello_world()" });
+        ).toEqual({
+            type: "code_block",
+            content: [{ type: "text", text: "hello_world()" }],
+        });
     });
 
     it("transforms a BlockQuote into a blockquote", () => {
@@ -202,9 +264,7 @@ describe("fromPandoc", () => {
                 },
                 {
                     type: "paragraph",
-                    content: [
-                        { type: "text", text: "More like Borem Ipsum!" },
-                    ],
+                    content: [{ type: "text", text: "More like Borem Ipsum!" }],
                 },
             ],
         });

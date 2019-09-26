@@ -16,6 +16,7 @@ import {
     Cite,
     Code,
     CodeBlock,
+    RawInline,
 } from "../types";
 import {
     textFromStrSpace,
@@ -33,6 +34,7 @@ import {
     nullTransformer,
     pandocPassThroughTransformer,
     tableTransformer,
+    pandocRawTransformer,
 } from "../transform/commonTransformers";
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
 
@@ -195,8 +197,26 @@ rules.fromPandoc("SoftBreak", nullTransformer);
 // Stuff we don't have equivalents for
 rules.fromPandoc("Span", pandocPassThroughTransformer);
 rules.fromPandoc("RawBlock", pandocPassThroughTransformer);
-rules.fromPandoc("RawInline", pandocPassThroughTransformer);
 rules.fromPandoc("Quoted", pandocPassThroughTransformer);
+
+rules.fromPandoc("RawBlock", pandocRawTransformer("text"));
+
+rules.fromPandoc("RawInline", (node: RawInline) => {
+    const { format, content } = node;
+    if (format === "tex") {
+        return {
+            type: "equation",
+            attrs: {
+                value: content,
+                html: katex.renderToString(content, {
+                    displayMode: false,
+                    throwOnError: false,
+                }),
+            },
+        };
+    }
+    return { type: "text", text: content };
+});
 
 // Tables
 rules.transform("Table", "table", tableTransformer);

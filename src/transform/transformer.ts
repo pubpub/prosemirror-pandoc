@@ -30,6 +30,10 @@ export interface TransformContext<From, To> {
     marksMap: Map<To, ProsemirrorMark[]>;
 }
 
+export interface TransformConfig {
+    resource?: (input: string) => string;
+}
+
 type TransformDefinition<From, To> = (
     node: From | From[],
     context: TransformContext<From, To>
@@ -277,7 +281,7 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
     }
     throw new Error(
         `Could not find rule for nodes: ${nodes
-            .map(n => n.type)
+            .map(n => n)
             .slice(0, 3)
             .join(", ") + (nodes.length > 3 ? "..." : "")}`
     );

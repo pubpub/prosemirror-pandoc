@@ -15,6 +15,7 @@ export const pandocInlineToHtmlString = (nodes: Inline[]) => {
         return "";
     }
     const document: Doc = {
+        type: "Doc",
         blocks: [{ type: "Para", content: nodes }],
         meta: {},
     };
@@ -26,6 +27,7 @@ export const pandocBlocksToHtmlString = (blocks: Block[]) => {
         return "";
     }
     const document: Doc = {
+        type: "Doc",
         blocks,
         meta: {},
     };

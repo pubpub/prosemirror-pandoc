@@ -7,6 +7,8 @@ import {
     ProsemirrorNode,
     Alignment,
     Doc,
+    RawBlock,
+    RawInline,
 } from "../types";
 import { flatten } from "./util";
 
@@ -136,7 +138,7 @@ export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
 ) => {
     const content = node.entries.map(value => {
         const { term, definitions } = value;
-        const blocks = flatten(definitions);
+        const blocks = flatten<Block>(definitions);
         const firstBlock = blocks[0];
         let prependableBlock: Para | Plain;
         if (
@@ -249,7 +251,9 @@ export const tableTransformer = {
         });
         const [headers, ...cells] = blocks;
         const columnWidths = headers.map(() => 0);
-        const alignments: Alignment[] = headers.map(() => "AlignDefault");
+        const alignments: Alignment[] = headers.map(
+            () => "AlignDefault" as "AlignDefault"
+        );
         return {
             type: "Table" as "Table", // That's Typescript, baby
             headers,
@@ -259,4 +263,22 @@ export const tableTransformer = {
             caption: [],
         };
     },
+};
+
+/*
+ * A transformer that turns a Pandoc RawBlock or RawInline into a paragraph
+ */
+export const pandocRawTransformer = (
+    pmInlineNodeName: string,
+    pmBlockNodeName: string = null
+) => {
+    return (node: RawBlock | RawInline) => {
+        const { content } = node;
+        const textNode = { type: pmInlineNodeName, text: content };
+        if (pmBlockNodeName) {
+            const blockNode = { type: pmBlockNodeName, content: [textNode] };
+            return blockNode;
+        }
+        return textNode;
+    };
 };

@@ -3,9 +3,10 @@ import { flatten, asArray } from "../util";
 import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "../../types";
 import { ProsemirrorFluent, prosemirrorFluent } from "../fluent";
 import {
-    TransformContext,
-    RuleSet,
     getTransformRuleForElements,
+    RuleSet,
+    TransformConfig,
+    TransformContext,
 } from "../transformer";
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
@@ -33,7 +34,7 @@ const fromPandocInner = (
             remaining,
             matchPandocNode
         );
-        const addition = flatten(
+        const addition: ProsemirrorNode[] = flatten(
             rule.acceptsMultiple
                 ? rule.transform(
                       elements.slice(ptr, ptr + acceptedCount),
@@ -62,11 +63,11 @@ const makeCounter = () => {
 export const fromPandoc = (
     elementOrArray: PandocNode | PandocNode[],
     rules: RuleSet<PandocNode, ProsemirrorNode>,
-    wrapInDocument: boolean = false
+    config: TransformConfig = {}
 ): ProsemirrorFluent => {
     const context = {
         rules: rules.fromPandoc,
-        resource: x => x,
+        resource: config.resource || (x => x),
         count: makeCounter(),
         transform: (element, marks = []) =>
             fromPandocInner(element, context, marks),
@@ -78,10 +79,6 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    if (wrapInDocument) {
-        const doc: ProsemirrorNode = { type: "doc", content: nodesWithMarks };
-        return prosemirrorFluent(heal(doc, rules.prosemirrorSchema));
-    }
     return prosemirrorFluent(
         nodesWithMarks.map(node => heal(node, rules.prosemirrorSchema))
     );

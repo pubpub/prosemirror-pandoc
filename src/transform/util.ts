@@ -58,7 +58,7 @@ export const asNode = <T>(item: T | T[]): T => {
     return Array.isArray(item) ? item[0] : item;
 };
 
-export const flatten = <T>(input: T | (T | T[])[]): T[] => {
+export const flatten = <T>(input: any): T[] => {
     if (!Array.isArray(input)) {
         return [input];
     }

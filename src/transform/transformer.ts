@@ -25,13 +25,13 @@ type TransformerFn<From, To> = (
 export interface TransformContext<From, To> {
     transform: TransformerFn<From, To>;
     rules: Rule<From, To>[];
-    resource: (url: string) => string;
+    resource: (url: string, context?: any) => string;
     count: (nodeType: string) => number;
     marksMap: Map<To, ProsemirrorMark[]>;
 }
 
 export interface TransformConfig {
-    resource?: (input: string) => string;
+    resource?: (input: string, context?: any) => string;
 }
 
 type TransformDefinition<From, To> = (
@@ -86,7 +86,7 @@ export interface BuildRuleset<
     transformToMark: (
         pdPattern: string,
         targetMark: string,
-        getMarkAttrs?: (n: PDNode) => {}
+        getMarkAttrs?: (n: PDNode, c: TransformContext<PDNode, PMNode>) => {}
     ) => void;
     finish: () => RuleSet<PDNode, PMNode>;
 }
@@ -185,7 +185,10 @@ export const buildRuleset = <
     const transformToMark = <PDType extends PDNode, PMType extends PMNode>(
         pdPattern: string,
         targetMark: string,
-        getMarkAttrs: (n: PDType) => {} = () => null
+        getMarkAttrs: (
+            n: PDType,
+            c: TransformContext<PDNode, PMNode>
+        ) => {} = () => null
     ) => {
         ruleset.fromPandoc.push(
             createPandocToMarkRule(
@@ -253,10 +256,11 @@ const createRule = <From, To>(
 const createPandocToMarkRule = <From, To>(
     expression: Expr,
     targetMark: string,
-    getMarkAttrs: (node: From) => {}
+    getMarkAttrs: (node: From, ctx: TransformContext<From, To>) => {}
 ): Rule<From, To> => {
-    const transform = (pandocNode, { transform }) => {
-        const attrs = getMarkAttrs(pandocNode);
+    const transform = (pandocNode, context) => {
+        const { transform } = context;
+        const attrs = getMarkAttrs(pandocNode, context);
         return transform(pandocNode.content, [
             {
                 type: targetMark,

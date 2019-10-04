@@ -214,7 +214,10 @@ const parseSpan = (n: { c: [any, any[]] }): Span => {
     };
 };
 
-export const parseInline = (n: { t: Inline["type"]; c: any }): Inline => {
+export const parseInline = (n: {
+    t: Inline["type"] | "MetaInlines";
+    c: any;
+}): Inline => {
     switch (n.t) {
         case "Str":
             return parseStr(n);
@@ -245,6 +248,7 @@ export const parseInline = (n: { t: Inline["type"]; c: any }): Inline => {
             return parseImage(n);
         case "Note":
             return parseNote(n);
+        case "MetaInlines":
         case "Span":
             return parseSpan(n);
     }
@@ -371,7 +375,10 @@ const parseTable = (n: {
     };
 };
 
-export const parseBlock = (n: { t: Block["type"]; c: any }): Block => {
+export const parseBlock = (n: {
+    t: Block["type"] | "MetaBlocks";
+    c: any;
+}): Block => {
     switch (n.t) {
         case "Plain":
             return parsePlain(n);
@@ -396,6 +403,7 @@ export const parseBlock = (n: { t: Block["type"]; c: any }): Block => {
         case "HorizontalRule":
         case "Null":
             return parseAtom(n);
+        case "MetaBlocks":
         case "Div":
             return parseDiv(n);
         case "Table":

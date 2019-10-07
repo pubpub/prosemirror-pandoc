@@ -17,10 +17,7 @@ export const callPandoc = (
         {
             input: source,
         }
-    )
-        .output.filter(x => x)
-        .map(x => x.toString())
-        .join("");
+    ).stdout.toString();
 };
 
 export const loadAndTransformFromPandoc = (

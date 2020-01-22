@@ -321,10 +321,8 @@ const parseBulletList = (n: { c: any[][] }): BulletList => {
     };
 };
 
-const parseDefinitionList = (n: {
-    c: [[any[], any[][]][]];
-}): DefinitionList => {
-    const [items] = n.c;
+const parseDefinitionList = (n: { c: [any[], any[][]][] }): DefinitionList => {
+    const items = n.c;
     const entries = items.map(item => {
         const [term, definitions] = item;
         return {

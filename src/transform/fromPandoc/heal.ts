@@ -1,5 +1,5 @@
 import { ProsemirrorNode, ProsemirrorSchema } from "../../types";
-import { parseExpr, acceptNodes, Expr } from "../nodeExpression";
+import { parseExpr, Expr, createItemAcceptor } from "../nodeExpression";
 
 interface OpenToken {
     type: "open";
@@ -10,6 +10,11 @@ interface OpenToken {
 interface CloseToken {
     type: "close";
     node: ProsemirrorNode;
+}
+
+interface AcceptedState {
+    consumeNode: (node: ProsemirrorNode) => boolean;
+    acceptedNodes: ProsemirrorNode[];
 }
 
 export type Token = OpenToken | CloseToken;
@@ -35,10 +40,10 @@ export const healNaiveTokenList = (
     tokens: Token[],
     schema: ProsemirrorSchema
 ): Token[] => {
-    let openTokens: OpenToken[] = [];
+    const openTokens: OpenToken[] = [];
     const nextTokens: Token[] = [];
 
-    const tokenToAcceptedMap: Map<OpenToken, ProsemirrorNode[]> = new Map();
+    const tokenToAcceptorMap: Map<OpenToken, AcceptedState> = new Map();
     const newOpenTokensMap: Map<ProsemirrorNode, OpenToken[]> = new Map();
     const acceptorExpressions: Map<string, Expr> = new Map();
     const nodeToTokenMap: Map<ProsemirrorNode, OpenToken[]> = new Map();
@@ -51,17 +56,33 @@ export const healNaiveTokenList = (
 
     const matchProsemirrorNode = (group: string) => (node: ProsemirrorNode) => {
         const schemaEntry = schema.nodes[node.type];
-        return node.type === group || schemaEntry.group === group;
+        const matchRes = node.type === group || schemaEntry.group === group;
+        return matchRes;
     };
 
     const openToken = (token: OpenToken) => {
         nextTokens.push(token);
         openTokens.push(token);
-        tokenToAcceptedMap.set(token, []);
         nodeToTokenMap.set(token.node, [
             ...(nodeToTokenMap.get(token.node) || []),
             token,
         ]);
+    };
+
+    const getOrAddAcceptedStateToTokenMap = (token): AcceptedState => {
+        const existing = tokenToAcceptorMap.get(token);
+        if (existing) {
+            return existing;
+        }
+        const next = {
+            consumeNode: createItemAcceptor(
+                acceptorExpressions.get(token.node.type),
+                matchProsemirrorNode
+            ),
+            acceptedNodes: [] as ProsemirrorNode[],
+        };
+        tokenToAcceptorMap.set(token, next);
+        return next;
     };
 
     for (const token of tokens) {
@@ -81,16 +102,13 @@ export const healNaiveTokenList = (
                     );
                 }
                 const testingToken = openTokens[acceptingParentDepth];
-                const tokenChildren = tokenToAcceptedMap.get(testingToken);
-                accepted =
-                    acceptNodes(
-                        acceptorExpressions.get(testingToken.node.type),
-                        [...tokenChildren, token.node],
-                        matchProsemirrorNode
-                    ) ===
-                    tokenChildren.length + 1;
+                const {
+                    acceptedNodes,
+                    consumeNode,
+                } = getOrAddAcceptedStateToTokenMap(testingToken);
+                accepted = consumeNode(token.node);
                 if (accepted) {
-                    tokenToAcceptedMap.get(testingToken).push(token.node);
+                    acceptedNodes.push(token.node);
                 } else {
                     nextTokens.push({
                         type: "close",
@@ -132,7 +150,8 @@ export const heal = (
     node: ProsemirrorNode,
     schema: ProsemirrorSchema
 ): ProsemirrorNode => {
-    const tokens = healNaiveTokenList(getNaiveTokenList(node), schema);
+    const naiveTokens = getNaiveTokenList(node);
+    const tokens = healNaiveTokenList(naiveTokens, schema);
     const parentStack = [];
     let rootNode: ProsemirrorNode;
     for (let i = 0; i < tokens.length; i++) {

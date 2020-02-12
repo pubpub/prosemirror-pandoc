@@ -79,7 +79,8 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    return prosemirrorFluent(
-        nodesWithMarks.map(node => heal(node, rules.prosemirrorSchema))
+    const healed = nodesWithMarks.map(node =>
+        heal(node, rules.prosemirrorSchema)
     );
+    return prosemirrorFluent(healed);
 };

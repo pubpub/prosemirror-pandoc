@@ -1,4 +1,4 @@
-import { spawnSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 
 import { parsePandocJson } from "./parse";
 import { RuleSet } from "./transform/transformer";
@@ -20,17 +20,36 @@ export const callPandoc = (
     ).stdout.toString();
 };
 
+export const callPandocWithFile = (
+    sourcePath: string,
+    outputFormat: string = "json",
+    inputFormat: string = null,
+    extraArgs: string[] = []
+) => {
+    const extraArgsString = extraArgs.join(" ");
+    const inputFormatString = inputFormat ? `-f ${inputFormat}` : "";
+    return execSync(
+        `pandoc ${sourcePath} ${inputFormatString} -t ${outputFormat} ${extraArgsString}`,
+        {
+            maxBuffer: 500 * 1024 * 1024,
+        }
+    ).toString();
+};
+
 export const loadAndTransformFromPandoc = (
-    contents: string,
-    inputFormat: string,
+    sourcePath: string,
     rules: RuleSet<any, any>
 ) => {
-    const pandocResult = callPandoc(contents, inputFormat, "json");
+    const pandocResult = callPandocWithFile(sourcePath);
     let json: PandocJson;
     try {
         json = JSON.parse(pandocResult);
     } catch (err) {
-        console.error(`Couldn't parse Pandoc result: ${pandocResult}`);
+        if (pandocResult) {
+            console.error(`Couldn't parse Pandoc result: ${pandocResult}`);
+        } else {
+            console.error(err);
+        }
     }
     const pandocAst = parsePandocJson(json);
     return fromPandoc(pandocAst, rules).asNode();

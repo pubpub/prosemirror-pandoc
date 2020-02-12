@@ -6,7 +6,7 @@ import {
 } from "../types";
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
-    acceptNodes,
+    acceptItems,
     expressionAcceptsMultiple,
     parseExpr,
     Expr,
@@ -278,7 +278,7 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
 ): { rule: Rule<From, To>; acceptedCount: number } => {
     for (const rule of rules) {
         const { expression } = rule;
-        const acceptedCount = acceptNodes(expression, nodes, matchTest);
+        const acceptedCount = acceptItems(expression, nodes, matchTest);
         if (acceptedCount > 0) {
             return { rule, acceptedCount };
         }

@@ -6,4 +6,4 @@ export { fromPandoc } from "./transform/fromPandoc";
 export { buildRuleset } from "./transform/transformer";
 export { emitPandocJson } from "./emit";
 export { parsePandocJson } from "./parse";
-export { callPandoc } from "./util";
+export { callPandoc, callPandocWithFile } from "./util";

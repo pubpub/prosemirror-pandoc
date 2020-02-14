@@ -5,6 +5,8 @@ import { RuleSet } from "./transform/transformer";
 import { fromPandoc } from "./transform/fromPandoc/fromPandoc";
 import { PandocJson } from "./types";
 
+const MAX_BUFFER = 0 * 1024 * 1024;
+
 export const callPandoc = (
     source: string,
     inputFormat: string,
@@ -14,9 +16,7 @@ export const callPandoc = (
     return spawnSync(
         "pandoc",
         ["-f", inputFormat, "-t", outputFormat, "--quiet", ...extraArgs],
-        {
-            input: source,
-        }
+        { input: source, maxBuffer: MAX_BUFFER }
     ).stdout.toString();
 };
 
@@ -30,9 +30,7 @@ export const callPandocWithFile = (
     const inputFormatString = inputFormat ? `-f ${inputFormat}` : "";
     return execSync(
         `pandoc ${sourcePath} ${inputFormatString} -t ${outputFormat} ${extraArgsString}`,
-        {
-            maxBuffer: 500 * 1024 * 1024,
-        }
+        { maxBuffer: MAX_BUFFER }
     ).toString();
 };
 

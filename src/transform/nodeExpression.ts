@@ -278,6 +278,38 @@ const createAcceptanceMachine = <Item>(
     return { startState, acceptState };
 };
 
+// Adds a position to a DiscoveryState if it hasn't already been discovered.
+const maybeEnqueuePosition = <Item>(
+    position: SearchPosition<Item>,
+    discoveryState: DiscoveryState<Item>
+) => {
+    const { discoveredPositions, positionsHeap } = discoveryState;
+    const hasAlreadyDiscoveredPosition = discoveredPositions.some(
+        discoveredPosition =>
+            discoveredPosition.state === position.state &&
+            discoveredPosition.consumedItems === position.consumedItems
+    );
+    if (!hasAlreadyDiscoveredPosition) {
+        positionsHeap.push(position);
+    }
+};
+
+// Mark a position discovered in a DiscoveryState.
+const discoverPosition = <Item>(
+    position: SearchPosition<Item>,
+    discoveryState: DiscoveryState<Item>
+) => {
+    discoveryState.discoveredPositions.push(position);
+};
+
+// Comparator between two search positions for heap -- higher consumedItem values come first.
+const heapComparator = <Item>(
+    p1: SearchPosition<Item>,
+    p2: SearchPosition<Item>
+) => {
+    return p1.consumedItems - p2.consumedItems;
+};
+
 export const createItemAcceptor = <Item>(
     expr: Expr,
     matchTest: IdentifierMatch<Item>
@@ -348,14 +380,6 @@ export const createItemAcceptor = <Item>(
     // Keep a running list of items we're given.
     const items = [];
 
-    // Comparator between two search positions for heap -- higher consumedItem values come first.
-    const heapComparator = (
-        p1: SearchPosition<Item>,
-        p2: SearchPosition<Item>
-    ) => {
-        return p1.consumedItems - p2.consumedItems;
-    };
-
     // Our initial position is the start state, with no items consumed.
     const initialPosition = {
         state: startState,
@@ -367,30 +391,6 @@ export const createItemAcceptor = <Item>(
     const globalDiscoveryState: DiscoveryState<Item> = {
         positionsHeap: new Heap([initialPosition], null, heapComparator),
         discoveredPositions: [],
-    };
-
-    // Adds a position to a DiscoveryState if it hasn't already been discovered.
-    const maybeEnqueuePosition = (
-        position: SearchPosition<Item>,
-        discoveryState: DiscoveryState<Item>
-    ) => {
-        const { discoveredPositions, positionsHeap } = discoveryState;
-        const hasAlreadyDiscoveredPosition = discoveredPositions.some(
-            discoveredPosition =>
-                discoveredPosition.state === position.state &&
-                discoveredPosition.consumedItems === position.consumedItems
-        );
-        if (!hasAlreadyDiscoveredPosition) {
-            positionsHeap.push(position);
-        }
-    };
-
-    // Mark a position discovered in a DiscoveryState.
-    const discoverPosition = (
-        position: SearchPosition<Item>,
-        discoveryState: DiscoveryState<Item>
-    ) => {
-        discoveryState.discoveredPositions.push(position);
     };
 
     return function acceptsNextItem(nextItem: Item): boolean {
@@ -444,6 +444,31 @@ export const createItemAcceptor = <Item>(
     };
 };
 
+export const quickAcceptChoice = <Item extends { type: string }>(
+    expr: Expr,
+    items: Item[]
+): number => {
+    if (
+        expr.type === "oneOrMore" &&
+        expr.child.type === "choice" &&
+        expr.child.children.every(child => child.type === "identifier")
+    ) {
+        const choice = expr.child;
+        const validIdentifiers = choice.children
+            .map(child => child.type === "identifier" && child.identifier)
+            .filter(x => x);
+        let ptr = 0;
+        while (
+            ptr < items.length &&
+            validIdentifiers.includes(items[ptr].type)
+        ) {
+            ++ptr;
+        }
+        return ptr;
+    }
+    return 0;
+};
+
 export const acceptItems = <Item>(
     expr: Expr,
     items: Item[],
@@ -457,7 +482,7 @@ export const acceptItems = <Item>(
         { state: startState, consumedItems: 0 },
     ];
     const discoveredPositions: SearchPosition<Item>[] = [];
-    const acceptedconsumedItemss = [];
+    let maxConsumedItems = 0;
 
     const maybePushPosition = (p: SearchPosition<Item>) => {
         const hasAlreadyDiscoveredPosition = discoveredPositions.some(
@@ -477,7 +502,7 @@ export const acceptItems = <Item>(
         const successors = state.getSuccessors(currentItem);
         discoveredPositions.push(position);
         if (state === acceptState) {
-            acceptedconsumedItemss.push(consumedItems);
+            maxConsumedItems = Math.max(maxConsumedItems, consumedItems);
         }
         for (const successor of successors) {
             const nextconsumedItems = state.consumesItem()
@@ -490,7 +515,7 @@ export const acceptItems = <Item>(
         }
     }
 
-    return acceptedconsumedItemss.reduce((a, b) => Math.max(a, b), 0);
+    return maxConsumedItems;
 };
 
 export const expressionAcceptsMultiple = (expr: Expr): boolean => {

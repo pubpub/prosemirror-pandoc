@@ -7,10 +7,11 @@ import {
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
     acceptItems,
-    expressionAcceptsMultiple,
-    parseExpr,
     Expr,
+    expressionAcceptsMultiple,
     IdentifierMatch,
+    parseExpr,
+    quickAcceptChoice,
     willAlwaysMatchSingleIdentifier,
 } from "./nodeExpression";
 
@@ -278,6 +279,10 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
 ): { rule: Rule<From, To>; acceptedCount: number } => {
     for (const rule of rules) {
         const { expression } = rule;
+        const acceptChoiceCount = quickAcceptChoice(expression, nodes);
+        if (acceptChoiceCount > 0) {
+            return { rule, acceptedCount: acceptChoiceCount };
+        }
         const acceptedCount = acceptItems(expression, nodes, matchTest);
         if (acceptedCount > 0) {
             return { rule, acceptedCount };

@@ -290,7 +290,7 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
     }
     throw new Error(
         `Could not find rule for nodes: ${nodes
-            .map(n => n)
+            .map(n => JSON.stringify(n))
             .slice(0, 3)
             .join(", ") + (nodes.length > 3 ? "..." : "")}`
     );

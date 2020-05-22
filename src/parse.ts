@@ -23,6 +23,13 @@ import {
     ListNumberStyle,
     Math,
     MathType,
+    MetaBlocks,
+    MetaBool,
+    MetaInlines,
+    MetaList,
+    MetaMap,
+    MetaString,
+    MetaValue,
     Note,
     OrderedList,
     PandocJson,
@@ -214,10 +221,7 @@ const parseSpan = (n: { c: [any, any[]] }): Span => {
     };
 };
 
-export const parseInline = (n: {
-    t: Inline["type"] | "MetaInlines";
-    c: any;
-}): Inline => {
+export const parseInline = (n: { t: Inline["type"]; c: any }): Inline => {
     switch (n.t) {
         case "Str":
             return parseStr(n);
@@ -248,7 +252,6 @@ export const parseInline = (n: {
             return parseImage(n);
         case "Note":
             return parseNote(n);
-        case "MetaInlines":
         case "Span":
             return parseSpan(n);
     }
@@ -373,10 +376,7 @@ const parseTable = (n: {
     };
 };
 
-export const parseBlock = (n: {
-    t: Block["type"] | "MetaBlocks";
-    c: any;
-}): Block => {
+export const parseBlock = (n: { t: Block["type"]; c: any }): Block => {
     switch (n.t) {
         case "Plain":
             return parsePlain(n);
@@ -401,7 +401,6 @@ export const parseBlock = (n: {
         case "HorizontalRule":
         case "Null":
             return parseAtom(n);
-        case "MetaBlocks":
         case "Div":
             return parseDiv(n);
         case "Table":
@@ -409,11 +408,79 @@ export const parseBlock = (n: {
     }
 };
 
+const parseMetaMap = (n: { c: { [key: string]: any } }): MetaMap => {
+    const values = {};
+    Object.entries(n.c).forEach(([key, value]) => {
+        values[key] = parseMetaValue(value);
+    });
+    return { type: "MetaMap", values };
+};
+
+const parseMetaList = (n: { c: any[] }): MetaList => {
+    return {
+        type: "MetaList",
+        content: n.c.map(parseMetaValue),
+    };
+};
+
+const parseMetaBool = (n: { c: boolean }): MetaBool => {
+    return {
+        type: "MetaBool",
+        content: n.c,
+    };
+};
+
+const parseMetaString = (n: { c: string }): MetaString => {
+    return {
+        type: "MetaString",
+        content: n.c,
+    };
+};
+
+const parseMetaInlines = (n: { c: any[] }): MetaInlines => {
+    return {
+        type: "MetaInlines",
+        content: n.c.map(parseInline),
+    };
+};
+
+const parseMetaBlocks = (n: { c: any[] }): MetaBlocks => {
+    return {
+        type: "MetaBlocks",
+        content: n.c.map(parseBlock),
+    };
+};
+
+const parseMetaValue = (n: { t: string; c: any }): MetaValue => {
+    switch (n.t) {
+        case "MetaMap":
+            return parseMetaMap(n);
+        case "MetaList":
+            return parseMetaList(n);
+        case "MetaBool":
+            return parseMetaBool(n);
+        case "MetaString":
+            return parseMetaString(n);
+        case "MetaInlines":
+            return parseMetaInlines(n);
+        case "MetaBlocks":
+            return parseMetaBlocks(n);
+    }
+};
+
+const parseMeta = (meta: PandocJson["meta"]) => {
+    const parsedMeta: { [key: string]: MetaValue } = {};
+    Object.entries(meta).forEach(([key, value]) => {
+        parsedMeta[key] = parseMetaValue(value);
+    });
+    return parsedMeta;
+};
+
 export const parsePandocJson = (json: PandocJson): Doc => {
-    const { blocks, meta } = json;
+    const { meta, blocks } = json;
     return {
         type: "Doc",
         blocks: blocks.map(parseBlock),
-        meta,
+        meta: parseMeta(meta),
     };
 };

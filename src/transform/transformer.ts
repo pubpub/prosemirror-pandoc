@@ -28,11 +28,13 @@ export interface TransformContext<From, To> {
     rules: Rule<From, To>[];
     resource: (url: string, context?: any) => string;
     count: (nodeType: string) => number;
+    useSmartQuotes: boolean;
     marksMap: Map<To, ProsemirrorMark[]>;
 }
 
 export interface TransformConfig {
     resource?: (input: string, context?: any) => string;
+    useSmartQuotes?: boolean;
 }
 
 type TransformDefinition<From, To> = (

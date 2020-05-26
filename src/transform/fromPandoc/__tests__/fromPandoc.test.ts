@@ -1060,4 +1060,65 @@ describe("fromPandoc", () => {
             )
         ).toMatchSnapshot();
     });
+
+    it("transforms Quoted elements correctly", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Emph",
+                    content: [
+                        { type: "Str", content: "Quoted" },
+                        { type: "Space" },
+                        { type: "Str", content: "nodes" },
+                        { type: "Space" },
+                        { type: "Str", content: "are" },
+                        { type: "Space" },
+                        { type: "Str", content: "a" },
+                        {
+                            type: "Quoted",
+                            quoteType: "SingleQuote",
+                            content: [
+                                { type: "Str", content: "good" },
+                                { type: "Space" },
+                                { type: "Str", content: "idea" },
+                            ],
+                        },
+                        { type: "Str", content: "!!!" },
+                    ],
+                },
+                rules
+            )
+        ).toMatchSnapshot();
+    });
+
+    it("respects the useSmartQuotes config option when transforming Quoted elements", () => {
+        expect(
+            fromPandoc(
+                {
+                    type: "Emph",
+                    content: [
+                        { type: "Str", content: "Quoted" },
+                        { type: "Space" },
+                        { type: "Str", content: "nodes" },
+                        { type: "Space" },
+                        { type: "Str", content: "are" },
+                        { type: "Space" },
+                        { type: "Str", content: "a" },
+                        {
+                            type: "Quoted",
+                            quoteType: "DoubleQuote",
+                            content: [
+                                { type: "Str", content: "good" },
+                                { type: "Space" },
+                                { type: "Str", content: "idea" },
+                            ],
+                        },
+                        { type: "Str", content: "!!!" },
+                    ],
+                },
+                rules,
+                { useSmartQuotes: true }
+            )
+        ).toMatchSnapshot();
+    });
 });

@@ -37,6 +37,7 @@ import {
     nullTransformer,
     pandocPassThroughTransformer,
     tableTransformer,
+    pandocQuotedTransformer,
 } from "../transform/commonTransformers";
 
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
@@ -199,7 +200,9 @@ rules.fromPandoc("SoftBreak", nullTransformer);
 
 // Stuff we don't have equivalents for
 rules.fromPandoc("Span", pandocPassThroughTransformer);
-rules.fromPandoc("Quoted", pandocPassThroughTransformer);
+
+// Anything in quotation marks is its own node, to Pandoc
+rules.fromPandoc("Quoted", pandocQuotedTransformer);
 
 rules.fromPandoc("RawBlock", (node: RawBlock) => {
     return {

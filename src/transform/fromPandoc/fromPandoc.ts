@@ -68,6 +68,7 @@ export const fromPandoc = (
     const context = {
         rules: rules.fromPandoc,
         resource: config.resource || (x => x),
+        useSmartQuotes: config.useSmartQuotes || false,
         count: makeCounter(),
         transform: (element, marks = []) =>
             fromPandocInner(element, context, marks),

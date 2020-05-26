@@ -1,5 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`fromPandoc respects the useSmartQuotes config option when transforming Quoted elements 1`] = `
+Array [
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "Quoted nodes are a",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "“",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "good idea",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "”",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "!!!",
+    "type": "text",
+  },
+]
+`;
+
 exports[`fromPandoc transforms Math (mathType=DisplayMath) into a block_equation 1`] = `
 Array [
   Object {
@@ -20,6 +70,56 @@ Array [
       "value": "e^{i\\\\pi} = -1",
     },
     "type": "equation",
+  },
+]
+`;
+
+exports[`fromPandoc transforms Quoted elements correctly 1`] = `
+Array [
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "Quoted nodes are a",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "'",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "good idea",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "'",
+    "type": "text",
+  },
+  Object {
+    "marks": Array [
+      Object {
+        "type": "em",
+      },
+    ],
+    "text": "!!!",
+    "type": "text",
   },
 ]
 `;

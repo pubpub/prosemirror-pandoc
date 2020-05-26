@@ -16,6 +16,6 @@ describe("setPandocApiVersion", () => {
         setPandocApiVersion(newPandocApiVersion);
         expect(PANDOC_API_VERSION).toEqual(newPandocApiVersion);
         const testJson = emitPandocJson({ type: "Doc", blocks: [], meta: {} });
-        expect(testJson["pandoc-api-version"]).toEqual([newPandocApiVersion]);
+        expect(testJson["pandoc-api-version"]).toEqual(newPandocApiVersion);
     });
 });

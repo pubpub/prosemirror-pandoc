@@ -84,12 +84,9 @@ export const metaValueToString = (m: MetaValue): string => {
     return "";
 };
 
-type Serializable =
-    | boolean
-    | string
-    | Serializable[]
-    | { [key: string]: Serializable };
-export const metaValueToJsonSerializable = (m: MetaValue): Serializable => {
+export const metaValueToJsonSerializable = (
+    m: MetaValue
+): object | any[] | string | boolean => {
     if (m.type === "MetaBool") {
         return m.content;
     }
@@ -97,12 +94,12 @@ export const metaValueToJsonSerializable = (m: MetaValue): Serializable => {
         return m.content.map(metaValueToJsonSerializable);
     }
     if (m.type === "MetaMap") {
-        const entries: [string, Serializable][] = Object.entries(m.values).map(
+        const entries: [string, any][] = Object.entries(m.values).map(
             ([key, value]) => {
                 return [key, metaValueToJsonSerializable(value)];
             }
         );
-        const res: { [key: string]: Serializable } = {};
+        const res: { [key: string]: any } = {};
         entries.forEach(entry => {
             const [key, value] = entry;
             res[key] = value;

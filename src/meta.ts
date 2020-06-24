@@ -83,3 +83,31 @@ export const metaValueToString = (m: MetaValue): string => {
     }
     return "";
 };
+
+type Serializable =
+    | boolean
+    | string
+    | Serializable[]
+    | { [key: string]: Serializable };
+export const metaValueToJsonSerializable = (m: MetaValue): Serializable => {
+    if (m.type === "MetaBool") {
+        return m.content;
+    }
+    if (m.type === "MetaList") {
+        return m.content.map(metaValueToJsonSerializable);
+    }
+    if (m.type === "MetaMap") {
+        const entries: [string, Serializable][] = Object.entries(m.values).map(
+            ([key, value]) => {
+                return [key, metaValueToJsonSerializable(value)];
+            }
+        );
+        const res: { [key: string]: Serializable } = {};
+        entries.forEach(entry => {
+            const [key, value] = entry;
+            res[key] = value;
+        });
+        return res;
+    }
+    return metaValueToString(m);
+};

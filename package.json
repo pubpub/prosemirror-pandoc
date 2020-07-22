@@ -1,10 +1,9 @@
 {
   "name": "@pubpub/prosemirror-pandoc",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Convert between Prosemirror schemas and the Pandoc AST",
   "main": "dist/index.js",
   "devDependencies": {
-    "@types/collections": "^5.0.1",
     "@types/jest": "^24.0.18",
     "@types/katex": "^0.10.2",
     "@types/node": "^12.7.4",

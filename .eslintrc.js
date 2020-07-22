@@ -21,7 +21,7 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module",
-        "project": './tsconfig.json'  
+        "project": './tsconfig.json'
     },
     "rules": {
         "@typescript-eslint/ban-ts-ignore": 0,
@@ -32,6 +32,7 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/no-inferrable-types": 0,
         "@typescript-eslint/no-use-before-define": 0,
+        "no-constant-condition": 0,
         "prettier/prettier": "error",
     },
 };

@@ -9,7 +9,7 @@
  *    id => str => id === str
  * ) // === 4 because only the first four elements of the input array match the expression.
  */
-import Heap from "collections/heap";
+import Heap from "./heap";
 
 interface Identifier {
     type: "identifier";
@@ -302,13 +302,8 @@ const discoverPosition = <Item>(
     discoveryState.discoveredPositions.push(position);
 };
 
-// Comparator between two search positions for heap -- higher consumedItem values come first.
-const heapComparator = <Item>(
-    p1: SearchPosition<Item>,
-    p2: SearchPosition<Item>
-) => {
-    return p1.consumedItems - p2.consumedItems;
-};
+// We want SearchPositions with high `consumedItems` to come out first, so they get low scores.
+const heapScore = <Item>(item: SearchPosition<Item>) => 0 - item.consumedItems;
 
 export const createItemAcceptor = <Item>(
     expr: Expr,
@@ -389,7 +384,7 @@ export const createItemAcceptor = <Item>(
     // A DiscoveryState is a heap of positions to explore next, and a list of positions that we've
     // already discovered and shouldn't explore further.
     const globalDiscoveryState: DiscoveryState<Item> = {
-        positionsHeap: new Heap([initialPosition], null, heapComparator),
+        positionsHeap: new Heap(heapScore, [initialPosition]),
         discoveredPositions: [],
     };
 
@@ -401,9 +396,8 @@ export const createItemAcceptor = <Item>(
         // Keep a local discovery state object that's a shallow copy of the global one.
         const localDiscoveryState: DiscoveryState<Item> = {
             positionsHeap: new Heap(
-                globalDiscoveryState.positionsHeap.toArray(),
-                null,
-                heapComparator
+                heapScore,
+                globalDiscoveryState.positionsHeap.toArray()
             ),
             discoveredPositions: [...globalDiscoveryState.discoveredPositions],
         };
@@ -411,7 +405,7 @@ export const createItemAcceptor = <Item>(
         const { positionsHeap: localHeap } = localDiscoveryState;
         // Mark the next item as consumable.
         items.push(nextItem);
-        while (localHeap.length > 0) {
+        while (localHeap.length() > 0) {
             // Get the next best candidate position
             const position = localHeap.pop();
             const { state, consumedItems } = position;

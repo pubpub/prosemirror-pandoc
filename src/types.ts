@@ -31,13 +31,17 @@ export interface ProsemirrorMark {
 
 export interface PandocJson {
     "pandoc-api-version": number[];
-    meta: {};
+    meta: {
+        [key: string]: any;
+    };
     blocks: {}[];
 }
 export interface Doc {
     type: "Doc";
     blocks: Block[];
-    meta: {};
+    meta: {
+        [key: string]: MetaValue;
+    };
 }
 
 export type Alignment =
@@ -334,6 +338,45 @@ export interface Span {
     content: Inline[];
 }
 
+/* Meta types */
+
+export interface MetaMap {
+    type: "MetaMap";
+    values: { [key: string]: MetaValue };
+}
+
+export interface MetaList {
+    type: "MetaList";
+    content: MetaValue[];
+}
+
+export interface MetaBool {
+    type: "MetaBool";
+    content: boolean;
+}
+
+export interface MetaString {
+    type: "MetaString";
+    content: string;
+}
+export interface MetaInlines {
+    type: "MetaInlines";
+    content: Inline[];
+}
+
+export interface MetaBlocks {
+    type: "MetaBlocks";
+    content: Block[];
+}
+
+export type MetaValue =
+    | MetaMap
+    | MetaList
+    | MetaBool
+    | MetaString
+    | MetaInlines
+    | MetaBlocks;
+
 export type Inline =
     | Str
     | Emph
@@ -355,7 +398,7 @@ export type Inline =
     | Note
     | Span;
 
-export type PandocNode = Doc | Block | Inline;
+export type PandocNode = Doc | Block | Inline | MetaValue;
 
 export const PANDOC_NODE_TYPES = [
     "BlockQuote",

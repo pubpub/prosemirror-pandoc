@@ -2,8 +2,9 @@
     "compilerOptions": {
         "allowJs": true,
         "downlevelIteration": true,
+        "esModuleInterop": true,
         "outDir": "dist",
-        "lib": ["es6", "dom"]
+        "lib": ["es6", "dom"],
     },
     "include": ["./**/*.ts"],
     "exclude": ["node_modules"]

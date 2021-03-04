@@ -72,3 +72,19 @@ export const flatten = <T>(input: any): T[] => {
         [] as T[]
     ) as T[];
 };
+
+export const getQuoteChar = (
+    single: boolean,
+    opening: boolean,
+    smart: boolean
+) => {
+    if (smart) {
+        if (single) {
+            return opening ? "‘" : "’";
+        } else {
+            return opening ? "“" : "”";
+        }
+    } else {
+        return single ? "'" : '"';
+    }
+};

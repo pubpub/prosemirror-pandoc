@@ -6,4 +6,6 @@ export { fromPandoc } from "./transform/fromPandoc";
 export { buildRuleset } from "./transform/transformer";
 export { emitPandocJson } from "./emit";
 export { parsePandocJson } from "./parse";
-export { callPandoc } from "./util";
+export { metaValueToString, metaValueToJsonSerializable } from "./meta";
+export { setPandocApiVersion } from "./config";
+export { callPandoc, callPandocWithFile } from "./util";

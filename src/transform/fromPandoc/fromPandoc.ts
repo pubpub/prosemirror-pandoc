@@ -68,6 +68,7 @@ export const fromPandoc = (
     const context = {
         rules: rules.fromPandoc,
         resource: config.resource || (x => x),
+        useSmartQuotes: config.useSmartQuotes || false,
         count: makeCounter(),
         transform: (element, marks = []) =>
             fromPandocInner(element, context, marks),
@@ -79,7 +80,8 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    return prosemirrorFluent(
-        nodesWithMarks.map(node => heal(node, rules.prosemirrorSchema))
+    const healed = nodesWithMarks.map(node =>
+        heal(node, rules.prosemirrorSchema)
     );
+    return prosemirrorFluent(healed);
 };

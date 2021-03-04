@@ -10,7 +10,7 @@ import {
     RawBlock,
     RawInline,
 } from "../types";
-import { flatten } from "./util";
+import { flatten, getQuoteChar } from "./util";
 
 /*
  * A transformer that turns Pandoc root-level documents into Prosemirror ones.
@@ -192,6 +192,27 @@ export const bareLeafTransformer = (pdNodeName, pmNodeName) => {
  */
 export const pandocPassThroughTransformer = (node, { transform }) => {
     return transform(node.content).asArray();
+};
+
+/**
+ * A one-way transformer that converts Pandoc's Quoted inline elements to quoted text.
+ */
+export const pandocQuotedTransformer = (
+    node,
+    { transform, useSmartQuotes }
+) => {
+    const isSingleQuote = node.quoteType === "SingleQuote";
+    return [
+        {
+            type: "text",
+            text: getQuoteChar(isSingleQuote, true, useSmartQuotes),
+        },
+        ...transform(node.content).asArray(),
+        {
+            type: "text",
+            text: getQuoteChar(isSingleQuote, false, useSmartQuotes),
+        },
+    ];
 };
 
 /**

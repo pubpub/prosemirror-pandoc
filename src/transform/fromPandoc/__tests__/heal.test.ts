@@ -4,7 +4,7 @@ import * as prosemirrorSchema from "../../../example/schema";
 import { ProsemirrorSchema } from "../../../types";
 import { getNaiveTokenList, healNaiveTokenList, Token, heal } from "../heal";
 
-const toyProsemirrorSchmea: ProsemirrorSchema = {
+const toyProsemirrorSchema: ProsemirrorSchema = {
     nodes: {
         A: {
             defining: true,
@@ -74,7 +74,7 @@ describe("healNaiveTokenList", () => {
                             },
                         ],
                     }),
-                    toyProsemirrorSchmea
+                    toyProsemirrorSchema
                 )
             )
         ).toEqual(
@@ -88,7 +88,7 @@ describe("healNaiveTokenList", () => {
             content: [{ type: "B", content: [{ type: "B" }] }],
         });
         expect(
-            stringify(healNaiveTokenList(naiveList, toyProsemirrorSchmea))
+            stringify(healNaiveTokenList(naiveList, toyProsemirrorSchema))
         ).toEqual("O(A) O*(B) C(B) O(B) C(B) O*(B) C(B) C(A)");
     });
 
@@ -106,7 +106,7 @@ describe("healNaiveTokenList", () => {
             ],
         });
         expect(
-            stringify(healNaiveTokenList(naiveList, toyProsemirrorSchmea))
+            stringify(healNaiveTokenList(naiveList, toyProsemirrorSchema))
         ).toEqual(
             "O(A) O*(B) C(B) O(B) C(B) O*(B) O*(D) C(D) O(C) C(C) O*(D) C(D) C(B) C(A)"
         );

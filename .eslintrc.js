@@ -21,15 +21,18 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module",
-        "project": './tsconfig.json'  
+        "project": './tsconfig.json'
     },
     "rules": {
-        "prettier/prettier": "error",
+        "@typescript-eslint/ban-ts-ignore": 0,
         "@typescript-eslint/camelcase": 0,
-        "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/explicit-function-return-type": 0,
         "@typescript-eslint/indent": 0,
         "@typescript-eslint/no-empty-interface": 0,
+        "@typescript-eslint/no-explicit-any": 0,
+        "@typescript-eslint/no-inferrable-types": 0,
         "@typescript-eslint/no-use-before-define": 0,
+        "no-constant-condition": 0,
+        "prettier/prettier": "error",
     },
 };

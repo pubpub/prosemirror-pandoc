@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-import { acceptNodes, parseExpr } from "../nodeExpression";
+import { acceptItems, parseExpr } from "../nodeExpression";
 
 interface Node {
     type: string;
@@ -393,7 +393,7 @@ describe("parseRegexp", () => {
 
 describe("accepts", () => {
     const acceptExpr = (pattern, nodes) =>
-        acceptNodes(parseExpr(pattern), nodes, (str: string) => (node: Node) =>
+        acceptItems(parseExpr(pattern), nodes, (str: string) => (node: Node) =>
             node.type === str
         );
 

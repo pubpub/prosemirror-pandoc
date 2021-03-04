@@ -6,11 +6,12 @@ import {
 } from "../types";
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
 import {
-    acceptNodes,
-    expressionAcceptsMultiple,
-    parseExpr,
+    acceptItems,
     Expr,
+    expressionAcceptsMultiple,
     IdentifierMatch,
+    parseExpr,
+    quickAcceptChoice,
     willAlwaysMatchSingleIdentifier,
 } from "./nodeExpression";
 
@@ -27,11 +28,13 @@ export interface TransformContext<From, To> {
     rules: Rule<From, To>[];
     resource: (url: string, context?: any) => string;
     count: (nodeType: string) => number;
+    useSmartQuotes: boolean;
     marksMap: Map<To, ProsemirrorMark[]>;
 }
 
 export interface TransformConfig {
     resource?: (input: string, context?: any) => string;
+    useSmartQuotes?: boolean;
 }
 
 type TransformDefinition<From, To> = (
@@ -278,14 +281,18 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
 ): { rule: Rule<From, To>; acceptedCount: number } => {
     for (const rule of rules) {
         const { expression } = rule;
-        const acceptedCount = acceptNodes(expression, nodes, matchTest);
+        const acceptChoiceCount = quickAcceptChoice(expression, nodes);
+        if (acceptChoiceCount > 0) {
+            return { rule, acceptedCount: acceptChoiceCount };
+        }
+        const acceptedCount = acceptItems(expression, nodes, matchTest);
         if (acceptedCount > 0) {
             return { rule, acceptedCount };
         }
     }
     throw new Error(
         `Could not find rule for nodes: ${nodes
-            .map(n => n)
+            .map(n => JSON.stringify(n))
             .slice(0, 3)
             .join(", ") + (nodes.length > 3 ? "..." : "")}`
     );

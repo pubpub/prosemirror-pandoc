@@ -17,7 +17,9 @@ import {
     Code,
     CodeBlock,
     RawInline,
+    RawBlock,
 } from "../types";
+
 import {
     textFromStrSpace,
     textToStrSpace,
@@ -25,6 +27,7 @@ import {
     intersperse,
     flatten,
 } from "../transform/util";
+
 import {
     bareLeafTransformer,
     contentTransformer,
@@ -34,8 +37,9 @@ import {
     nullTransformer,
     pandocPassThroughTransformer,
     tableTransformer,
-    pandocRawTransformer,
+    pandocQuotedTransformer,
 } from "../transform/commonTransformers";
+
 import { buildRuleset, BuildRuleset } from "../transform/transformer";
 
 import {
@@ -196,10 +200,16 @@ rules.fromPandoc("SoftBreak", nullTransformer);
 
 // Stuff we don't have equivalents for
 rules.fromPandoc("Span", pandocPassThroughTransformer);
-rules.fromPandoc("RawBlock", pandocPassThroughTransformer);
-rules.fromPandoc("Quoted", pandocPassThroughTransformer);
 
-rules.fromPandoc("RawBlock", pandocRawTransformer("text"));
+// Anything in quotation marks is its own node, to Pandoc
+rules.fromPandoc("Quoted", pandocQuotedTransformer);
+
+rules.fromPandoc("RawBlock", (node: RawBlock) => {
+    return {
+        type: "paragraph",
+        content: [{ type: "text", text: node.content }],
+    };
+});
 
 rules.fromPandoc("RawInline", (node: RawInline) => {
     const { format, content } = node;

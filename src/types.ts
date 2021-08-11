@@ -175,16 +175,67 @@ export interface HorizontalRule {
     type: "HorizontalRule";
 }
 
-/* Table, with caption, column alignments (required),
- relative column widths (0 = default), column headers (each a list of blocks),
- and rows (each a list of lists of blocks) */
+/* Table */
+
+export interface Caption {
+    type: "Caption";
+    shortCaption?: Inline[];
+    content: Block[];
+}
+
+export type ColSpec = {
+    type: "ColSpec";
+    alignment: Alignment;
+} & ({ width: number } | { defaultWidth: true });
+
+export interface Cell {
+    type: "Cell";
+    attr: Attr;
+    alignment: Alignment;
+    rowSpan: number;
+    colSpan: number;
+    content: Block[];
+}
+
+export interface Row {
+    type: "Row";
+    attr: Attr;
+    cells: Cell[];
+}
+
+export interface TableHead {
+    type: "TableHead";
+    attr: Attr;
+    rows: Row[];
+}
+
+export interface TableFoot {
+    type: "TableFoot";
+    attr: Attr;
+    rows: Row[];
+}
+
+export interface TableBody {
+    type: "TableBody";
+    attr: Attr;
+    rowHeadColumns: number;
+    headRows: Row[];
+    bodyRows: Row[];
+}
+
 export interface Table {
     type: "Table";
-    caption: Inline[];
-    alignments: Alignment[];
-    columnWidths: number[];
-    headers: Block[][];
-    cells: Block[][][];
+    attr: Attr;
+    caption: Caption;
+    colSpecs: ColSpec[];
+    head: TableHead;
+    bodies: TableBody[];
+    foot: TableFoot;
+}
+
+export interface TableRow {
+    attr: Attr;
+    rowHeadColumns: number;
 }
 
 /* Generic block container with attributes */
@@ -226,6 +277,12 @@ export interface Str {
 /* Emphasized text (list of inlines) */
 export interface Emph {
     type: "Emph";
+    content: Inline[];
+}
+
+/* Underlined text (list of inlines) */
+export interface Underline {
+    type: "Underline";
     content: Inline[];
 }
 
@@ -377,14 +434,18 @@ export type MetaValue =
     | MetaInlines
     | MetaBlocks;
 
-export type Inline =
-    | Str
+export type SimpleInline =
     | Emph
+    | Underline
     | Strong
     | Strikeout
     | Superscript
     | Subscript
-    | SmallCaps
+    | SmallCaps;
+
+export type Inline =
+    | Str
+    | SimpleInline
     | Quoted
     | Cite
     | Code

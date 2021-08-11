@@ -4,14 +4,16 @@ import {
     Block,
     BlockQuote,
     BulletList,
+    Caption,
+    Cell,
     CitationMode,
     Cite,
     Code,
     CodeBlock,
+    ColSpec,
     DefinitionList,
     Div,
     Doc,
-    Emph,
     Format,
     Header,
     Image,
@@ -39,14 +41,14 @@ import {
     QuoteType,
     RawBlock,
     RawInline,
-    SmallCaps,
+    Row,
+    SimpleInline,
     Span,
     Str,
-    Strikeout,
-    Strong,
-    Subscript,
-    Superscript,
     Table,
+    TableBody,
+    TableFoot,
+    TableHead,
     Target,
 } from "./types";
 
@@ -107,14 +109,8 @@ const parseSimpleInline = (
     n: {
         c: any[];
     },
-    nodeType:
-        | "Emph"
-        | "Strong"
-        | "Strikeout"
-        | "Superscript"
-        | "Subscript"
-        | "SmallCaps"
-): Emph | Strong | Strikeout | Superscript | Subscript | SmallCaps => {
+    nodeType: SimpleInline["type"]
+): SimpleInline => {
     const inline = n.c;
     return {
         type: nodeType,
@@ -360,19 +356,93 @@ const parseDiv = (n: { c: [any, any[]] }): Div => {
     };
 };
 
-const parseTable = (n: {
-    c: [any[], any[], number[], any[][], any[][][]];
-}): Table => {
-    const [caption, alignments, columnWidths, headers, cells] = n.c;
+const parseCell = (n: [any, any, any, any, any[]]): Cell => {
+    const [attr, alignment, rowSpan, colSpan, blocks] = n;
+    return {
+        type: "Cell",
+        attr: unwrapAttr(attr),
+        alignment: unwrapEnum<Alignment>(alignment),
+        rowSpan,
+        colSpan,
+        content: blocks.map(parseBlock),
+    };
+};
+
+const parseRow = (n: [any, any[]]): Row => {
+    const [attr, cells] = n;
+    return {
+        type: "Row",
+        attr: unwrapAttr(attr),
+        cells: cells.map(parseCell),
+    };
+};
+
+const parseTableHead = (n: [any, any[]]): TableHead => {
+    const [attr, rows] = n;
+    return {
+        type: "TableHead",
+        attr: unwrapAttr(attr),
+        rows: rows.map(parseRow),
+    };
+};
+
+const parseTableFoot = (n: [any, any[]]): TableFoot => {
+    const [attr, rows] = n;
+    return {
+        type: "TableFoot",
+        attr: unwrapAttr(attr),
+        rows: rows.map(parseRow),
+    };
+};
+
+const parseTableBody = (n: [any, any, any[], any[]]): TableBody => {
+    const [attr, rowHeadColumns, head, body] = n;
+    return {
+        type: "TableBody",
+        rowHeadColumns,
+        attr: unwrapAttr(attr),
+        headRows: head.map(parseRow),
+        bodyRows: body.map(parseRow),
+    };
+};
+
+const parseColSpec = (n: [any, any]): ColSpec => {
+    const [alignment, colWidth] = n;
+    const base = {
+        type: "ColSpec" as const,
+        alignment: unwrapEnum<Alignment>(alignment),
+    };
+    if (colWidth.t === "ColWidthDefault") {
+        return { ...base, defaultWidth: true };
+    }
+    return { ...base, width: colWidth.c };
+};
+
+const parseCaption = (n: [null | any[], any[]]): Caption => {
+    const [shortCaption, content] = n;
+    const baseCaption: Caption = {
+        type: "Caption",
+        content: content.map(parseBlock),
+    };
+    if (shortCaption) {
+        return {
+            ...baseCaption,
+            shortCaption: shortCaption.map(parseInline),
+        };
+    }
+    return baseCaption;
+};
+
+const parseTable = (n: { c: [any, any, any[], any, any[], any] }): Table => {
+    const [attr, caption, colSpecs, head, bodies, foot] = n.c;
     return {
         type: "Table",
-        caption: caption.map(parseInline),
-        alignments: alignments.map(alignment =>
-            unwrapEnum<Alignment>(alignment)
-        ),
-        columnWidths,
-        headers: headers.map(blocks => blocks.map(parseBlock)),
-        cells: cells.map(row => row.map(cell => cell.map(parseBlock))),
+        attr: unwrapAttr(attr),
+        caption: parseCaption(caption),
+        colSpecs: colSpecs.map(parseColSpec),
+        head: parseTableHead(head),
+        bodies: bodies.map(parseTableBody),
+        foot: parseTableFoot(foot),
     };
 };
 

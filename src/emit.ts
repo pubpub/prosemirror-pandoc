@@ -38,6 +38,7 @@ import {
     RawBlock,
     RawInline,
     Row,
+    SimpleInline,
     SmallCaps,
     Span,
     Str,
@@ -95,9 +96,7 @@ const emitStr = (str: Str) => {
     };
 };
 
-const emitSimpleInline = (
-    node: Emph | Strong | Strikeout | Superscript | Subscript | SmallCaps
-) => {
+const emitSimpleInline = (node: SimpleInline) => {
     const { type, content } = node;
     return {
         t: type,
@@ -203,6 +202,7 @@ export const emitInline = (n: Inline): { t: string; c?: string | any[] } => {
             return emitStr(n);
         case "Emph":
         case "Strong":
+        case "Underline":
         case "Strikeout":
         case "Superscript":
         case "Subscript":

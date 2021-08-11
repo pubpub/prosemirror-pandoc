@@ -223,6 +223,7 @@ export const parseInline = (n: { t: Inline["type"]; c: any }): Inline => {
             return parseStr(n);
         case "Emph":
         case "Strong":
+        case "Underline":
         case "Strikeout":
         case "Superscript":
         case "Subscript":

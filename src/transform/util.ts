@@ -1,20 +1,11 @@
 import { Attr, Str, Space } from "../types";
 
-type CreateAttr =
-    | ((properties: {}) => Attr)
-    | ((identifier: string, classes?: string[], properties?: {}) => Attr);
-
-export const createAttr: CreateAttr = (...args): Attr => {
-    if (args.length === 1) {
-        return {
-            identifier: "",
-            classes: [],
-            properties: args[0],
-        };
-    } else {
-        const [identifier, classes = [], properties = {}] = args;
-        return { identifier, classes, properties };
-    }
+export const createAttr = (
+    identifier: string,
+    classes?: string[],
+    properties?: Record<string, any>
+): Attr => {
+    return { identifier, classes, properties };
 };
 
 export const textFromStrSpace = (nodes: (Str | Space)[]) => {
@@ -46,7 +37,7 @@ export const intersperse = (
 
 export const textToStrSpace = (text: string): (Str | Space)[] =>
     intersperse(
-        text.split(" ").map(word => ({ type: "Str", content: word })),
+        text.split(" ").map((word) => ({ type: "Str", content: word })),
         () => ({ type: "Space" })
     );
 
@@ -62,15 +53,12 @@ export const flatten = <T>(input: any): T[] => {
     if (!Array.isArray(input)) {
         return [input];
     }
-    return input.reduce(
-        (arr: T[], next: T | T[]) => {
-            if (Array.isArray(next)) {
-                return [...arr, ...flatten(next)];
-            }
-            return [...arr, next];
-        },
-        [] as T[]
-    ) as T[];
+    return input.reduce((arr: T[], next: T | T[]) => {
+        if (Array.isArray(next)) {
+            return [...arr, ...flatten(next)];
+        }
+        return [...arr, next];
+    }, [] as T[]) as T[];
 };
 
 export const getQuoteChar = (

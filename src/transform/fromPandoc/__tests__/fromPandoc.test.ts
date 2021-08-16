@@ -171,7 +171,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        [blockOne, blockTwo, blockThree].forEach(block =>
+        [blockOne, blockTwo, blockThree].forEach((block) =>
             expect(fromPandoc(block, rules).asNode()).toEqual({
                 type: "paragraph",
                 content: [{ type: "text", text: "Hello world!" }],
@@ -847,9 +847,9 @@ describe("fromPandoc", () => {
         expect(
             fromPandoc(
                 // This is incorrectly typed -- that's okay
-                // @ts-ignore
                 {
                     type: "Strong",
+                    // @ts-ignore
                     content: [{ type: "HorizontalRule" }],
                 },
                 rules

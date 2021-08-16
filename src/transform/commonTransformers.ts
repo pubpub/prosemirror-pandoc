@@ -63,13 +63,13 @@ export const contentTransformer = (pdNodeName, pmNodeName) => {
  */
 export const textTransformer = (pdNodeName, pmNodeName) => {
     return {
-        fromPandoc: node => {
+        fromPandoc: (node) => {
             return {
                 type: pmNodeName,
                 text: node.content,
             };
         },
-        fromProsemirror: node => {
+        fromProsemirror: (node) => {
             return {
                 type: pdNodeName,
                 content: node.content.join(""),
@@ -82,92 +82,90 @@ export const textTransformer = (pdNodeName, pmNodeName) => {
  * A transformer appropriate for converting between Pandoc OrderedLists and BulletLists and the
  * equivalent types in a Prosemirror schema -- basically, anything like an <ol> or a <ul>.
  */
-export const listTransformer = (
-    pmInnerNodeName: string,
-    processListItem: <N>(n: N) => N = x => x
-) => (pdNodeName, pmNodeName) => {
-    return {
-        fromPandoc: (node, { transform }) => {
-            const content = node.content.map(blocks => {
-                return processListItem({
-                    type: pmInnerNodeName,
-                    content: transform(blocks).asArray(),
+export const listTransformer =
+    (pmInnerNodeName: string, processListItem: <N>(n: N) => N = (x) => x) =>
+    (pdNodeName, pmNodeName) => {
+        return {
+            fromPandoc: (node, { transform }) => {
+                const content = node.content.map((blocks) => {
+                    return processListItem({
+                        type: pmInnerNodeName,
+                        content: transform(blocks).asArray(),
+                    });
                 });
-            });
-            const hasOrder =
-                node.listAttributes &&
-                typeof node.listAttributes.startNumber === "number";
-            const attrs = hasOrder
-                ? { order: node.listAttributes.startNumber }
-                : {};
-            return {
-                type: pmNodeName,
-                attrs,
-                content,
-            };
-        },
-        fromProsemirror: (node, { transform }) => {
-            const content = node.content.map(listItem =>
-                transform(listItem).asArray()
-            );
-            const additionalAttributes =
-                typeof node.attrs.order === "number"
-                    ? {
-                          listAttributes: {
-                              startNumber: node.attrs.order,
-                              listNumberStyle: "DefaultStyle",
-                              listNumberDelim: "DefaultDelim",
-                          },
-                      }
+                const hasOrder =
+                    node.listAttributes &&
+                    typeof node.listAttributes.startNumber === "number";
+                const attrs = hasOrder
+                    ? { order: node.listAttributes.startNumber }
                     : {};
-            return {
-                type: pdNodeName,
-                content,
-                ...additionalAttributes,
-            };
-        },
+                return {
+                    type: pmNodeName,
+                    attrs,
+                    content,
+                };
+            },
+            fromProsemirror: (node, { transform }) => {
+                const content = node.content.map((listItem) =>
+                    transform(listItem).asArray()
+                );
+                const additionalAttributes =
+                    typeof node.attrs.order === "number"
+                        ? {
+                              listAttributes: {
+                                  startNumber: node.attrs.order,
+                                  listNumberStyle: "DefaultStyle",
+                                  listNumberDelim: "DefaultDelim",
+                              },
+                          }
+                        : {};
+                return {
+                    type: pdNodeName,
+                    content,
+                    ...additionalAttributes,
+                };
+            },
+        };
     };
-};
 
 /**
  * A one-way transformer that takes the cursed DefinitionList and turns it into an unordered list.
  */
-export const definitionListTransformer = (pmOuterNodeName, pmInnerNodeName) => (
-    node: DefinitionList,
-    { transform }
-) => {
-    const content = node.entries.map(value => {
-        const { term, definitions } = value;
-        const blocks = flatten<Block>(definitions);
-        const firstBlock = blocks[0];
-        let prependableBlock: Para | Plain;
-        if (
-            firstBlock &&
-            (firstBlock.type === "Para" || firstBlock.type === "Plain")
-        ) {
-            prependableBlock = firstBlock as (Para | Plain);
-        } else {
-            prependableBlock = { type: "Para", content: [] };
-            blocks.unshift(prependableBlock);
-        }
-        prependableBlock.content.unshift({
-            type: "Strong",
-            content: [
-                ...term,
-                { type: "Str", content: ":" },
-                { type: "Space" },
-            ],
+export const definitionListTransformer =
+    (pmOuterNodeName, pmInnerNodeName) =>
+    (node: DefinitionList, { transform }) => {
+        const content = node.entries.map((value) => {
+            const { term, definitions } = value;
+            const blocks = flatten<Block>(definitions);
+            const firstBlock = blocks[0];
+            let prependableBlock: Para | Plain;
+            if (
+                firstBlock &&
+                (firstBlock.type === "Para" || firstBlock.type === "Plain")
+            ) {
+                prependableBlock = firstBlock as Para | Plain;
+            } else {
+                prependableBlock = { type: "Para", content: [] };
+                blocks.unshift(prependableBlock);
+            }
+            prependableBlock.content.unshift({
+                type: "Strong",
+                content: [
+                    ...term,
+                    { type: "Str", content: ":" },
+                    { type: "Space" },
+                ],
+            });
+            return {
+                type: pmInnerNodeName,
+                content: transform(blocks).asArray(),
+            };
         });
         return {
-            type: pmInnerNodeName,
-            content: transform(blocks).asArray(),
+            type: pmOuterNodeName,
+            content,
         };
-    });
-    return {
-        type: pmOuterNodeName,
-        content,
     };
-};
 
 /**
  * A transformer that does type -> type conversion for simple leaf nodes
@@ -224,27 +222,21 @@ export const nullTransformer = () => [];
  * A transformer that handles tables as specified by the popular prosemirror-tables package.
  */
 export const tableTransformer = {
-    assertProsemirrorHandlerFor: [
-        "table",
-        "table_row",
-        "table_header",
-        "table_cell",
-    ],
     fromPandoc: (node: Table, { transform }) => {
         const { headers, cells, caption } = node;
         const pmHeaderNode = {
             type: "table_row",
-            content: headers.map(pdHeaderBlocks => {
+            content: headers.map((pdHeaderBlocks) => {
                 return {
                     type: "table_header",
                     content: transform(pdHeaderBlocks).asArray(),
                 };
             }),
         };
-        const pmRowNodes = cells.map(row => {
+        const pmRowNodes = cells.map((row) => {
             return {
                 type: "table_row",
-                content: row.map(cellBlock => {
+                content: row.map((cellBlock) => {
                     return {
                         type: "table_cell",
                         content: transform(cellBlock).asArray(),
@@ -265,18 +257,18 @@ export const tableTransformer = {
         return table;
     },
     fromProsemirror: (node: ProsemirrorNode, { transform }) => {
-        const blocks: Block[][][] = node.content.map(row => {
-            return row.content.map(cell =>
+        const blocks: Block[][][] = node.content.map((row) => {
+            return row.content.map((cell) =>
                 transform(cell.content).asPandocBlock()
             );
         });
         const [headers, ...cells] = blocks;
         const columnWidths = headers.map(() => 0);
         const alignments: Alignment[] = headers.map(
-            () => "AlignDefault" as "AlignDefault"
+            () => "AlignDefault" as const
         );
         return {
-            type: "Table" as "Table", // That's Typescript, baby
+            type: "Table" as const, // That's Typescript, baby
             headers,
             cells,
             columnWidths,

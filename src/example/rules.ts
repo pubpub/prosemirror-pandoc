@@ -33,7 +33,6 @@ import {
     listTransformer,
     nullTransformer,
     pandocPassThroughTransformer,
-    tableTransformer,
     pandocQuotedTransformer,
 } from "../transform/commonTransformers";
 
@@ -45,6 +44,7 @@ import {
     pandocBlocksToHtmlString,
     htmlStringToPandocBlocks,
 } from "./util";
+import { tableFromPandoc } from "../transform/tableTransformers";
 
 const rules = buildRuleset({
     nodes,
@@ -226,7 +226,7 @@ rules.fromPandoc("RawInline", (node: RawInline) => {
 });
 
 // Tables
-rules.transform("Table", "table", tableTransformer);
+rules.fromPandoc("Table", tableFromPandoc);
 
 // Equations
 rules.fromPandoc("Math", (node: Math) => {

@@ -23,7 +23,7 @@ export type BidiTransformer<
     fromProsemirror: Transformer<PmElem, PdNode>;
 };
 
-export type WrappedTransformer<
+export type WrappedBidiTransformer<
     PdNode extends PandocNode = PandocNode,
     PmElem extends ProsemirrorElement = ProsemirrorElement
 > =

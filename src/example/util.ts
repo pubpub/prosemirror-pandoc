@@ -40,9 +40,11 @@ export const htmlStringToPandocInline = (htmlString: string): Inline[] => {
     }
     const pandocAst = getPandocDocForHtmlString(htmlString);
     return flatten(
-        (pandocAst.blocks.filter(
-            block => block.type === "Plain" || block.type === "Para"
-        ) as (Plain | Para)[]).map(block => block.content)
+        (
+            pandocAst.blocks.filter(
+                (block) => block.type === "Plain" || block.type === "Para"
+            ) as (Plain | Para)[]
+        ).map((block) => block.content)
     );
 };
 

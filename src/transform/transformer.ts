@@ -1,9 +1,11 @@
 import {
+    PANDOC_NODE_TYPES,
     PandocNode,
     ProsemirrorSchema,
-    PANDOC_NODE_TYPES,
     ProsemirrorNode,
     ProsemirrorElement,
+    Inline,
+    Block,
 } from "../types";
 import { InferPandocNodeType } from "./infer";
 import {
@@ -20,14 +22,14 @@ import {
     RuleSet,
     TransformContext,
     Transformer,
-    WrappedTransformer,
+    WrappedBidiTransformer,
 } from "./types";
 
 const unwrapTransformer = <
     PdNode extends PandocNode,
     PmNode extends ProsemirrorNode
 >(
-    wt: WrappedTransformer<PandocNode, ProsemirrorNode>,
+    wt: WrappedBidiTransformer<PandocNode, ProsemirrorNode>,
     pdPattern: string,
     pmPattern: string
 ) => {
@@ -91,7 +93,7 @@ export const buildRuleset = (prosemirrorSchema: ProsemirrorSchema) => {
     const transform = <PdPattern extends string, PmPattern extends string>(
         pdPattern: PdPattern,
         pmPattern: PmPattern,
-        wrappedTransformer: WrappedTransformer<
+        wrappedTransformer: WrappedBidiTransformer<
             InferPandocNodeType<PdPattern>,
             ProsemirrorNode
         >
@@ -161,7 +163,7 @@ const createBidirectionalRules = <
 >(
     pdPattern: string,
     pmPattern: string,
-    wrappedTransformer: WrappedTransformer<PdNode, PmElem>
+    wrappedTransformer: WrappedBidiTransformer<PdNode, PmElem>
 ) => {
     const {
         pdExpr,
@@ -186,25 +188,25 @@ const createRule = <From, To>(
     };
 };
 
-const createPandocToMarkRule = <From, To>(
+const createPandocToMarkRule = <
+    From extends PandocNode & { content: Block[] | Inline[] }
+>(
     expression: Expr,
     targetMark: string,
     getMarkAttrs: (
         node: From,
-        ctx: TransformContext<From, To>
+        ctx: TransformContext<From, ProsemirrorNode>
     ) => null | Record<string, any>
-): Rule<From, To> => {
-    const transform = (pandocNode, context) => {
+): Rule<From, ProsemirrorNode> => {
+    return createRule(expression, (pandocNode, context) => {
         const { transform } = context;
         const attrs = getMarkAttrs(pandocNode, context);
-        return transform(pandocNode.content, [
-            {
-                type: targetMark,
-                ...(attrs && Object.keys(attrs).length > 0 ? { attrs } : {}),
-            },
-        ]);
-    };
-    return createRule(expression, transform);
+        const mark = {
+            type: targetMark,
+            ...(attrs && Object.keys(attrs).length > 0 ? { attrs } : {}),
+        };
+        return transform(pandocNode.content, { marks: [mark] });
+    });
 };
 
 export const getTransformRuleForElements = <

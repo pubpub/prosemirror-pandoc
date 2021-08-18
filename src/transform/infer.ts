@@ -41,5 +41,3 @@ type ResolveIdentifier<S> = S extends PandocNode["type"]
 export type InferPandocNodeType<T extends string> = Resolve<T> extends never
     ? PandocNode
     : Resolve<T>;
-
-type Z = InferPandocNodeType<"Header">;

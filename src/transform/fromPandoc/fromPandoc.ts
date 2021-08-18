@@ -68,7 +68,7 @@ export const fromPandoc = (
         resource = (x) => x,
         useSmartQuotes = false,
         prosemirrorTextAlignAttr = null,
-        docWidth = 1000,
+        prosemirrorDocWidth = 1000,
     } = config;
     const context: TransformContext<PandocNode, ProsemirrorNode> = {
         rules: rules.fromPandoc,
@@ -79,10 +79,10 @@ export const fromPandoc = (
         count: makeCounter(),
         transform: (
             element,
-            { marks, context: parentContext } = { marks: [], context: {} }
+            { marks = [], context: parentContext = {} } = {}
         ) => fromPandocInner(element, { ...context, ...parentContext }, marks),
         marksMap: new Map(),
-        docWidth,
+        prosemirrorDocWidth,
         textAlign: "left",
     };
     const nodes = context.transform(elementOrArray);

@@ -219,11 +219,49 @@ Array [
       Object {
         "content": Array [
           Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 240,
+            },
+            "content": Array [],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 560,
+            },
             "content": Array [
               Object {
                 "content": Array [
                   Object {
-                    "text": "Apple",
+                    "text": "He-Man",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 240,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Role",
                     "type": "text",
                   },
                 ],
@@ -233,11 +271,40 @@ Array [
             "type": "table_header",
           },
           Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 560,
+            },
             "content": Array [
               Object {
                 "content": Array [
                   Object {
-                    "text": "Rating",
+                    "text": "Hero",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 240,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Weapon",
                     "type": "text",
                   },
                 ],
@@ -246,31 +313,17 @@ Array [
             ],
             "type": "table_header",
           },
-        ],
-        "type": "table_row",
-      },
-      Object {
-        "content": Array [
           Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 560,
+            },
             "content": Array [
               Object {
                 "content": Array [
                   Object {
-                    "text": "RedDelicious",
-                    "type": "text",
-                  },
-                ],
-                "type": "paragraph",
-              },
-            ],
-            "type": "table_cell",
-          },
-          Object {
-            "content": Array [
-              Object {
-                "content": Array [
-                  Object {
-                    "text": "Terrible",
+                    "text": "Power Sword",
                     "type": "text",
                   },
                 ],
@@ -285,91 +338,35 @@ Array [
       Object {
         "content": Array [
           Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 240,
+            },
             "content": Array [
               Object {
                 "content": Array [
                   Object {
-                    "text": "GrannySmith",
+                    "text": "Dark secret",
                     "type": "text",
                   },
                 ],
                 "type": "paragraph",
               },
             ],
-            "type": "table_cell",
+            "type": "table_header",
           },
           Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+              "width": 560,
+            },
             "content": Array [
               Object {
                 "content": Array [
                   Object {
-                    "text": "Bad",
-                    "type": "text",
-                  },
-                ],
-                "type": "paragraph",
-              },
-            ],
-            "type": "table_cell",
-          },
-        ],
-        "type": "table_row",
-      },
-      Object {
-        "content": Array [
-          Object {
-            "content": Array [
-              Object {
-                "content": Array [
-                  Object {
-                    "text": "Jazz",
-                    "type": "text",
-                  },
-                ],
-                "type": "paragraph",
-              },
-            ],
-            "type": "table_cell",
-          },
-          Object {
-            "content": Array [
-              Object {
-                "content": Array [
-                  Object {
-                    "text": "PrettyGood",
-                    "type": "text",
-                  },
-                ],
-                "type": "paragraph",
-              },
-            ],
-            "type": "table_cell",
-          },
-        ],
-        "type": "table_row",
-      },
-      Object {
-        "content": Array [
-          Object {
-            "content": Array [
-              Object {
-                "content": Array [
-                  Object {
-                    "text": "Honeycrisp",
-                    "type": "text",
-                  },
-                ],
-                "type": "paragraph",
-              },
-            ],
-            "type": "table_cell",
-          },
-          Object {
-            "content": Array [
-              Object {
-                "content": Array [
-                  Object {
-                    "text": "Perfect",
+                    "text": "Expert florist",
                     "type": "text",
                   },
                 ],
@@ -387,7 +384,394 @@ Array [
   Object {
     "content": Array [
       Object {
-        "text": "Caption!",
+        "text": "He-Man and Skeletor facts",
+        "type": "text",
+      },
+    ],
+    "type": "paragraph",
+  },
+]
+`;
+
+exports[`fromPandoc transforms a Table with rowSpans and colSpans > 1 1`] = `
+Array [
+  Object {
+    "content": Array [
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Bob",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Alice",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 2,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Favorite",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Color",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Blue",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Purple",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Flavor",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Banana",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Chocolate",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 2,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Least Favorite",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Color",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Yellow",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Pink",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Flavor",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Mint",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "Walnut",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+      Object {
+        "content": Array [
+          Object {
+            "attrs": Object {
+              "colspan": 4,
+              "rowspan": 1,
+            },
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "text": "This is just some stuff at the bottom of the table.",
+                    "type": "text",
+                  },
+                ],
+                "type": "paragraph",
+              },
+            ],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [],
+            "type": "table_header",
+          },
+          Object {
+            "attrs": Object {
+              "colspan": 1,
+              "rowspan": 1,
+            },
+            "content": Array [],
+            "type": "table_cell",
+          },
+        ],
+        "type": "table_row",
+      },
+    ],
+    "type": "table",
+  },
+  Object {
+    "content": Array [
+      Object {
+        "text": "Favorite and Least Favorite Things",
         "type": "text",
       },
     ],

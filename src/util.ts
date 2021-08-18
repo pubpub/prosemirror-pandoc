@@ -1,7 +1,7 @@
 import { execSync, spawnSync } from "child_process";
 
 import { parsePandocJson } from "./parse";
-import { RuleSet } from "./transform/transformer";
+import { RuleSet } from "./transform/types";
 import { fromPandoc } from "./transform/fromPandoc/fromPandoc";
 import { PandocJson } from "./types";
 
@@ -36,7 +36,7 @@ export const callPandocWithFile = (
 
 export const loadAndTransformFromPandoc = (
     sourcePath: string,
-    rules: RuleSet<any, any>
+    rules: RuleSet
 ) => {
     const pandocResult = callPandocWithFile(sourcePath);
     let json: PandocJson;

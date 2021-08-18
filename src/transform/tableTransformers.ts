@@ -32,8 +32,15 @@ const resolveParentContextFromTextAlignment = (
     return {};
 };
 
-const resolveCellAttrs = (cell: Cell, colSpec: ColSpec, docWidth: number) => {
-    const width = "width" in colSpec ? { width: colSpec.width * docWidth } : {};
+const resolveCellAttrs = (
+    cell: Cell,
+    colSpec: ColSpec,
+    prosemirrorDocWidth: number
+) => {
+    const width =
+        "width" in colSpec
+            ? { width: colSpec.width * prosemirrorDocWidth }
+            : {};
     return {
         ...width,
         rowspan: cell.rowSpan,
@@ -50,7 +57,7 @@ const cellFromPandoc = (
     const parentContext = resolveParentContextFromTextAlignment(colSpec);
     return {
         type: isHead ? "table_header" : "table_cell",
-        attrs: resolveCellAttrs(cell, colSpec, context.docWidth),
+        attrs: resolveCellAttrs(cell, colSpec, context.prosemirrorDocWidth),
         content: context
             .transform(cell.content, { context: parentContext })
             .asArray(),

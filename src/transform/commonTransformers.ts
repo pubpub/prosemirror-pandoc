@@ -3,9 +3,7 @@ import {
     DefinitionList,
     Para,
     Plain,
-    Table,
     ProsemirrorNode,
-    Alignment,
     Doc,
     RawBlock,
     RawInline,
@@ -217,66 +215,6 @@ export const pandocQuotedTransformer = (
  * A transformer that returns an empty array
  */
 export const nullTransformer = () => [];
-
-/**
- * A transformer that handles tables as specified by the popular prosemirror-tables package.
- */
-export const tableTransformer = {
-    fromPandoc: (node: Table, { transform }) => {
-        const { headers, cells, caption } = node;
-        const pmHeaderNode = {
-            type: "table_row",
-            content: headers.map((pdHeaderBlocks) => {
-                return {
-                    type: "table_header",
-                    content: transform(pdHeaderBlocks).asArray(),
-                };
-            }),
-        };
-        const pmRowNodes = cells.map((row) => {
-            return {
-                type: "table_row",
-                content: row.map((cellBlock) => {
-                    return {
-                        type: "table_cell",
-                        content: transform(cellBlock).asArray(),
-                    };
-                }),
-            };
-        });
-        const table = {
-            type: "table",
-            content: [pmHeaderNode, ...pmRowNodes],
-        };
-        if (caption.length > 0) {
-            return [
-                table,
-                { type: "paragraph", content: transform(caption).asArray() },
-            ];
-        }
-        return table;
-    },
-    fromProsemirror: (node: ProsemirrorNode, { transform }) => {
-        const blocks: Block[][][] = node.content.map((row) => {
-            return row.content.map((cell) =>
-                transform(cell.content).asPandocBlock()
-            );
-        });
-        const [headers, ...cells] = blocks;
-        const columnWidths = headers.map(() => 0);
-        const alignments: Alignment[] = headers.map(
-            () => "AlignDefault" as const
-        );
-        return {
-            type: "Table" as const, // That's Typescript, baby
-            headers,
-            cells,
-            columnWidths,
-            alignments,
-            caption: [],
-        };
-    },
-};
 
 /*
  * A transformer that turns a Pandoc RawBlock or RawInline into a paragraph

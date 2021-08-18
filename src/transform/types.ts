@@ -36,7 +36,7 @@ export type WrappedBidiTransformer<
 export type TransformConfig = {
     resource: (input: string, context?: any) => string;
     useSmartQuotes: boolean;
-    docWidth: number;
+    prosemirrorDocWidth: number;
     prosemirrorTextAlignAttr: null | string;
 };
 

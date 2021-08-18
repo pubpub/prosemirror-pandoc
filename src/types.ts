@@ -17,16 +17,23 @@ export type ProsemirrorSchema = {
     marks: { [name: string]: ProsemirrorMarkDefinition };
 };
 
+export type ProsemirrorAttr =
+    | undefined
+    | null
+    | number
+    | string
+    | ProsemirrorAttr[];
+
 export type ProsemirrorNode<Type = string> = {
     type: Type;
     content?: ProsemirrorNode[];
     text?: string;
-    attrs?: { [key: string]: string | number | null | undefined };
+    attrs?: Record<string, ProsemirrorAttr>;
 };
 
 export type ProsemirrorMark<Type = string> = {
     type: Type;
-    attrs?: { [key: string]: string | number | null | undefined };
+    attrs?: Record<string, ProsemirrorAttr>;
 };
 
 export type ProsemirrorElement = ProsemirrorNode | ProsemirrorMark;

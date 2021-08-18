@@ -1,4 +1,5 @@
 import {
+    Block,
     Caption,
     Cell,
     ColSpec,
@@ -6,8 +7,8 @@ import {
     ProsemirrorNode,
     Row,
     Table,
-} from "../types";
-import { TransformContext, TransformParentContext } from "./types";
+} from "../../types";
+import { TransformContext, TransformParentContext } from "../types";
 
 const resolveCaption = (
     caption: Caption,
@@ -34,15 +35,18 @@ const resolveParentContextFromTextAlignment = (
 
 const resolveCellAttrs = (
     cell: Cell,
-    colSpec: ColSpec,
+    colSpecs: ColSpec[],
     prosemirrorDocWidth: number
 ) => {
-    const width =
-        "width" in colSpec
-            ? { width: colSpec.width * prosemirrorDocWidth }
-            : {};
+    const colWidths = colSpecs
+        .map(colSpec => ("width" in colSpec ? colSpec.width : 0))
+        // Subtract 1 from the total width here to account for 1px column dividers
+        .map(percentageWidth => -1 + percentageWidth * prosemirrorDocWidth);
+    const widthAttr = colWidths.some(width => width > 0)
+        ? { colwidth: colWidths }
+        : {};
     return {
-        ...width,
+        ...widthAttr,
         rowspan: cell.rowSpan,
         colspan: cell.colSpan,
     };
@@ -50,16 +54,21 @@ const resolveCellAttrs = (
 
 const cellFromPandoc = (
     cell: Cell,
-    colSpec: ColSpec,
+    colSpecs: ColSpec[],
     isHead: boolean,
     context: TransformContext<PandocNode, ProsemirrorNode>
 ): ProsemirrorNode<"table_cell" | "table_header"> => {
-    const parentContext = resolveParentContextFromTextAlignment(colSpec);
+    const parentContext = resolveParentContextFromTextAlignment(colSpecs[0]);
+    // Don't pass empty content into table_header or table_cell, which expect block+
+    const contentToTransform: Block[] =
+        cell.content.length > 0
+            ? cell.content
+            : [{ type: "Para", content: [] }];
     return {
         type: isHead ? "table_header" : "table_cell",
-        attrs: resolveCellAttrs(cell, colSpec, context.prosemirrorDocWidth),
+        attrs: resolveCellAttrs(cell, colSpecs, context.prosemirrorDocWidth),
         content: context
-            .transform(cell.content, { context: parentContext })
+            .transform(contentToTransform, { context: parentContext })
             .asArray(),
     };
 };
@@ -74,12 +83,17 @@ const rowFromPandoc = (
     return {
         type: "table_row",
         content: row.cells.map((cell, idx) =>
-            cellFromPandoc(cell, colSpecs[idx], idx < headCutoff, context)
+            cellFromPandoc(
+                cell,
+                colSpecs.slice(idx, idx + cell.colSpan),
+                idx < headCutoff,
+                context
+            )
         ),
     };
 };
 
-export const tableFromPandoc = (
+export const pandocTableTransformer = (
     node: Table,
     context: TransformContext<PandocNode, ProsemirrorNode>
 ):
@@ -90,16 +104,14 @@ export const tableFromPandoc = (
     const renderMyRow = (row: Row, headColumns: number | "all") =>
         rowFromPandoc(row, colSpecs, headColumns, context);
 
-    const headRows = head.rows.map((row) => renderMyRow(row, "all"));
+    const headRows = head.rows.map(row => renderMyRow(row, "all"));
     const bodyRows = bodies
-        .map((body) => [
-            ...body.headRows.map((row) => renderMyRow(row, "all")),
-            ...body.bodyRows.map((row) =>
-                renderMyRow(row, body.rowHeadColumns)
-            ),
+        .map(body => [
+            ...body.headRows.map(row => renderMyRow(row, "all")),
+            ...body.bodyRows.map(row => renderMyRow(row, body.rowHeadColumns)),
         ])
         .reduce((a, b) => [...a, ...b]);
-    const footRows = foot.rows.map((row) => renderMyRow(row, 0));
+    const footRows = foot.rows.map(row => renderMyRow(row, 0));
     const prosemirrorCaption = resolveCaption(caption, context);
 
     const table: ProsemirrorNode<"table"> = {

@@ -504,4 +504,5 @@ export const PANDOC_NODE_TYPES = [
     "Subscript",
     "Superscript",
     "Table",
+    "Underline",
 ];

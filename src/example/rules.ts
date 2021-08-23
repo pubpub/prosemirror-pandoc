@@ -196,6 +196,7 @@ rules.fromPandoc("SoftBreak", nullTransformer);
 
 // Stuff we don't have equivalents for
 rules.fromPandoc("Span", pandocPassThroughTransformer);
+rules.fromPandoc("Underline", pandocPassThroughTransformer);
 
 // Anything in quotation marks is its own node, to Pandoc
 rules.fromPandoc("Quoted", pandocQuotedTransformer);

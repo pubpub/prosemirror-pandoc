@@ -1,8 +1,6 @@
 import * as transformUtil from "./transform/util";
 import * as transformers from "./transform/transformers";
 
-console.log("greetings");
-
 export { transformUtil, transformers };
 export { fromPandoc } from "./transform/fromPandoc";
 export { buildRuleset } from "./transform/transformer";

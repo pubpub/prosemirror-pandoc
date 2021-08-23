@@ -39,10 +39,10 @@ const resolveCellAttrs = (
     prosemirrorDocWidth: number
 ) => {
     const colWidths = colSpecs
-        .map(colSpec => ("width" in colSpec ? colSpec.width : 0))
+        .map((colSpec) => ("width" in colSpec ? colSpec.width : 0))
         // Subtract 1 from the total width here to account for 1px column dividers
-        .map(percentageWidth => -1 + percentageWidth * prosemirrorDocWidth);
-    const widthAttr = colWidths.some(width => width > 0)
+        .map((percentageWidth) => -1 + percentageWidth * prosemirrorDocWidth);
+    const widthAttr = colWidths.some((width) => width > 0)
         ? { colwidth: colWidths }
         : {};
     return {
@@ -104,14 +104,16 @@ export const pandocTableTransformer = (
     const renderMyRow = (row: Row, headColumns: number | "all") =>
         rowFromPandoc(row, colSpecs, headColumns, context);
 
-    const headRows = head.rows.map(row => renderMyRow(row, "all"));
+    const headRows = head.rows.map((row) => renderMyRow(row, "all"));
     const bodyRows = bodies
-        .map(body => [
-            ...body.headRows.map(row => renderMyRow(row, "all")),
-            ...body.bodyRows.map(row => renderMyRow(row, body.rowHeadColumns)),
+        .map((body) => [
+            ...body.headRows.map((row) => renderMyRow(row, "all")),
+            ...body.bodyRows.map((row) =>
+                renderMyRow(row, body.rowHeadColumns)
+            ),
         ])
         .reduce((a, b) => [...a, ...b]);
-    const footRows = foot.rows.map(row => renderMyRow(row, 0));
+    const footRows = foot.rows.map((row) => renderMyRow(row, 0));
     const prosemirrorCaption = resolveCaption(caption, context);
 
     const table: ProsemirrorNode<"table"> = {

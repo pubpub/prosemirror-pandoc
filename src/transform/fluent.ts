@@ -10,9 +10,8 @@ type CommonFluent<T> = T & {
     asNode: () => T;
 };
 
-export type ProsemirrorFluent<
-    T extends ProsemirrorNode = ProsemirrorNode
-> = CommonFluent<T>;
+export type ProsemirrorFluent<T extends ProsemirrorNode = ProsemirrorNode> =
+    CommonFluent<T>;
 
 export type PandocFluent<T extends PandocNode = PandocNode> = CommonFluent<T>;
 
@@ -21,7 +20,7 @@ const assignFluent = <T>(
     fluentizer: (target: T | FluentType<T>) => FluentType<T>,
     methods: { [key: string]: (target: any) => any }
 ): FluentType<T> => {
-    Object.keys(methods).forEach(key => {
+    Object.keys(methods).forEach((key) => {
         const method = methods[key];
         Object.defineProperty(target, key, {
             value: () => fluentizer(method(target)),

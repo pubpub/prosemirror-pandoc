@@ -117,7 +117,7 @@ const emitCite = (cite: Cite) => {
     return {
         t: "Cite",
         c: [
-            citations.map(citation => {
+            citations.map((citation) => {
                 const {
                     citationHash,
                     citationId,
@@ -253,7 +253,7 @@ const emitLineBlock = (lineBlock: LineBlock) => {
     const { content } = lineBlock;
     return {
         t: "LineBlock",
-        c: content.map(line => line.map(emitInline)),
+        c: content.map((line) => line.map(emitInline)),
     };
 };
 
@@ -287,7 +287,7 @@ const emitOrderedList = (orderedList: OrderedList) => {
         t: "OrderedList",
         c: [
             wrapListAttributes(listAttributes),
-            content.map(entry => entry.map(emitBlock)),
+            content.map((entry) => entry.map(emitBlock)),
         ],
     };
 };
@@ -296,7 +296,7 @@ const emitBulletList = (bulletList: BulletList) => {
     const { content } = bulletList;
     return {
         t: "BulletList",
-        c: content.map(entry => entry.map(emitBlock)),
+        c: content.map((entry) => entry.map(emitBlock)),
     };
 };
 
@@ -305,11 +305,11 @@ const emitDefinitionList = (definitionList: DefinitionList) => {
     return {
         t: "DefinitionList",
         c: [
-            entries.map(entry => {
+            entries.map((entry) => {
                 const { term, definitions } = entry;
                 return [
                     term.map(emitInline),
-                    definitions.map(definition => definition.map(emitBlock)),
+                    definitions.map((definition) => definition.map(emitBlock)),
                 ];
             }),
         ],

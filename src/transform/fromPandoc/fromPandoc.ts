@@ -8,9 +8,11 @@ import { RuleSet, TransformConfig, TransformContext } from "../types";
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
 
-const matchPandocNode = (identifier: string) => (node: PandocNode): boolean => {
-    return identifier === node.type;
-};
+const matchPandocNode =
+    (identifier: string) =>
+    (node: PandocNode): boolean => {
+        return identifier === node.type;
+    };
 
 const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
@@ -63,7 +65,7 @@ export const fromPandoc = (
     config: Partial<TransformConfig> = {}
 ): ProsemirrorFluent => {
     const {
-        resource = x => x,
+        resource = (x) => x,
         useSmartQuotes = false,
         prosemirrorTextAlignAttr = null,
         prosemirrorDocWidth = 1000,
@@ -89,7 +91,7 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    const healed = nodesWithMarks.map(node =>
+    const healed = nodesWithMarks.map((node) =>
         heal(node, rules.prosemirrorSchema)
     );
     return prosemirrorFluent(healed);

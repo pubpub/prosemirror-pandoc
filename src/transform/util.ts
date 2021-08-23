@@ -46,7 +46,7 @@ export const intersperse = (
 
 export const textToStrSpace = (text: string): (Str | Space)[] =>
     intersperse(
-        text.split(" ").map(word => ({ type: "Str", content: word })),
+        text.split(" ").map((word) => ({ type: "Str", content: word })),
         () => ({ type: "Space" })
     );
 
@@ -62,15 +62,12 @@ export const flatten = <T>(input: any): T[] => {
     if (!Array.isArray(input)) {
         return [input];
     }
-    return input.reduce(
-        (arr: T[], next: T | T[]) => {
-            if (Array.isArray(next)) {
-                return [...arr, ...flatten(next)];
-            }
-            return [...arr, next];
-        },
-        [] as T[]
-    ) as T[];
+    return input.reduce((arr: T[], next: T | T[]) => {
+        if (Array.isArray(next)) {
+            return [...arr, ...flatten(next)];
+        }
+        return [...arr, next];
+    }, [] as T[]) as T[];
 };
 
 export const getQuoteChar = (

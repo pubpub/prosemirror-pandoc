@@ -135,7 +135,7 @@ const parseCite = (n: { c: [any[], any[]] }): Cite => {
     const [citations, inline] = n.c;
     return {
         type: "Cite",
-        citations: citations.map(citation => {
+        citations: citations.map((citation) => {
             const {
                 citationHash,
                 citationId,
@@ -277,7 +277,7 @@ const parseLineBlock = (n: { c: any[][] }): LineBlock => {
     const lines = n.c;
     return {
         type: "LineBlock",
-        content: lines.map(line => line.map(inline => parseInline(inline))),
+        content: lines.map((line) => line.map((inline) => parseInline(inline))),
     };
 };
 
@@ -312,7 +312,7 @@ const parseOrderedList = (n: { c: [any, any[][]] }): OrderedList => {
     return {
         type: "OrderedList",
         listAttributes: unwrapListAttributes(listAttributes),
-        content: items.map(item => item.map(parseBlock)),
+        content: items.map((item) => item.map(parseBlock)),
     };
 };
 
@@ -320,17 +320,17 @@ const parseBulletList = (n: { c: any[][] }): BulletList => {
     const items = n.c;
     return {
         type: "BulletList",
-        content: items.map(item => item.map(parseBlock)),
+        content: items.map((item) => item.map(parseBlock)),
     };
 };
 
 const parseDefinitionList = (n: { c: [any[], any[][]][] }): DefinitionList => {
     const items = n.c;
-    const entries = items.map(item => {
+    const entries = items.map((item) => {
         const [term, definitions] = item;
         return {
             term: term.map(parseInline),
-            definitions: definitions.map(definition =>
+            definitions: definitions.map((definition) =>
                 definition.map(parseBlock)
             ),
         };
@@ -367,12 +367,12 @@ const parseTable = (n: {
     return {
         type: "Table",
         caption: caption.map(parseInline),
-        alignments: alignments.map(alignment =>
+        alignments: alignments.map((alignment) =>
             unwrapEnum<Alignment>(alignment)
         ),
         columnWidths,
-        headers: headers.map(blocks => blocks.map(parseBlock)),
-        cells: cells.map(row => row.map(cell => cell.map(parseBlock))),
+        headers: headers.map((blocks) => blocks.map(parseBlock)),
+        cells: cells.map((row) => row.map((cell) => cell.map(parseBlock))),
     };
 };
 

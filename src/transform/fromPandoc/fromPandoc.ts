@@ -11,9 +11,11 @@ import {
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
 
-const matchPandocNode = (identifier: string) => (node: PandocNode): boolean => {
-    return identifier === node.type;
-};
+const matchPandocNode =
+    (identifier: string) =>
+    (node: PandocNode): boolean => {
+        return identifier === node.type;
+    };
 
 const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
@@ -67,7 +69,7 @@ export const fromPandoc = (
 ): ProsemirrorFluent => {
     const context = {
         rules: rules.fromPandoc,
-        resource: config.resource || (x => x),
+        resource: config.resource || ((x) => x),
         useSmartQuotes: config.useSmartQuotes || false,
         count: makeCounter(),
         transform: (element, marks = []) =>
@@ -80,7 +82,7 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    const healed = nodesWithMarks.map(node =>
+    const healed = nodesWithMarks.map((node) =>
         heal(node, rules.prosemirrorSchema)
     );
     return prosemirrorFluent(healed);

@@ -393,8 +393,10 @@ describe("parseRegexp", () => {
 
 describe("accepts", () => {
     const acceptExpr = (pattern, nodes) =>
-        acceptItems(parseExpr(pattern), nodes, (str: string) => (node: Node) =>
-            node.type === str
+        acceptItems(
+            parseExpr(pattern),
+            nodes,
+            (str: string) => (node: Node) => node.type === str
         );
 
     it("accepts an empty node array where expected", () => {

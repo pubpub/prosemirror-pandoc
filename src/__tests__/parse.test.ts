@@ -17,7 +17,7 @@ describe("parseInline", () => {
             "Superscript",
             "Subscript",
             "SmallCaps",
-        ].forEach(type => {
+        ].forEach((type) => {
             expect(
                 // @ts-ignore
                 parseInline({ t: type, c: [{ t: "Str", c: "Testing!" }] })
@@ -41,7 +41,10 @@ describe("parseInline", () => {
                     [
                         "this-is-an-identifier",
                         ["these", "are", "classes"],
-                        [["key1", "val1"], ["key2", "val2"]],
+                        [
+                            ["key1", "val1"],
+                            ["key2", "val2"],
+                        ],
                     ],
                     [
                         {

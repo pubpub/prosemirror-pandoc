@@ -171,7 +171,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        [blockOne, blockTwo, blockThree].forEach(block =>
+        [blockOne, blockTwo, blockThree].forEach((block) =>
             expect(fromPandoc(block, rules).asNode()).toEqual({
                 type: "paragraph",
                 content: [{ type: "text", text: "Hello world!" }],

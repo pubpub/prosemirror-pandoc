@@ -143,7 +143,7 @@ export const parseExpr = (str: string): Expr => {
         }
         const rangeStrs = str.slice(ptr + 1, str.length - 1).split(",");
         const hasTwo = rangeStrs.length === 2;
-        const range = rangeStrs.map(str => parseInt(str.trim()));
+        const range = rangeStrs.map((str) => parseInt(str.trim()));
         const [lowerBound, upperBound] = range;
         return {
             type: "range",
@@ -206,15 +206,15 @@ const createAcceptanceMachine = <Item>(
         startState.addSuccessor(identifierState);
         identifierState.addSuccessor(acceptState);
     } else if (expr.type === "choice") {
-        const choiceMachines = expr.children.map(x =>
+        const choiceMachines = expr.children.map((x) =>
             createAcceptanceMachine(x, matcher)
         );
-        choiceMachines.forEach(machine => {
+        choiceMachines.forEach((machine) => {
             startState.addSuccessor(machine.startState);
             machine.acceptState.addSuccessor(acceptState);
         });
     } else if (expr.type === "sequence") {
-        const sequenceMachines = expr.children.map(x =>
+        const sequenceMachines = expr.children.map((x) =>
             createAcceptanceMachine(x, matcher)
         );
         const finalAcceptState = sequenceMachines.reduce(
@@ -285,7 +285,7 @@ const maybeEnqueuePosition = <Item>(
 ) => {
     const { discoveredPositions, positionsHeap } = discoveryState;
     const hasAlreadyDiscoveredPosition = discoveredPositions.some(
-        discoveredPosition =>
+        (discoveredPosition) =>
             discoveredPosition.state === position.state &&
             discoveredPosition.consumedItems === position.consumedItems
     );
@@ -445,12 +445,12 @@ export const quickAcceptChoice = <Item extends { type: string }>(
     if (
         expr.type === "oneOrMore" &&
         expr.child.type === "choice" &&
-        expr.child.children.every(child => child.type === "identifier")
+        expr.child.children.every((child) => child.type === "identifier")
     ) {
         const choice = expr.child;
         const validIdentifiers = choice.children
-            .map(child => child.type === "identifier" && child.identifier)
-            .filter(x => x);
+            .map((child) => child.type === "identifier" && child.identifier)
+            .filter((x) => x);
         let ptr = 0;
         while (
             ptr < items.length &&
@@ -480,7 +480,7 @@ export const acceptItems = <Item>(
 
     const maybePushPosition = (p: SearchPosition<Item>) => {
         const hasAlreadyDiscoveredPosition = discoveredPositions.some(
-            discoveredPosition =>
+            (discoveredPosition) =>
                 discoveredPosition.state === p.state &&
                 discoveredPosition.consumedItems === p.consumedItems
         );
@@ -524,7 +524,7 @@ export const expressionAcceptsMultiple = (expr: Expr): boolean => {
     } else if (expr.type === "range") {
         return expr.upperBound === null || expr.upperBound > 1;
     } else if (expr.type === "choice") {
-        return expr.children.some(child => expressionAcceptsMultiple(child));
+        return expr.children.some((child) => expressionAcceptsMultiple(child));
     }
 };
 
@@ -534,7 +534,7 @@ export const willAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
     } else if (expr.type === "sequence") {
         return false;
     } else if (expr.type === "choice") {
-        return expr.children.some(child =>
+        return expr.children.some((child) =>
             willAlwaysMatchSingleIdentifier(child, id)
         );
     } else if (expr.type === "range") {

@@ -9,4 +9,4 @@ const main = async () => {
     console.log(JSON.stringify(loadAndTransformFromPandoc(filePath, rules)));
 };
 
-main().catch(e => console.error(e));
+main().catch((e) => console.error(e));

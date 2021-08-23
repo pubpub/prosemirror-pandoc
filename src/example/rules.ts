@@ -72,7 +72,7 @@ rules.fromPandoc("Div", pandocPassThroughTransformer);
 // I'm not really sure what a LineBlock is, but let's just call it a single paragraph
 // with some hard breaks thrown in.
 rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
-    const lines: ProsemirrorNode[][] = node.content.map(line =>
+    const lines: ProsemirrorNode[][] = node.content.map((line) =>
         transform(line).asArray()
     );
     return {
@@ -95,7 +95,7 @@ rules.transform("CodeBlock", "code_block", {
     fromProsemirror: (node: ProsemirrorNode): CodeBlock => {
         return {
             type: "CodeBlock",
-            content: node.content.map(text => text.text).join(""),
+            content: node.content.map((text) => text.text).join(""),
             attr: createAttr(""),
         };
     },
@@ -104,7 +104,7 @@ rules.transform("CodeBlock", "code_block", {
 rules.transform("BlockQuote", "blockquote", contentTransformer);
 
 // Use a listTransformer to take care of OrderedList and BulletList
-const ensureFirstElementIsParagraph = listItem => {
+const ensureFirstElementIsParagraph = (listItem) => {
     if (
         listItem.content.length === 0 ||
         listItem.content[0].type !== "paragraph"

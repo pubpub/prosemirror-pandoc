@@ -134,10 +134,10 @@ const validateRuleset = <PDNode, PMNode>(
     prosemirrorSchema: ProsemirrorSchema
 ) => {
     const { fromPandoc } = ruleset;
-    const expressions = fromPandoc.map(rule => rule.expression);
+    const expressions = fromPandoc.map((rule) => rule.expression);
     const missingPandocTypes = PANDOC_NODE_TYPES.filter(
-        type =>
-            !expressions.some(expr =>
+        (type) =>
+            !expressions.some((expr) =>
                 willAlwaysMatchSingleIdentifier(expr, type)
             )
     );
@@ -291,9 +291,11 @@ export const getTransformRuleForElements = <From extends MinimalType, To>(
         }
     }
     throw new Error(
-        `Could not find rule for nodes: ${nodes
-            .map(n => JSON.stringify(n))
-            .slice(0, 3)
-            .join(", ") + (nodes.length > 3 ? "..." : "")}`
+        `Could not find rule for nodes: ${
+            nodes
+                .map((n) => JSON.stringify(n))
+                .slice(0, 3)
+                .join(", ") + (nodes.length > 3 ? "..." : "")
+        }`
     );
 };

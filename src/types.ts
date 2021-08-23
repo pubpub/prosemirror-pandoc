@@ -12,37 +12,46 @@ interface ProsemirrorNodeDefinition {
 
 interface ProsemirrorMarkDefinition {}
 
-export interface ProsemirrorSchema {
+export type ProsemirrorSchema = {
     nodes: { [name: string]: ProsemirrorNodeDefinition };
     marks: { [name: string]: ProsemirrorMarkDefinition };
-}
+};
 
-export interface ProsemirrorNode {
-    type: string;
+export type ProsemirrorAttr =
+    | undefined
+    | null
+    | number
+    | string
+    | ProsemirrorAttr[];
+
+export type ProsemirrorNode<Type = string> = {
+    type: Type;
     content?: ProsemirrorNode[];
     text?: string;
-    attrs?: { [key: string]: string | number | null | undefined };
-}
+    attrs?: Record<string, ProsemirrorAttr>;
+};
 
-export interface ProsemirrorMark {
-    type: string;
-    attrs?: { [key: string]: string | number | null | undefined };
-}
+export type ProsemirrorMark<Type = string> = {
+    type: Type;
+    attrs?: Record<string, ProsemirrorAttr>;
+};
 
-export interface PandocJson {
+export type ProsemirrorElement = ProsemirrorNode | ProsemirrorMark;
+
+export type PandocJson = {
     "pandoc-api-version": number[];
     meta: {
         [key: string]: any;
     };
-    blocks: {}[];
-}
-export interface Doc {
+    blocks: { [key: string]: any }[];
+};
+export type Doc = {
     type: "Doc";
     blocks: Block[];
     meta: {
         [key: string]: MetaValue;
     };
-}
+};
 
 export type Alignment =
     | "AlignLeft"
@@ -68,136 +77,186 @@ export type ListNumberDelim =
     | "OneParen"
     | "TwoParens";
 
-export interface ListAttributes {
+export type ListAttributes = {
     startNumber: number;
     listNumberStyle: ListNumberStyle;
     listNumberDelim: ListNumberDelim;
-}
+};
 
 export type Format = string;
 
-export interface Attr {
+export type Attr = {
     identifier: string;
     classes: string[];
     properties: { [key: string]: string };
-}
+};
 
-export interface Target {
+export type Target = {
     url: string;
     title: string;
-}
+};
 
 export type CitationMode = "AuthorInText" | "SuppressAuthor" | "NormalCitation";
 
-export interface Citation {
+export type Citation = {
     citationId: string;
     citationPrefix: Inline[];
     citationSuffix: Inline[];
     citationMode: CitationMode;
     citationNoteNum: number;
     citationHash: number;
-}
+};
 
 /* ~~~ Block-level definitions ~~~ */
 
 /* Plain text, not a paragraph */
-export interface Plain {
+export type Plain = {
     type: "Plain";
     content: Inline[];
-}
+};
 
 /* Paragraph */
-export interface Para {
+export type Para = {
     type: "Para";
     content: Inline[];
-}
+};
 
 /* Multiple non-breaking lines */
-export interface LineBlock {
+export type LineBlock = {
     type: "LineBlock";
     content: Inline[][];
-}
+};
 
 /* Code block (literal) with attributes */
-export interface CodeBlock {
+export type CodeBlock = {
     type: "CodeBlock";
     attr: Attr;
     content: string;
-}
+};
 
 /* Raw block */
-export interface RawBlock {
+export type RawBlock = {
     type: "RawBlock";
     format: Format;
     content: string;
-}
+};
 
 /* Block quote (list of blocks) */
-export interface BlockQuote {
+export type BlockQuote = {
     type: "BlockQuote";
     content: Block[];
-}
+};
 
 /* Ordered list (attributes and a list of items, each a list of blocks) */
-export interface OrderedList {
+export type OrderedList = {
     type: "OrderedList";
     listAttributes: ListAttributes;
     content: Block[][];
-}
+};
 
 /* Bullet list (list of items, each a list of blocks) */
-export interface BulletList {
+export type BulletList = {
     type: "BulletList";
     content: Block[][];
-}
+};
 
 /* Definition list
  Each list item is a pair consisting of a term (a list of inlines)
  and one or more definitions (each a list of blocks) */
-export interface DefinitionList {
+export type DefinitionList = {
     type: "DefinitionList";
     entries: {
         term: Inline[];
         definitions: Block[][];
     }[];
-}
+};
 
 /* Header - level (integer) and text (inlines) */
-export interface Header {
+export type Header = {
     type: "Header";
     level: number;
     attr: Attr;
     content: Inline[];
-}
+};
 
 /* Horizontal rule */
-export interface HorizontalRule {
+export type HorizontalRule = {
     type: "HorizontalRule";
-}
+};
 
-/* Table, with caption, column alignments (required),
- relative column widths (0 = default), column headers (each a list of blocks),
- and rows (each a list of lists of blocks) */
-export interface Table {
+/* Table stuff */
+export type Caption = {
+    type: "Caption";
+    shortCaption?: Inline[];
+    content: Block[];
+};
+
+export type ColSpec = {
+    type: "ColSpec";
+    alignment: Alignment;
+} & ({ width: number } | { defaultWidth: true });
+
+export type Cell = {
+    type: "Cell";
+    attr: Attr;
+    alignment: Alignment;
+    rowSpan: number;
+    colSpan: number;
+    content: Block[];
+};
+
+export type Row = {
+    type: "Row";
+    attr: Attr;
+    cells: Cell[];
+};
+
+export type TableHead = {
+    type: "TableHead";
+    attr: Attr;
+    rows: Row[];
+};
+
+export type TableFoot = {
+    type: "TableFoot";
+    attr: Attr;
+    rows: Row[];
+};
+
+export type TableBody = {
+    type: "TableBody";
+    attr: Attr;
+    rowHeadColumns: number;
+    headRows: Row[];
+    bodyRows: Row[];
+};
+
+export type Table = {
     type: "Table";
-    caption: Inline[];
-    alignments: Alignment[];
-    columnWidths: number[];
-    headers: Block[][];
-    cells: Block[][][];
-}
+    attr: Attr;
+    caption: Caption;
+    colSpecs: ColSpec[];
+    head: TableHead;
+    bodies: TableBody[];
+    foot: TableFoot;
+};
+
+export type TableRow = {
+    attr: Attr;
+    rowHeadColumns: number;
+};
 
 /* Generic block container with attributes */
-export interface Div {
+export type Div = {
     type: "Div";
     attr: Attr;
     content: Block[];
-}
+};
 
 /* Nothing */
-export interface Null {
+export type Null = {
     type: "Null";
-}
+};
 
 export type Block =
     | Plain
@@ -218,156 +277,162 @@ export type Block =
 /* ~~~ Inline-level definitions ~~~ */
 
 /* Text (string) */
-export interface Str {
+export type Str = {
     type: "Str";
     content: string;
-}
+};
 
 /* Emphasized text (list of inlines) */
-export interface Emph {
+export type Emph = {
     type: "Emph";
     content: Inline[];
-}
+};
+
+/* Underlined text (list of inlines) */
+export type Underline = {
+    type: "Underline";
+    content: Inline[];
+};
 
 /* Strongly emphasized text (list of inlines) */
-export interface Strong {
+export type Strong = {
     type: "Strong";
     content: Inline[];
-}
+};
 
 /* Strikeout text (list of inlines) */
-export interface Strikeout {
+export type Strikeout = {
     type: "Strikeout";
     content: Inline[];
-}
+};
 
 /* Superscripted text (list of inlines) */
-export interface Superscript {
+export type Superscript = {
     type: "Superscript";
     content: Inline[];
-}
+};
 
 /* Subscripted text (list of inlines) */
-export interface Subscript {
+export type Subscript = {
     type: "Subscript";
     content: Inline[];
-}
+};
 
 /* Small caps text (list of inlines) */
-export interface SmallCaps {
+export type SmallCaps = {
     type: "SmallCaps";
     content: Inline[];
-}
+};
 
 /* Quoted text (list of inlines) */
-export interface Quoted {
+export type Quoted = {
     type: "Quoted";
     quoteType: QuoteType;
     content: Inline[];
-}
+};
 
 /* Citation (list of inlines) */
-export interface Cite {
+export type Cite = {
     type: "Cite";
     citations: Citation[];
     content: Inline[];
-}
+};
 
 /* Inline code (literal) */
-export interface Code {
+export type Code = {
     type: "Code";
     attr: Attr;
     content: string;
-}
+};
 
 /* Inter-word space */
-export interface Space {
+export type Space = {
     type: "Space";
-}
+};
 
 /* Soft line break */
-export interface SoftBreak {
+export type SoftBreak = {
     type: "SoftBreak";
-}
+};
 
 /* Hard line break */
-export interface LineBreak {
+export type LineBreak = {
     type: "LineBreak";
-}
+};
 
 /* TeX math (literal) */
-export interface Math {
+export type Math = {
     type: "Math";
     mathType: MathType;
     content: string;
-}
+};
 
 /* Raw inline */
-export interface RawInline {
+export type RawInline = {
     type: "RawInline";
     format: Format;
     content: string;
-}
+};
 
 /* Hyperlink: alt text (list of inlines), target */
-export interface Link {
+export type Link = {
     type: "Link";
     attr: Attr;
     content: Inline[];
     target: Target;
-}
+};
 
 /* Image: alt text (list of inlines), target */
-export interface Image {
+export type Image = {
     type: "Image";
     attr: Attr;
     content: Inline[];
     target: Target;
-}
+};
 
 /* Footnote or endnote */
-export interface Note {
+export type Note = {
     type: "Note";
     content: Block[];
-}
+};
 
 /* Generic inline container with attributes */
-export interface Span {
+export type Span = {
     type: "Span";
     attr: Attr;
     content: Inline[];
-}
+};
 
 /* Meta types */
 
-export interface MetaMap {
+export type MetaMap = {
     type: "MetaMap";
     values: { [key: string]: MetaValue };
-}
+};
 
-export interface MetaList {
+export type MetaList = {
     type: "MetaList";
     content: MetaValue[];
-}
+};
 
-export interface MetaBool {
+export type MetaBool = {
     type: "MetaBool";
     content: boolean;
-}
+};
 
-export interface MetaString {
+export type MetaString = {
     type: "MetaString";
     content: string;
-}
-export interface MetaInlines {
+};
+export type MetaInlines = {
     type: "MetaInlines";
     content: Inline[];
-}
+};
 
-export interface MetaBlocks {
+export type MetaBlocks = {
     type: "MetaBlocks";
     content: Block[];
-}
+};
 
 export type MetaValue =
     | MetaMap
@@ -377,14 +442,18 @@ export type MetaValue =
     | MetaInlines
     | MetaBlocks;
 
-export type Inline =
-    | Str
+export type SimpleInline =
     | Emph
+    | Underline
     | Strong
     | Strikeout
     | Superscript
     | Subscript
-    | SmallCaps
+    | SmallCaps;
+
+export type Inline =
+    | Str
+    | SimpleInline
     | Quoted
     | Cite
     | Code
@@ -435,4 +504,5 @@ export const PANDOC_NODE_TYPES = [
     "Subscript",
     "Superscript",
     "Table",
+    "Underline",
 ];

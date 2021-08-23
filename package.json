@@ -1,18 +1,17 @@
 {
   "name": "@pubpub/prosemirror-pandoc",
-  "version": "0.6.1",
+  "version": "0.7.0-beta.0",
   "description": "Convert between Prosemirror schemas and the Pandoc AST",
   "main": "dist/index.js",
   "devDependencies": {
     "@types/jest": "^24.0.18",
     "@types/katex": "^0.10.2",
     "@types/node": "^12.7.4",
-    "@typescript-eslint/eslint-plugin": "^2.19.2",
-    "@typescript-eslint/parser": "^2.19.2",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
-    "esm": "^3.2.25",
     "jest": "^24.9.0",
     "katex": "^0.11.1",
     "prettier": "^2.3.2",
@@ -27,7 +26,8 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "prepublishOnly": "npm run lint && npm test && npm run build",
-    "convert": "ts-node src/example/convert.ts"
+    "convert": "ts-node src/example/convert.ts",
+    "parse": "ts-node src/example/parse.ts"
   },
   "repository": {
     "type": "git",

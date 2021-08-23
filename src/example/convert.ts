@@ -6,7 +6,9 @@ const main = async () => {
     const {
         _: [filePath],
     } = argv;
-    console.log(JSON.stringify(loadAndTransformFromPandoc(filePath, rules)));
+    console.log(
+        JSON.stringify(loadAndTransformFromPandoc(filePath as string, rules))
+    );
 };
 
 main().catch((e) => console.error(e));

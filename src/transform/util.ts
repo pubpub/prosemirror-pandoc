@@ -1,20 +1,11 @@
 import { Attr, Str, Space } from "../types";
 
-type CreateAttr =
-    | ((properties: {}) => Attr)
-    | ((identifier: string, classes?: string[], properties?: {}) => Attr);
-
-export const createAttr: CreateAttr = (...args): Attr => {
-    if (args.length === 1) {
-        return {
-            identifier: "",
-            classes: [],
-            properties: args[0],
-        };
-    } else {
-        const [identifier, classes = [], properties = {}] = args;
-        return { identifier, classes, properties };
-    }
+export const createAttr = (
+    identifier: string,
+    classes?: string[],
+    properties?: Record<string, any>
+): Attr => {
+    return { identifier, classes, properties };
 };
 
 export const textFromStrSpace = (nodes: (Str | Space)[]) => {

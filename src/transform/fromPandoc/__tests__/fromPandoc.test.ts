@@ -171,7 +171,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        [blockOne, blockTwo, blockThree].forEach(block =>
+        [blockOne, blockTwo, blockThree].forEach((block) =>
             expect(fromPandoc(block, rules).asNode()).toEqual({
                 type: "paragraph",
                 content: [{ type: "text", text: "Hello world!" }],
@@ -847,9 +847,9 @@ describe("fromPandoc", () => {
         expect(
             fromPandoc(
                 // This is incorrectly typed -- that's okay
-                // @ts-ignore
                 {
                     type: "Strong",
+                    // @ts-ignore
                     content: [{ type: "HorizontalRule" }],
                 },
                 rules
@@ -913,127 +913,1004 @@ describe("fromPandoc", () => {
         expect(
             fromPandoc(
                 {
-                    caption: [{ type: "Str", content: "Caption!" }],
                     type: "Table",
-                    alignments: ["AlignDefault", "AlignDefault"],
-                    columnWidths: [0, 0],
-                    headers: [
-                        [
+                    attr: {
+                        identifier: "",
+                        classes: [],
+                        properties: {},
+                    },
+                    caption: {
+                        type: "Caption",
+                        content: [
                             {
                                 type: "Plain",
-                                content: [{ type: "Str", content: "Apple" }],
+                                content: [
+                                    {
+                                        type: "Str",
+                                        content: "He-Man",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "and",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "Skeletor",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "facts",
+                                    },
+                                ],
                             },
                         ],
-                        [
-                            {
-                                type: "Plain",
-                                content: [{ type: "Str", content: "Rating" }],
+                    },
+                    colSpecs: [
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            width: 0.3,
+                        },
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            width: 0.7,
+                        },
+                    ],
+                    head: {
+                        type: "TableHead",
+                        attr: {
+                            identifier: "",
+                            classes: [],
+                            properties: {},
+                        },
+                        rows: [],
+                    },
+                    bodies: [
+                        {
+                            type: "TableBody",
+                            rowHeadColumns: 1,
+                            attr: {
+                                identifier: "",
+                                classes: [],
+                                properties: {},
                             },
-                        ],
+                            headRows: [],
+                            bodyRows: [
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: ["heman"],
+                                                properties: {
+                                                    scope: "col",
+                                                },
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "He-Man",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {
+                                                    scope: "row",
+                                                },
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Role",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Hero",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {
+                                                    scope: "row",
+                                                },
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Weapon",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Power",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "Sword",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {
+                                                    scope: "row",
+                                                },
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Dark",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "secret",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Expert",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "florist",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
                     ],
-                    cells: [
-                        [
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "RedDelicious",
-                                        },
-                                    ],
-                                },
-                            ],
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "Terrible",
-                                        },
-                                    ],
-                                },
-                            ],
-                        ],
-                        [
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "GrannySmith",
-                                        },
-                                    ],
-                                },
-                            ],
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "Bad",
-                                        },
-                                    ],
-                                },
-                            ],
-                        ],
-                        [
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "Jazz",
-                                        },
-                                    ],
-                                },
-                            ],
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "PrettyGood",
-                                        },
-                                    ],
-                                },
-                            ],
-                        ],
-                        [
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "Honeycrisp",
-                                        },
-                                    ],
-                                },
-                            ],
-                            [
-                                {
-                                    type: "Plain",
-                                    content: [
-                                        {
-                                            type: "Str",
-                                            content: "Perfect",
-                                        },
-                                    ],
-                                },
-                            ],
-                        ],
-                    ],
+                    foot: {
+                        type: "TableFoot",
+                        attr: {
+                            identifier: "",
+                            classes: [],
+                            properties: {},
+                        },
+                        rows: [],
+                    },
                 },
-                rules
+                rules,
+                { prosemirrorDocWidth: 800 }
             )
         ).toMatchSnapshot();
     });
+
+    it("transforms a Table with rowSpans and colSpans > 1", () =>
+        expect(
+            fromPandoc(
+                {
+                    type: "Table",
+                    attr: {
+                        identifier: "",
+                        classes: [],
+                        properties: {},
+                    },
+                    caption: {
+                        type: "Caption",
+                        content: [
+                            {
+                                type: "Plain",
+                                content: [
+                                    {
+                                        type: "Str",
+                                        content: "Favorite",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "and",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "Least",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "Favorite",
+                                    },
+                                    {
+                                        type: "Space",
+                                    },
+                                    {
+                                        type: "Str",
+                                        content: "Things",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    colSpecs: [
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            defaultWidth: true,
+                        },
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            defaultWidth: true,
+                        },
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            defaultWidth: true,
+                        },
+                        {
+                            type: "ColSpec",
+                            alignment: "AlignDefault",
+                            defaultWidth: true,
+                        },
+                    ],
+                    head: {
+                        type: "TableHead",
+                        attr: {
+                            identifier: "",
+                            classes: [],
+                            properties: {},
+                        },
+                        rows: [
+                            {
+                                type: "Row",
+                                attr: {
+                                    identifier: "",
+                                    classes: [],
+                                    properties: {},
+                                },
+                                cells: [
+                                    {
+                                        type: "Cell",
+                                        attr: {
+                                            identifier: "",
+                                            classes: [],
+                                            properties: {},
+                                        },
+                                        alignment: "AlignDefault",
+                                        rowSpan: 1,
+                                        colSpan: 1,
+                                        content: [],
+                                    },
+                                    {
+                                        type: "Cell",
+                                        attr: {
+                                            identifier: "",
+                                            classes: [],
+                                            properties: {},
+                                        },
+                                        alignment: "AlignDefault",
+                                        rowSpan: 1,
+                                        colSpan: 1,
+                                        content: [],
+                                    },
+                                    {
+                                        type: "Cell",
+                                        attr: {
+                                            identifier: "",
+                                            classes: [],
+                                            properties: {},
+                                        },
+                                        alignment: "AlignDefault",
+                                        rowSpan: 1,
+                                        colSpan: 1,
+                                        content: [
+                                            {
+                                                type: "Plain",
+                                                content: [
+                                                    {
+                                                        type: "Str",
+                                                        content: "Bob",
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    {
+                                        type: "Cell",
+                                        attr: {
+                                            identifier: "",
+                                            classes: [],
+                                            properties: {},
+                                        },
+                                        alignment: "AlignDefault",
+                                        rowSpan: 1,
+                                        colSpan: 1,
+                                        content: [
+                                            {
+                                                type: "Plain",
+                                                content: [
+                                                    {
+                                                        type: "Str",
+                                                        content: "Alice",
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    bodies: [
+                        {
+                            type: "TableBody",
+                            rowHeadColumns: 2,
+                            attr: {
+                                identifier: "",
+                                classes: [],
+                                properties: {},
+                            },
+                            headRows: [],
+                            bodyRows: [
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 2,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Favorite",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Color",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Blue",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Purple",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Flavor",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Banana",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content:
+                                                                "Chocolate",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 2,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Least",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "Favorite",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Color",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Yellow",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Pink",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Flavor",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Mint",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "Walnut",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "Row",
+                                    attr: {
+                                        identifier: "",
+                                        classes: [],
+                                        properties: {},
+                                    },
+                                    cells: [
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 4,
+                                            content: [
+                                                {
+                                                    type: "Plain",
+                                                    content: [
+                                                        {
+                                                            type: "Str",
+                                                            content: "This",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "is",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "just",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "some",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "stuff",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "at",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "the",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "bottom",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "of",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "the",
+                                                        },
+                                                        {
+                                                            type: "Space",
+                                                        },
+                                                        {
+                                                            type: "Str",
+                                                            content: "table.",
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [],
+                                        },
+                                        {
+                                            type: "Cell",
+                                            attr: {
+                                                identifier: "",
+                                                classes: [],
+                                                properties: {},
+                                            },
+                                            alignment: "AlignDefault",
+                                            rowSpan: 1,
+                                            colSpan: 1,
+                                            content: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                    foot: {
+                        type: "TableFoot",
+                        attr: {
+                            identifier: "",
+                            classes: [],
+                            properties: {},
+                        },
+                        rows: [],
+                    },
+                },
+                rules
+            )
+        ).toMatchSnapshot());
 
     it("transforms Math (mathType=InlineMath) into an equation", () => {
         expect(

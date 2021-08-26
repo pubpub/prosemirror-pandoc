@@ -97,15 +97,13 @@ export const healNaiveTokenList = (
                             ` (closed ${toReopen
                                 .concat()
                                 .reverse()
-                                .map(t => t.node.type)
+                                .map((t) => t.node.type)
                                 .join(", ")})`
                     );
                 }
                 const testingToken = openTokens[acceptingParentDepth];
-                const {
-                    acceptedNodes,
-                    consumeNode,
-                } = getOrAddAcceptedStateToTokenMap(testingToken);
+                const { acceptedNodes, consumeNode } =
+                    getOrAddAcceptedStateToTokenMap(testingToken);
                 accepted = consumeNode(token.node);
                 if (accepted) {
                     acceptedNodes.push(token.node);
@@ -137,7 +135,7 @@ export const healNaiveTokenList = (
             }
         }
     }
-    return nextTokens.map(token => {
+    return nextTokens.map((token) => {
         const tokensForNode = nodeToTokenMap.get(token.node);
         if (tokensForNode && tokensForNode.length > 1) {
             return { ...token, createdFromSplit: true };

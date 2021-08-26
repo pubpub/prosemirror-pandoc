@@ -2,10 +2,7 @@ import * as katex from "katex";
 
 import { nodes, marks } from "./schema";
 import {
-    PandocNode,
     Image,
-    Str,
-    Space,
     Header,
     LineBlock,
     ProsemirrorNode,
@@ -36,11 +33,10 @@ import {
     listTransformer,
     nullTransformer,
     pandocPassThroughTransformer,
-    tableTransformer,
     pandocQuotedTransformer,
-} from "../transform/commonTransformers";
-
-import { buildRuleset, BuildRuleset } from "../transform/transformer";
+    pandocTableTransformer,
+} from "../transform/transformers";
+import { buildRuleset } from "../transform/transformer";
 
 import {
     pandocInlineToHtmlString,
@@ -49,7 +45,7 @@ import {
     htmlStringToPandocBlocks,
 } from "./util";
 
-const rules: BuildRuleset<PandocNode, ProsemirrorNode> = buildRuleset({
+const rules = buildRuleset({
     nodes,
     marks,
 });
@@ -72,7 +68,7 @@ rules.fromPandoc("Div", pandocPassThroughTransformer);
 // I'm not really sure what a LineBlock is, but let's just call it a single paragraph
 // with some hard breaks thrown in.
 rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
-    const lines: ProsemirrorNode[][] = node.content.map(line =>
+    const lines: ProsemirrorNode[][] = node.content.map((line) =>
         transform(line).asArray()
     );
     return {
@@ -95,7 +91,7 @@ rules.transform("CodeBlock", "code_block", {
     fromProsemirror: (node: ProsemirrorNode): CodeBlock => {
         return {
             type: "CodeBlock",
-            content: node.content.map(text => text.text).join(""),
+            content: node.content.map((text) => text.text).join(""),
             attr: createAttr(""),
         };
     },
@@ -104,7 +100,7 @@ rules.transform("CodeBlock", "code_block", {
 rules.transform("BlockQuote", "blockquote", contentTransformer);
 
 // Use a listTransformer to take care of OrderedList and BulletList
-const ensureFirstElementIsParagraph = listItem => {
+const ensureFirstElementIsParagraph = (listItem) => {
     if (
         listItem.content.length === 0 ||
         listItem.content[0].type !== "paragraph"
@@ -133,7 +129,7 @@ rules.fromPandoc(
 
 // Tranform headers
 rules.transform("Header", "heading", {
-    fromPandoc: (node: Header, { transform }) => {
+    fromPandoc: (node, { transform }) => {
         return {
             type: "heading",
             attrs: {
@@ -182,7 +178,7 @@ rules.transformToMark("Link", "link", (link: Link) => {
 rules.fromPandoc("SmallCaps", pandocPassThroughTransformer);
 
 // Tell the transformer how to deal with typical content-level nodes
-rules.fromPandoc("(Str | Space)+", (nodes: (Str | Space)[]) => {
+rules.fromPandoc("(Str | Space)+", (nodes) => {
     return {
         type: "text",
         text: textFromStrSpace(nodes),
@@ -200,6 +196,7 @@ rules.fromPandoc("SoftBreak", nullTransformer);
 
 // Stuff we don't have equivalents for
 rules.fromPandoc("Span", pandocPassThroughTransformer);
+rules.fromPandoc("Underline", pandocPassThroughTransformer);
 
 // Anything in quotation marks is its own node, to Pandoc
 rules.fromPandoc("Quoted", pandocQuotedTransformer);
@@ -229,7 +226,7 @@ rules.fromPandoc("RawInline", (node: RawInline) => {
 });
 
 // Tables
-rules.transform("Table", "table", tableTransformer);
+rules.fromPandoc("Table", pandocTableTransformer);
 
 // Equations
 rules.fromPandoc("Math", (node: Math) => {
@@ -298,7 +295,7 @@ rules.transform("Cite", "citation", {
         const citationNumber =
             typeof node.attrs.count === "number"
                 ? node.attrs.count
-                : parseInt(node.attrs.count);
+                : parseInt(node.attrs.count as string);
         return {
             type: "Cite",
             content: htmlStringToPandocInline(inputHtml),

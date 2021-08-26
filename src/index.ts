@@ -1,7 +1,7 @@
 import * as transformUtil from "./transform/util";
-import * as commonTransformers from "./transform/commonTransformers";
+import * as transformers from "./transform/transformers";
 
-export { transformUtil, commonTransformers };
+export { transformUtil, transformers };
 export { fromPandoc } from "./transform/fromPandoc";
 export { buildRuleset } from "./transform/transformer";
 export { emitPandocJson } from "./emit";

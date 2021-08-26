@@ -2,18 +2,17 @@ import { flatten, asArray } from "../util";
 
 import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "../../types";
 import { ProsemirrorFluent, prosemirrorFluent } from "../fluent";
-import {
-    getTransformRuleForElements,
-    RuleSet,
-    TransformConfig,
-    TransformContext,
-} from "../transformer";
+import { getTransformRuleForElements } from "../transformer";
+import { RuleSet, TransformConfig, TransformContext } from "../types";
+
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
 
-const matchPandocNode = (identifier: string) => (node: PandocNode): boolean => {
-    return identifier === node.type;
-};
+const matchPandocNode =
+    (identifier: string) =>
+    (node: PandocNode): boolean => {
+        return identifier === node.type;
+    };
 
 const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
@@ -62,17 +61,29 @@ const makeCounter = () => {
 
 export const fromPandoc = (
     elementOrArray: PandocNode | PandocNode[],
-    rules: RuleSet<PandocNode, ProsemirrorNode>,
-    config: TransformConfig = {}
+    rules: RuleSet,
+    config: Partial<TransformConfig> = {}
 ): ProsemirrorFluent => {
-    const context = {
+    const {
+        resource = (x) => x,
+        useSmartQuotes = false,
+        prosemirrorTextAlignAttr = null,
+        prosemirrorDocWidth = 1000,
+    } = config;
+    const context: TransformContext<PandocNode, ProsemirrorNode> = {
         rules: rules.fromPandoc,
-        resource: config.resource || (x => x),
-        useSmartQuotes: config.useSmartQuotes || false,
+        prosemirrorSchema: rules.prosemirrorSchema,
+        resource,
+        useSmartQuotes,
+        prosemirrorTextAlignAttr,
         count: makeCounter(),
-        transform: (element, marks = []) =>
-            fromPandocInner(element, context, marks),
+        transform: (
+            element,
+            { marks = [], context: parentContext = {} } = {}
+        ) => fromPandocInner(element, { ...context, ...parentContext }, marks),
         marksMap: new Map(),
+        prosemirrorDocWidth,
+        textAlign: "left",
     };
     const nodes = context.transform(elementOrArray);
     const nodesWithMarks = applyMarksToNodes(
@@ -80,7 +91,7 @@ export const fromPandoc = (
         rules.prosemirrorSchema,
         context.marksMap
     );
-    const healed = nodesWithMarks.map(node =>
+    const healed = nodesWithMarks.map((node) =>
         heal(node, rules.prosemirrorSchema)
     );
     return prosemirrorFluent(healed);

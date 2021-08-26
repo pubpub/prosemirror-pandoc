@@ -5,10 +5,13 @@ import {
     Block,
     BlockQuote,
     BulletList,
+    Caption,
+    Cell,
     CitationMode,
     Cite,
     Code,
     CodeBlock,
+    ColSpec,
     DefinitionList,
     Div,
     Doc,
@@ -27,12 +30,15 @@ import {
     Note,
     OrderedList,
     PandocJson,
+    PandocNode,
     Para,
     Plain,
     Quoted,
     QuoteType,
     RawBlock,
     RawInline,
+    Row,
+    SimpleInline,
     SmallCaps,
     Span,
     Str,
@@ -41,8 +47,10 @@ import {
     Subscript,
     Superscript,
     Table,
+    TableBody,
+    TableFoot,
+    TableHead,
     Target,
-    PandocNode,
 } from "./types";
 
 const wrapEnum = <T>(instance: T): { t: T } => {
@@ -88,9 +96,7 @@ const emitStr = (str: Str) => {
     };
 };
 
-const emitSimpleInline = (
-    node: Emph | Strong | Strikeout | Superscript | Subscript | SmallCaps
-) => {
+const emitSimpleInline = (node: SimpleInline) => {
     const { type, content } = node;
     return {
         t: type,
@@ -111,7 +117,7 @@ const emitCite = (cite: Cite) => {
     return {
         t: "Cite",
         c: [
-            citations.map(citation => {
+            citations.map((citation) => {
                 const {
                     citationHash,
                     citationId,
@@ -196,6 +202,7 @@ export const emitInline = (n: Inline): { t: string; c?: string | any[] } => {
             return emitStr(n);
         case "Emph":
         case "Strong":
+        case "Underline":
         case "Strikeout":
         case "Superscript":
         case "Subscript":
@@ -246,7 +253,7 @@ const emitLineBlock = (lineBlock: LineBlock) => {
     const { content } = lineBlock;
     return {
         t: "LineBlock",
-        c: content.map(line => line.map(emitInline)),
+        c: content.map((line) => line.map(emitInline)),
     };
 };
 
@@ -280,7 +287,7 @@ const emitOrderedList = (orderedList: OrderedList) => {
         t: "OrderedList",
         c: [
             wrapListAttributes(listAttributes),
-            content.map(entry => entry.map(emitBlock)),
+            content.map((entry) => entry.map(emitBlock)),
         ],
     };
 };
@@ -289,7 +296,7 @@ const emitBulletList = (bulletList: BulletList) => {
     const { content } = bulletList;
     return {
         t: "BulletList",
-        c: content.map(entry => entry.map(emitBlock)),
+        c: content.map((entry) => entry.map(emitBlock)),
     };
 };
 
@@ -298,11 +305,11 @@ const emitDefinitionList = (definitionList: DefinitionList) => {
     return {
         t: "DefinitionList",
         c: [
-            entries.map(entry => {
+            entries.map((entry) => {
                 const { term, definitions } = entry;
                 return [
                     term.map(emitInline),
-                    definitions.map(definition => definition.map(emitBlock)),
+                    definitions.map((definition) => definition.map(emitBlock)),
                 ];
             }),
         ],
@@ -325,16 +332,71 @@ const emitDiv = (div: Div) => {
     };
 };
 
+const emitCell = (cell: Cell) => {
+    const { attr, alignment, rowSpan, colSpan, content } = cell;
+    return [
+        wrapAttr(attr),
+        wrapEnum(alignment),
+        rowSpan,
+        colSpan,
+        content.map(emitBlock),
+    ];
+};
+
+const emitRow = (row: Row) => {
+    const { attr, cells } = row;
+    return [wrapAttr(attr), cells.map(emitCell)];
+};
+
+const emitTableHead = (head: TableHead) => {
+    const { attr, rows } = head;
+    return [wrapAttr(attr), rows.map(emitRow)];
+};
+
+const emitTableFoot = (foot: TableFoot) => {
+    const { attr, rows } = foot;
+    return [wrapAttr(attr), rows.map(emitRow)];
+};
+
+const emitTableBody = (body: TableBody) => {
+    const { attr, rowHeadColumns, headRows, bodyRows } = body;
+    return [
+        wrapAttr(attr),
+        rowHeadColumns,
+        headRows.map(emitRow),
+        bodyRows.map(emitRow),
+    ];
+};
+
+const emitColSpec = (colSpec: ColSpec) => {
+    const { alignment } = colSpec;
+    return [
+        wrapEnum<Alignment>(alignment),
+        "defaultWidth" in colSpec
+            ? { t: "ColWidthDefault" }
+            : { t: "ColWidth", c: colSpec.width },
+    ];
+};
+
+const emitCaption = (caption: Caption) => {
+    const { shortCaption, content } = caption;
+    return [
+        shortCaption ? shortCaption.map(emitInline) : null,
+        content.map(emitBlock),
+    ];
+};
+
 const emitTable = (table: Table) => {
-    const { caption, alignments, columnWidths, headers, cells } = table;
+    const { attr, caption, colSpecs, head, bodies, foot } = table;
     return {
         t: "Table",
         c: [
-            caption.map(emitInline),
-            alignments.map(alignment => wrapEnum<Alignment>(alignment)),
-            columnWidths,
-            headers.map(blocks => blocks.map(emitBlock)),
-            cells.map(row => row.map(cell => cell.map(emitBlock))),
+            wrapAttr(attr),
+            emitCaption(caption),
+            colSpecs.map(emitColSpec),
+            emitTableHead(head),
+            bodies.map(emitTableBody),
+            emitTableFoot(foot),
         ],
     };
 };

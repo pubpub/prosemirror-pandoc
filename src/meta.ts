@@ -47,11 +47,11 @@ const extractStringFromBlock = (item: Block): string => {
         }
         if (item.type === "LineBlock") {
             return item.content
-                .map(inlines => extractStringFromInlines(inlines))
+                .map((inlines) => extractStringFromInlines(inlines))
                 .join("\n");
         }
         return item.content
-            .map(blocks => extractStringFromBlocks(blocks))
+            .map((blocks) => extractStringFromBlocks(blocks))
             .join("\n");
     }
 };
@@ -100,7 +100,7 @@ export const metaValueToJsonSerializable = (
             }
         );
         const res: { [key: string]: any } = {};
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
             const [key, value] = entry;
             res[key] = value;
         });

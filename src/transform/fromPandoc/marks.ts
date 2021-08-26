@@ -11,7 +11,9 @@ const compareMarks = (first: ProsemirrorMark, second: ProsemirrorMark) =>
 const dedupeMarks = (marks: ProsemirrorMark[]): ProsemirrorMark[] => {
     const collected: ProsemirrorMark[] = [];
     for (const mark of marks) {
-        if (!collected.some(existingMark => compareMarks(existingMark, mark))) {
+        if (
+            !collected.some((existingMark) => compareMarks(existingMark, mark))
+        ) {
             collected.push(mark);
         }
     }
@@ -55,7 +57,7 @@ export const applyMarksToNodes = (
         const nextPendingMarks = acceptMarksHere ? [] : cumulativeMarks;
         const contentProps = node.content
             ? {
-                  content: node.content.map(child =>
+                  content: node.content.map((child) =>
                       applyInner(child, nextAppliedMarks, nextPendingMarks)
                   ),
               }
@@ -67,5 +69,5 @@ export const applyMarksToNodes = (
         };
     };
 
-    return nodes.map(node => applyInner(node, [], []));
+    return nodes.map((node) => applyInner(node, [], []));
 };

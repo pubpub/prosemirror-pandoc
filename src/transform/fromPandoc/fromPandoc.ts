@@ -1,6 +1,6 @@
-import { flatten, asArray } from "../util";
+import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "types";
 
-import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "../../types";
+import { flatten, asArray, makeCounter } from "../util";
 import { ProsemirrorFluent, prosemirrorFluent } from "../fluent";
 import { getTransformRuleForElements } from "../transformer";
 import { RuleSet, TransformConfig, TransformContext } from "../types";
@@ -48,15 +48,6 @@ const fromPandocInner = (
         ptr += acceptedCount;
     }
     return prosemirrorFluent(transformed);
-};
-
-const makeCounter = () => {
-    const countMap: Map<string, number> = new Map();
-    return (type: string) => {
-        const count = countMap.get(type) || 0;
-        countMap.set(type, count + 1);
-        return count;
-    };
 };
 
 export const fromPandoc = (

@@ -7,7 +7,7 @@ import {
     Doc,
     RawBlock,
     RawInline,
-} from "../../types";
+} from "types";
 import { flatten, getQuoteChar } from "../util";
 
 /*

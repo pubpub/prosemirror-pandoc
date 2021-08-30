@@ -76,3 +76,12 @@ export const getQuoteChar = (
         return single ? "'" : '"';
     }
 };
+
+export const makeCounter = () => {
+    const countMap: Map<string, number> = new Map();
+    return (type: string) => {
+        const count = countMap.get(type) || 0;
+        countMap.set(type, count + 1);
+        return count;
+    };
+};

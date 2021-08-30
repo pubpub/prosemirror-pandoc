@@ -1,4 +1,4 @@
-import { ProsemirrorNode, ProsemirrorSchema } from "../../types";
+import { ProsemirrorNode, ProsemirrorSchema } from "types";
 import { parseExpr, Expr, createItemAcceptor } from "../nodeExpression";
 
 interface OpenToken {

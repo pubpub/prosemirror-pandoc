@@ -5,6 +5,7 @@
         "esModuleInterop": true,
         "outDir": "dist",
         "lib": ["es6", "dom"],
+        "baseUrl": "src",
     },
     "include": ["src"],
     "exclude": ["node_modules"]

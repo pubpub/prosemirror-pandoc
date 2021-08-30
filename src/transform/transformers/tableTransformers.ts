@@ -7,7 +7,7 @@ import {
     ProsemirrorNode,
     Row,
     Table,
-} from "../../types";
+} from "types";
 import { TransformContext, TransformParentContext } from "../types";
 
 const resolveCaption = (

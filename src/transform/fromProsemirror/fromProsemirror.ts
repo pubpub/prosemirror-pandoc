@@ -1,4 +1,6 @@
-import { ProsemirrorNode, PandocNode } from "../../types";
+import { ProsemirrorNode, PandocNode, ProsemirrorMark } from "types";
+
+import { asArray, flatten, makeCounter } from "../util";
 import {
     getTransformRuleForElements,
     RuleSet,
@@ -6,14 +8,11 @@ import {
     TransformContext,
 } from "../transformer";
 import { PandocFluent, pandocFluent } from "../fluent";
-import { asArray, flatten, makeCounter } from "../util";
-import { createWrapperNodeForMarks } from "./marks";
 
-const matchProsemirrorNode = (identifier: string) => (
-    node: ProsemirrorNode
-): boolean => {
-    return identifier === node.type;
-};
+import { createWrapperNodeForMarks, splitNodesByMarks } from "./marks";
+
+const matchProsemirrorNode = (identifier: string) => (node: ProsemirrorNode) =>
+    identifier === node.type;
 
 export const fromProsemirrorInner = (
     elementOrArray: ProsemirrorNode | ProsemirrorNode[],
@@ -23,13 +22,13 @@ export const fromProsemirrorInner = (
         return pandocFluent([]);
     }
     const { rules } = context;
-    const elementsAndMarks = splitElementsByMarks(asArray(elementOrArray));
+    const nodesAndAssociatedMarks = splitNodesByMarks(asArray(elementOrArray));
     const transformed: PandocNode[] = [];
-    for (const [elements, marks] of elementsAndMarks) {
+    for (const { nodes, marks } of nodesAndAssociatedMarks) {
         let ptr = 0;
         const innerTransformed = [];
-        while (ptr < elements.length) {
-            const remaining = elements.slice(ptr);
+        while (ptr < nodes.length) {
+            const remaining = nodes.slice(ptr);
             const { rule, acceptedCount } = getTransformRuleForElements(
                 rules,
                 remaining,
@@ -38,17 +37,17 @@ export const fromProsemirrorInner = (
             const addition: PandocNode[] = flatten(
                 rule.acceptsMultiple
                     ? rule.transform(
-                          elements.slice(ptr, ptr + acceptedCount),
+                          nodes.slice(ptr, ptr + acceptedCount),
                           context
                       )
-                    : rule.transform(elements[ptr], context)
+                    : rule.transform(nodes[ptr], context)
             );
             for (const element of addition) {
                 innerTransformed.push(element);
             }
             ptr += acceptedCount;
         }
-        const maybeWrappedNodes = createWrapperNodeFromMarks(
+        const maybeWrappedNodes = createWrapperNodeForMarks(
             innerTransformed,
             marks
         );
@@ -68,9 +67,9 @@ export const fromProsemirror = (
 ): PandocFluent => {
     const context = {
         rules: rules.fromProsemirror,
-        resource: config.resource || (x => x),
+        resource: config.resource || ((x) => x),
         count: makeCounter(),
-        transform: element => fromProsemirrorInner(element, context),
+        transform: (element) => fromProsemirrorInner(element, context),
     };
     return context.transform(elementOrArray);
 };

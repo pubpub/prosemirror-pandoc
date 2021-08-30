@@ -1,8 +1,4 @@
-import {
-    ProsemirrorNode,
-    ProsemirrorMark,
-    ProsemirrorSchema,
-} from "../../types";
+import { ProsemirrorNode, ProsemirrorMark, ProsemirrorSchema } from "types";
 
 const compareMarks = (first: ProsemirrorMark, second: ProsemirrorMark) =>
     // Tell no one what you saw here

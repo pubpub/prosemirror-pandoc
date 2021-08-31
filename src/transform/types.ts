@@ -37,7 +37,6 @@ export type TransformConfig = {
     resource: (input: string, context?: any) => string;
     useSmartQuotes: boolean;
     prosemirrorDocWidth: number;
-    prosemirrorTextAlignAttr: null | string;
 };
 
 export type TransformParentContext = {

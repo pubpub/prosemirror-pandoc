@@ -512,7 +512,7 @@ export const acceptItems = <Item>(
     return maxConsumedItems;
 };
 
-export const expressionAcceptsMultiple = (expr: Expr): boolean => {
+export const exprAcceptsMultiple = (expr: Expr): boolean => {
     if (expr.type === "identifier") {
         return false;
     } else if (expr.type === "sequence") {
@@ -524,25 +524,25 @@ export const expressionAcceptsMultiple = (expr: Expr): boolean => {
     } else if (expr.type === "range") {
         return expr.upperBound === null || expr.upperBound > 1;
     } else if (expr.type === "choice") {
-        return expr.children.some((child) => expressionAcceptsMultiple(child));
+        return expr.children.some((child) => exprAcceptsMultiple(child));
     }
 };
 
-export const willAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
+export const exprWillAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
     if (expr.type === "identifier") {
         return expr.identifier === id;
     } else if (expr.type === "sequence") {
         return false;
     } else if (expr.type === "choice") {
         return expr.children.some((child) =>
-            willAlwaysMatchSingleIdentifier(child, id)
+            exprWillAlwaysMatchSingleIdentifier(child, id)
         );
     } else if (expr.type === "range") {
         return (
             expr.lowerBound === 1 &&
-            willAlwaysMatchSingleIdentifier(expr.child, id)
+            exprWillAlwaysMatchSingleIdentifier(expr.child, id)
         );
     } else {
-        return willAlwaysMatchSingleIdentifier(expr.child, id);
+        return exprWillAlwaysMatchSingleIdentifier(expr.child, id);
     }
 };

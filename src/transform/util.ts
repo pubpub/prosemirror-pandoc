@@ -1,7 +1,7 @@
 import { Attr, Str, Space } from "../types";
 
 export const createAttr = (
-    identifier: string,
+    identifier: string = "",
     classes?: string[],
     properties?: Record<string, any>
 ): Attr => {

@@ -3,20 +3,6 @@
  * See https://hackage.haskell.org/package/pandoc-types-1.17.6/docs/Text-Pandoc-Definition.html
  */
 
-interface ProsemirrorNodeDefinition {
-    content?: string;
-    attrs?: { [key: string]: any };
-    group?: string;
-    defining?: boolean;
-}
-
-interface ProsemirrorMarkDefinition {}
-
-export type ProsemirrorSchema = {
-    nodes: { [name: string]: ProsemirrorNodeDefinition };
-    marks: { [name: string]: ProsemirrorMarkDefinition };
-};
-
 export type ProsemirrorAttr =
     | undefined
     | null
@@ -467,7 +453,7 @@ export type Inline =
     | Note
     | Span;
 
-export type PandocNode = Doc | Block | Inline | MetaValue;
+export type PandocNode = Doc | Block | Inline;
 
 export const PANDOC_NODE_TYPES = [
     "BlockQuote",

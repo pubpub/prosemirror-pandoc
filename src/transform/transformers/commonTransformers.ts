@@ -7,13 +7,15 @@ import {
     Doc,
     RawBlock,
     RawInline,
+    PandocNode,
+    Inline,
 } from "types";
 import { flatten, getQuoteChar } from "../util";
 
 /*
  * A transformer that turns Pandoc root-level documents into Prosemirror ones.
  */
-export const docTransformer = (pdNodeName, pmNodeName) => {
+export const docTransformer = (pmNodeName: string) => {
     return {
         fromPandoc: (node: Doc, { transform }): ProsemirrorNode => {
             const { blocks } = node;
@@ -25,7 +27,7 @@ export const docTransformer = (pdNodeName, pmNodeName) => {
         fromProsemirror: (node: ProsemirrorNode, { transform }): Doc => {
             const { content } = node;
             return {
-                type: pdNodeName,
+                type: "Doc",
                 blocks: transform(content).asArray(),
                 meta: {},
             };
@@ -38,17 +40,20 @@ export const docTransformer = (pdNodeName, pmNodeName) => {
  * correspondences between Pandoc elements with a content property and
  * Prosemirror elements with a content property
  */
-export const contentTransformer = (pdNodeName, pmNodeName) => {
+export const contentTransformer = (
+    pdNodeType: Inline["type"] | Block["type"],
+    pmNodeType: string
+) => {
     return {
         fromPandoc: (node, { transform }) => {
             return {
-                type: pmNodeName,
+                type: pmNodeType,
                 content: transform(node.content),
             };
         },
         fromProsemirror: (node, { transform }) => {
             return {
-                type: pdNodeName,
+                type: pdNodeType,
                 content: transform(node.content),
             };
         },
@@ -59,7 +64,7 @@ export const contentTransformer = (pdNodeName, pmNodeName) => {
  * A transformer that converts between Pandoc elements with string content and Prosemirror
  * elements that accept {type: 'text', text: string}[] as their content.
  */
-export const textTransformer = (pdNodeName, pmNodeName) => {
+export const textTransformer = (pdNodeName: string, pmNodeName: string) => {
     return {
         fromPandoc: (node) => {
             return {

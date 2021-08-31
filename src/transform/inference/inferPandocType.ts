@@ -1,4 +1,4 @@
-import { PandocNode } from "../types";
+import { PandocNode, ProsemirrorMark, ProsemirrorNode } from "../../types";
 
 type Whitespace = "\n" | " ";
 type OneOrMore<T> = [T, ...T[]];

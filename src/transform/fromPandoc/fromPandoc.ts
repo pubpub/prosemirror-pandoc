@@ -1,7 +1,7 @@
 import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "types";
 
 import { flatten, asArray, makeCounter } from "../util";
-import { ProsemirrorFluent, prosemirrorFluent } from "../fluent";
+import { fluent, Fluent } from "../fluent";
 import { getTransformRuleForElements } from "../transformer";
 import { RuleSet, TransformConfig, TransformContext } from "../types";
 
@@ -18,9 +18,9 @@ const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
     context: TransformContext<PandocNode, ProsemirrorNode>,
     marks: ProsemirrorMark[]
-): ProsemirrorFluent => {
+): Fluent<ProsemirrorNode> => {
     if (!elementOrArray) {
-        return prosemirrorFluent([]);
+        return fluent([] as ProsemirrorNode[]);
     }
     const { rules, marksMap } = context;
     const elements = asArray(elementOrArray);
@@ -47,7 +47,7 @@ const fromPandocInner = (
         }
         ptr += acceptedCount;
     }
-    return prosemirrorFluent(transformed);
+    return fluent(transformed);
 };
 
 export const fromPandoc = (
@@ -58,7 +58,6 @@ export const fromPandoc = (
     const {
         resource = (x) => x,
         useSmartQuotes = false,
-        prosemirrorTextAlignAttr = null,
         prosemirrorDocWidth = 1000,
     } = config;
     const context: TransformContext<PandocNode, ProsemirrorNode> = {
@@ -66,7 +65,6 @@ export const fromPandoc = (
         prosemirrorSchema: rules.prosemirrorSchema,
         resource,
         useSmartQuotes,
-        prosemirrorTextAlignAttr,
         count: makeCounter(),
         transform: (
             element,

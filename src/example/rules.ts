@@ -152,6 +152,9 @@ rules.transform("Header", "heading", {
 // Transform horizontal rules
 rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
 
+
+rules.transform("Emph", "em", 
+
 // Specify all nodes that are equivalent to Prosemirror marks
 rules.transformToMark("Emph", "em");
 rules.transformToMark("Strong", "strong");

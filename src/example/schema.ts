@@ -1,3 +1,4 @@
+import { Schema } from "prosemirror-model";
 import { tableNodes } from "prosemirror-tables";
 
 export const nodes = {
@@ -125,3 +126,5 @@ export const marks = {
     strike: {},
     code: {},
 };
+
+export const prosemirrorSchema = new Schema({ nodes, marks });

@@ -7,15 +7,15 @@ import {
     Inline,
     Block,
 } from "../types";
-import { InferPandocNodeType } from "./infer";
+import { InferPandocNodeType } from "./inference/inferPandocType";
 import {
     acceptItems,
     Expr,
-    expressionAcceptsMultiple,
+    exprAcceptsMultiple,
     IdentifierMatch,
     parseExpr,
     quickAcceptChoice,
-    willAlwaysMatchSingleIdentifier,
+    exprWillAlwaysMatchSingleIdentifier,
 } from "./nodeExpression";
 import {
     Rule,
@@ -27,9 +27,9 @@ import {
 
 const unwrapTransformer = <
     PdNode extends PandocNode,
-    PmNode extends ProsemirrorNode
+    PmElem extends ProsemirrorElement
 >(
-    wt: WrappedBidiTransformer<PandocNode, ProsemirrorNode>,
+    wt: WrappedBidiTransformer<PandocNode, ProsemirrorElement>,
     pdPattern: string,
     pmPattern: string
 ) => {
@@ -42,7 +42,7 @@ const unwrapTransformer = <
                 pmExpr,
                 transformer: wt(
                     pdExpr.identifier as PdNode["type"],
-                    pmExpr.identifier as PmNode["type"]
+                    pmExpr.identifier as PmElem["type"]
                 ),
             };
         } else {
@@ -69,7 +69,7 @@ const validateRuleset = (
     const missingPandocTypes = PANDOC_NODE_TYPES.filter(
         (type) =>
             !expressions.some((expr) =>
-                willAlwaysMatchSingleIdentifier(expr, type)
+                exprWillAlwaysMatchSingleIdentifier(expr, type)
             )
     );
     if (missingPandocTypes.length > 0) {
@@ -95,7 +95,7 @@ export const buildRuleset = (prosemirrorSchema: ProsemirrorSchema) => {
         pmPattern: PmPattern,
         wrappedTransformer: WrappedBidiTransformer<
             InferPandocNodeType<PdPattern>,
-            ProsemirrorNode
+            ProsemirrorElement
         >
     ) => {
         const { fromPandoc, fromProsemirror } = createBidirectionalRules(
@@ -165,11 +165,11 @@ const createBidirectionalRules = <
     pmPattern: string,
     wrappedTransformer: WrappedBidiTransformer<PdNode, PmElem>
 ) => {
-    const {
-        pdExpr,
-        pmExpr,
-        transformer: { fromPandoc, fromProsemirror },
-    } = unwrapTransformer(wrappedTransformer, pdPattern, pmPattern);
+    const { pdExpr, pmExpr, transformer } = unwrapTransformer(
+        wrappedTransformer,
+        pdPattern,
+        pmPattern
+    );
 
     return {
         fromPandoc: createRule(pdExpr, fromPandoc),
@@ -184,7 +184,7 @@ const createRule = <From, To>(
     return {
         expression,
         transform,
-        acceptsMultiple: expressionAcceptsMultiple(expression),
+        acceptsMultiple: exprAcceptsMultiple(expression),
     };
 };
 
@@ -229,7 +229,7 @@ export const getTransformRuleForElements = <
         }
     }
     throw new Error(
-        `Could not find rule for nodes: ${
+        `Could not find transform rule for nodes: ${
             nodes
                 .map((n) => JSON.stringify(n))
                 .slice(0, 3)

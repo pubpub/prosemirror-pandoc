@@ -29,12 +29,12 @@ type BidirectionalTransformer<
 > =
     | {
           fromProsemirrorNode: ProsemirrorNodeToPandocNodeTransformer<
-              Extract<ProsemirrorType, ProsemirrorNode>,
+              ProsemirrorType,
               PandocType
           >;
           toProsemirrorNode: PandocNodeToProsemirrorNodeTransformer<
               PandocType,
-              Extract<ProsemirrorType, ProsemirrorNode>
+              ProsemirrorType
           >;
       }
     | {

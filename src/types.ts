@@ -1,6 +1,6 @@
 /**
  * Definitions for the Pandoc AST
- * See https://hackage.haskell.org/package/pandoc-types-1.17.6/docs/Text-Pandoc-Definition.html
+ * See https://hackage.haskell.org/package/pandoc-types-1.22/docs/Text-Pandoc-Definition.html
  */
 
 export type ProsemirrorAttr =

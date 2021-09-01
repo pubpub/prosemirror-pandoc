@@ -27,10 +27,10 @@ import {
 
 import {
     bareLeafTransformer,
-    contentTransformer,
+    bareContentTransformer,
     definitionListTransformer,
     docTransformer,
-    listTransformer,
+    createListTransformer,
     nullTransformer,
     pandocPassThroughTransformer,
     pandocQuotedTransformer,
@@ -60,7 +60,7 @@ rules.fromPandoc("Null", nullTransformer);
 rules.transform(
     "Para | Plain",
     "paragraph",
-    contentTransformer("Para", "paragraph")
+    bareContentTransformer("Para", "paragraph")
 );
 
 rules.fromPandoc("Div", pandocPassThroughTransformer);
@@ -97,7 +97,7 @@ rules.transform("CodeBlock", "code_block", {
     },
 });
 
-rules.transform("BlockQuote", "blockquote", contentTransformer);
+rules.transform("BlockQuote", "blockquote", bareContentTransformer);
 
 // Use a listTransformer to take care of OrderedList and BulletList
 const ensureFirstElementIsParagraph = (listItem) => {
@@ -113,13 +113,13 @@ const ensureFirstElementIsParagraph = (listItem) => {
 rules.transform(
     "OrderedList",
     "ordered_list",
-    listTransformer("list_item", ensureFirstElementIsParagraph)
+    createListTransformer("list_item", ensureFirstElementIsParagraph)
 );
 
 rules.transform(
     "BulletList",
     "bullet_list",
-    listTransformer("list_item", ensureFirstElementIsParagraph)
+    createListTransformer("list_item", ensureFirstElementIsParagraph)
 );
 
 rules.fromPandoc(
@@ -151,9 +151,6 @@ rules.transform("Header", "heading", {
 
 // Transform horizontal rules
 rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
-
-
-rules.transform("Emph", "em", 
 
 // Specify all nodes that are equivalent to Prosemirror marks
 rules.transformToMark("Emph", "em");

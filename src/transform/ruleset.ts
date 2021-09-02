@@ -15,7 +15,7 @@ import {
     ProsemirrorMarkToPandocNodeTransformer,
     ProsemirrorNodeToPandocNodeTransformer,
 } from "./typesNew";
-import { Expr, parseExpr, exprAcceptsMultiple } from "./nodeExpression";
+import { Expr, parseExpr, exprAcceptsMultiple } from "./expression";
 
 type Rule<Transformer> = {
     transformer: Transformer;
@@ -182,25 +182,5 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             const { fromProsemirrorMark } = bidirectionalTransformer;
             this.fromProsemirrorMark(prosemirrorPattern, fromProsemirrorMark);
         }
-    }
-
-    transformBetweenNodeAndMark(
-        nodePattern: Inline["type"] | Block["type"],
-        markPattern: string
-    ) {
-        return this.transform(nodePattern, markPattern, {
-            fromProsemirrorMark: (_, content) => {
-                return {
-                    type: nodePattern,
-                    attr
-                    content,
-                };
-            },
-            toProsemirrorMark: () => {
-                return {
-                    type: markPattern,
-                };
-            },
-        });
     }
 }

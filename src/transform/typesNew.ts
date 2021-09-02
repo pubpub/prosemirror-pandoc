@@ -26,16 +26,15 @@ type SharedTransformConfig = {
 type SharedTransformContext = {
     ruleset: RuleSet<any>;
     count: (label: string) => number;
-    prosemirrorSchema: ProsemirrorSchema;
 };
 
 // Transform config with Pandoc-specific options
-type FromPandocTransformConfig = SharedTransformConfig & {
+export type FromPandocTransformConfig = SharedTransformConfig & {
     useSmartQuotes: boolean;
 };
 
 // Transform config with Prosemirror-specific options
-type FromProsemirrorTransformConfig = SharedTransformConfig;
+export type FromProsemirrorTransformConfig = SharedTransformConfig;
 
 // Transform context for Pandoc
 export type FromPandocTransformContext = FromPandocTransformConfig &

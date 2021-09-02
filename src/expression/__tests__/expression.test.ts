@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-import { acceptItems, parseExpr } from "../nodeExpression";
+import { acceptItems, parseExpr } from "expression";
 
 interface Node {
     type: string;

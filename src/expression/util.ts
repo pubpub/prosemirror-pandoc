@@ -1,0 +1,61 @@
+import { Expr } from "./types";
+
+export const exprAcceptsMultiple = (expr: Expr): boolean => {
+    if (expr.type === "identifier") {
+        return false;
+    } else if (expr.type === "sequence") {
+        return true;
+    } else if (expr.type === "oneOrMore") {
+        return true;
+    } else if (expr.type === "zeroOrMore") {
+        return true;
+    } else if (expr.type === "range") {
+        return expr.upperBound === null || expr.upperBound > 1;
+    } else if (expr.type === "choice") {
+        return expr.children.some((child) => exprAcceptsMultiple(child));
+    }
+};
+
+export const exprWillAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
+    if (expr.type === "identifier") {
+        return expr.identifier === id;
+    } else if (expr.type === "sequence") {
+        return false;
+    } else if (expr.type === "choice") {
+        return expr.children.some((child) =>
+            exprWillAlwaysMatchSingleIdentifier(child, id)
+        );
+    } else if (expr.type === "range") {
+        return (
+            expr.lowerBound === 1 &&
+            exprWillAlwaysMatchSingleIdentifier(expr.child, id)
+        );
+    } else {
+        return exprWillAlwaysMatchSingleIdentifier(expr.child, id);
+    }
+};
+
+export const quickAcceptChoiceExpr = <Item extends { type: string }>(
+    expr: Expr,
+    items: Item[]
+): number => {
+    if (
+        expr.type === "oneOrMore" &&
+        expr.child.type === "choice" &&
+        expr.child.children.every((child) => child.type === "identifier")
+    ) {
+        const choice = expr.child;
+        const validIdentifiers = choice.children
+            .map((child) => child.type === "identifier" && child.identifier)
+            .filter((x) => x);
+        let ptr = 0;
+        while (
+            ptr < items.length &&
+            validIdentifiers.includes(items[ptr].type)
+        ) {
+            ++ptr;
+        }
+        return ptr;
+    }
+    return 0;
+};

@@ -14,9 +14,9 @@ import {
     exprAcceptsMultiple,
     IdentifierMatch,
     parseExpr,
-    quickAcceptChoice,
+    quickAcceptChoiceExpr,
     exprWillAlwaysMatchSingleIdentifier,
-} from "./nodeExpression";
+} from "expression";
 import {
     Rule,
     RuleSet,
@@ -219,7 +219,7 @@ export const getTransformRuleForElements = <
 ): { rule: Rule<From, To>; acceptedCount: number } => {
     for (const rule of rules) {
         const { expression } = rule;
-        const acceptChoiceCount = quickAcceptChoice(expression, nodes);
+        const acceptChoiceCount = quickAcceptChoiceExpr(expression, nodes);
         if (acceptChoiceCount > 0) {
             return { rule, acceptedCount: acceptChoiceCount };
         }

@@ -1,5 +1,7 @@
-import { ProsemirrorNode, ProsemirrorSchema } from "types";
-import { parseExpr, Expr, createItemAcceptor } from "../nodeExpression";
+import { Schema as ProsemirrorSchema } from "prosemirror-model";
+
+import { ProsemirrorNode } from "types";
+import { parseExpr, Expr, createItemAcceptor } from "expression";
 
 interface OpenToken {
     type: "open";
@@ -49,14 +51,15 @@ export const healNaiveTokenList = (
     const nodeToTokenMap: Map<ProsemirrorNode, OpenToken[]> = new Map();
 
     Object.entries(schema.nodes).forEach(([key, entry]) => {
-        if (entry.content) {
-            acceptorExpressions.set(key, parseExpr(entry.content));
+        if (entry.spec.content) {
+            acceptorExpressions.set(key, parseExpr(entry.spec.content));
         }
     });
 
     const matchProsemirrorNode = (group: string) => (node: ProsemirrorNode) => {
         const schemaEntry = schema.nodes[node.type];
-        const matchRes = node.type === group || schemaEntry.group === group;
+        const matchRes =
+            node.type === group || schemaEntry.spec.group === group;
         return matchRes;
     };
 

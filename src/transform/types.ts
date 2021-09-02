@@ -3,10 +3,9 @@ import {
     ProsemirrorElement,
     ProsemirrorMark,
     ProsemirrorNode,
-    ProsemirrorSchema,
 } from "../types";
 import { ProsemirrorFluent, PandocFluent } from "./fluent";
-import { Expr } from "./nodeExpression";
+import { Expr } from "expression";
 
 export type Transformer<From, To> = (
     node: From,

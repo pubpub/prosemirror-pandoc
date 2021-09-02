@@ -6,6 +6,7 @@
         "outDir": "dist",
         "lib": ["es6", "dom"],
         "baseUrl": "src",
+        "noErrorTruncation": true,
     },
     "include": ["src"],
     "exclude": ["node_modules"]

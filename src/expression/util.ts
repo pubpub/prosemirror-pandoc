@@ -34,28 +34,3 @@ export const exprWillAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
         return exprWillAlwaysMatchSingleIdentifier(expr.child, id);
     }
 };
-
-export const quickAcceptChoiceExpr = <Item extends { type: string }>(
-    expr: Expr,
-    items: Item[]
-): number => {
-    if (
-        expr.type === "oneOrMore" &&
-        expr.child.type === "choice" &&
-        expr.child.children.every((child) => child.type === "identifier")
-    ) {
-        const choice = expr.child;
-        const validIdentifiers = choice.children
-            .map((child) => child.type === "identifier" && child.identifier)
-            .filter((x) => x);
-        let ptr = 0;
-        while (
-            ptr < items.length &&
-            validIdentifiers.includes(items[ptr].type)
-        ) {
-            ++ptr;
-        }
-        return ptr;
-    }
-    return 0;
-};

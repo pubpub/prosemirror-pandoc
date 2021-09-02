@@ -1,8 +1,13 @@
-import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "types";
+import {
+    PandocNode,
+    ProsemirrorNode,
+    ProsemirrorMark,
+    Inline,
+    Block,
+} from "types";
 
-import { flatten, asArray, makeCounter } from "transform/util";
+import { asArray, makeCounter } from "transform/util";
 import { fluent, Fluent } from "transform/fluent";
-import { getTransformRuleForElements } from "transform/transformer";
 import {
     FromPandocTransformContext,
     FromPandocTransformConfig,
@@ -12,42 +17,44 @@ import { RuleSet } from "transform/ruleset";
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
 
-const matchPandocNode =
-    (identifier: string) =>
-    (node: PandocNode): boolean => {
-        return identifier === node.type;
-    };
-
 const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
-    context: FromPandocTransformContext,
-    marks: ProsemirrorMark[]
+    context: FromPandocTransformContext
 ): Fluent<ProsemirrorNode> => {
     if (!elementOrArray) {
         return fluent([] as ProsemirrorNode[]);
     }
-    const { ruleset, marksMap } = context;
+    const { ruleset } = context;
     const elements = asArray(elementOrArray);
     const transformed: ProsemirrorNode[] = [];
+    const localMarksMap = new Map<ProsemirrorNode, ProsemirrorMark[]>();
     let ptr = 0;
     while (ptr < elements.length) {
         const remaining = elements.slice(ptr);
-        const { rule, acceptedCount } = getTransformRuleForElements(
-            rules,
-            remaining,
-            matchPandocNode
-        );
-        const addition: ProsemirrorNode[] = flatten(
-            rule.acceptsMultiple
-                ? rule.transform(
-                      elements.slice(ptr, ptr + acceptedCount),
-                      context
-                  )
-                : rule.transform(elements[ptr], context)
-        );
-        for (const element of addition) {
-            marksMap.set(element, [...(marksMap.get(element) || []), ...marks]);
-            transformed.push(element);
+        const { rule, acceptedCount } = ruleset.acceptPandocNodes(remaining);
+        if (rule.isMarksRule) {
+            const accepted = elements[ptr];
+            const marks = asArray(rule.transformer(accepted, context));
+            if ("content" in accepted) {
+                const innerTransformed = fromPandocInner(
+                    // This cast works around the fact that some Pandoc nodes have nested arrays
+                    // as their content property (e.g. OrderedList has Block[][]). This shouldn't
+                    // be a problem in practice unless you're trying to do something very stupid
+                    // like turn an OrderedList node into an em mark.
+                    accepted.content as Block[] | Inline[],
+                    context
+                ).asArray();
+                for (const node of innerTransformed) {
+                    localMarksMap.set(node, marks);
+                }
+                transformed.push(...innerTransformed);
+            }
+        } else if (rule.isMarksRule === false) {
+            const accepted = rule.acceptsMultiple
+                ? elements.slice(ptr, ptr + acceptedCount)
+                : elements[ptr];
+            const addition = rule.transformer(accepted, context);
+            transformed.push(...asArray(addition));
         }
         ptr += acceptedCount;
     }
@@ -69,13 +76,10 @@ export const fromPandoc = (
         resource,
         useSmartQuotes,
         count: makeCounter(),
-        transform: (
-            element,
-            { marks = [], context: parentContext = {} } = {}
-        ) => fromPandocInner(element, { ...context, ...parentContext }, marks),
+        transform: (element, parentContext = {}) =>
+            fromPandocInner(element, { ...context, ...parentContext }),
         marksMap: new Map(),
         prosemirrorDocWidth,
-        textAlign: "left",
     };
     const nodes = context.transform(elementOrArray);
     const nodesWithMarks = applyMarksToNodes(

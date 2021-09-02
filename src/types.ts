@@ -3,6 +3,8 @@
  * See https://hackage.haskell.org/package/pandoc-types-1.22/docs/Text-Pandoc-Definition.html
  */
 
+export { Schema as ProsemirrorSchema } from "prosemirror-model";
+
 export type ProsemirrorAttr =
     | undefined
     | null
@@ -11,6 +13,7 @@ export type ProsemirrorAttr =
     | ProsemirrorAttr[];
 
 export type ProsemirrorNode<Type = string> = {
+    __isMark?: false;
     type: Type;
     content?: ProsemirrorNode[];
     text?: string;
@@ -18,6 +21,7 @@ export type ProsemirrorNode<Type = string> = {
 };
 
 export type ProsemirrorMark<Type = string> = {
+    __isMark?: true;
     type: Type;
     attrs?: Record<string, ProsemirrorAttr>;
 };

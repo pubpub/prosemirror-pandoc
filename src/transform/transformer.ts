@@ -7,7 +7,7 @@ import {
     Inline,
     Block,
 } from "../types";
-import { InferPandocNodeType } from "./inference/inferPandocType";
+import { InferPandocPattern } from "./inference/inferPandocType";
 import {
     acceptItems,
     Expr,
@@ -94,7 +94,7 @@ export const buildRuleset = (prosemirrorSchema: ProsemirrorSchema) => {
         pdPattern: PdPattern,
         pmPattern: PmPattern,
         wrappedTransformer: WrappedBidiTransformer<
-            InferPandocNodeType<PdPattern>,
+            InferPandocPattern<PdPattern>,
             ProsemirrorElement
         >
     ) => {
@@ -110,7 +110,7 @@ export const buildRuleset = (prosemirrorSchema: ProsemirrorSchema) => {
     const fromPandoc = <PdPattern extends string>(
         pdPattern: PdPattern,
         transformFn: Transformer<
-            InferPandocNodeType<PdPattern>,
+            InferPandocPattern<PdPattern>,
             ProsemirrorNode
         >
     ) => {

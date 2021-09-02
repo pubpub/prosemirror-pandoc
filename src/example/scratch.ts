@@ -157,7 +157,7 @@ rules.transform("Link", "link", {
         return {
             type: "Link",
             attr: createAttr(),
-            content,
+            content: content,
             target: {
                 url: link.attrs.href.toString(),
                 title: link.attrs.title.toString(),

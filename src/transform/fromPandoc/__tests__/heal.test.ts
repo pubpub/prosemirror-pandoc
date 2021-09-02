@@ -1,10 +1,10 @@
 /* global describe, it, expect */
-import * as prosemirrorSchema from "../../../example/schema";
-
 import { ProsemirrorSchema } from "../../../types";
+import { prosemirrorSchema } from "../../../example/schema";
+
 import { getNaiveTokenList, healNaiveTokenList, Token, heal } from "../heal";
 
-const toyProsemirrorSchema: ProsemirrorSchema = {
+const toyProsemirrorSchema: ProsemirrorSchema = new ProsemirrorSchema({
     nodes: {
         A: {
             defining: true,
@@ -24,7 +24,7 @@ const toyProsemirrorSchema: ProsemirrorSchema = {
         },
     },
     marks: {},
-};
+});
 
 const stringify = (tokens: Token[]) =>
     tokens

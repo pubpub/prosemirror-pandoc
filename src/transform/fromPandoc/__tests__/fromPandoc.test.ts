@@ -1,5 +1,5 @@
 /* global describe, it, expect */
-import rules from "../../../example/rules";
+import { rules } from "../../../example/scratch";
 
 import { fromPandoc } from "../fromPandoc";
 import { createAttr } from "../../util";

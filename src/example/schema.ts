@@ -1,7 +1,7 @@
 import { Schema } from "prosemirror-model";
 import { tableNodes } from "prosemirror-tables";
 
-export const nodes = {
+const nodes = {
     doc: {
         content: "block+",
         attrs: {
@@ -110,7 +110,7 @@ export const nodes = {
     }),
 };
 
-export const marks = {
+const marks = {
     em: {},
     strong: {},
     link: {

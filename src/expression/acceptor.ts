@@ -295,11 +295,41 @@ export const createItemAcceptor = <Item>(
     };
 };
 
+const quickAcceptItems = <Item>(
+    expr: Expr,
+    items: Item[],
+    matchTest: IdentifierMatch<Item>
+): number => {
+    if (
+        expr.type === "oneOrMore" &&
+        expr.child.type === "choice" &&
+        expr.child.children.every((child) => child.type === "identifier")
+    ) {
+        const choice = expr.child;
+        const validIdentifiers = choice.children
+            .map((child) => child.type === "identifier" && child.identifier)
+            .filter((x) => x);
+        let ptr = 0;
+        while (
+            ptr < items.length &&
+            validIdentifiers.some((id) => matchTest(id)(items[ptr]))
+        ) {
+            ++ptr;
+        }
+        return ptr;
+    }
+    return 0;
+};
+
 export const acceptItems = <Item>(
     expr: Expr,
     items: Item[],
     matchTest: IdentifierMatch<Item>
 ): number => {
+    const quickAcceptedItems = quickAcceptItems(expr, items, matchTest);
+    if (quickAcceptItems.length > 0) {
+        return quickAcceptedItems;
+    }
     const { startState, acceptState } = createAcceptanceMachine(
         expr,
         matchTest

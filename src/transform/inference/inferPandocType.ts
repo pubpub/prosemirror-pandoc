@@ -1,43 +1,35 @@
-import { PandocNode, ProsemirrorMark, ProsemirrorNode } from "../../types";
+import { PandocNode } from "../../types";
 
-type Whitespace = "\n" | " ";
-type OneOrMore<T> = [T, ...T[]];
+import { OneOrMore, Trim } from "./shared";
 
-type Trim<T> = T extends `${Whitespace}${infer U}`
-    ? Trim<U>
-    : T extends `${infer U}${Whitespace}`
-    ? Trim<U>
-    : T;
+type Resolve<Str> =
+    | ResolveZeroOrMore<Str>
+    | ResolveOneOrMore<Str>
+    | ResolveParens<Str>
+    | ResolveChoice<Str>
+    | ResolveIdentifier<Str>;
 
-type Resolve<T> =
-    | ResolveZeroOrMore<T>
-    | ResolveOneOrMore<T>
-    | ResolveParens<T>
-    | ResolveChoice<T>
-    | ResolveIdentifier<T>;
-
-type ResolveZeroOrMore<S> = S extends `${infer Some}*`
+type ResolveZeroOrMore<Str> = Str extends `${infer Some}*`
     ? Resolve<Some> extends never
         ? never
         : Resolve<Some>[]
     : never;
 
-type ResolveOneOrMore<S> = S extends `${infer Some}+`
+type ResolveOneOrMore<Str> = Str extends `${infer Some}+`
     ? Resolve<Some> extends never
         ? never
         : OneOrMore<Resolve<Some>>
     : never;
 
-type ResolveParens<S> = S extends `(${infer Some})` ? Resolve<Some> : never;
+type ResolveParens<Str> = Str extends `(${infer Some})` ? Resolve<Some> : never;
 
-type ResolveChoice<S> = S extends `${infer Some}|${infer Rest}`
+type ResolveChoice<Str> = Str extends `${infer Some}|${infer Rest}`
     ? Resolve<Trim<Some>> | Resolve<Trim<Rest>>
     : never;
 
-type ResolveIdentifier<S> = S extends PandocNode["type"]
-    ? PandocNode & { type: S }
+type ResolveIdentifier<Str> = Str extends PandocNode["type"]
+    ? Readonly<PandocNode & { type: Str }>
     : never;
 
-export type InferPandocNodeType<T extends string> = Resolve<T> extends never
-    ? PandocNode
-    : Resolve<T>;
+export type InferPandocPattern<Str extends string> = Resolve<Str>;
+export type InferPandocNodeType<S> = ResolveIdentifier<S>;

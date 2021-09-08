@@ -22,8 +22,13 @@ const toyProsemirrorSchema: ProsemirrorSchema = new ProsemirrorSchema({
             defining: true,
             content: "text*",
         },
+        text: {
+            inline: true,
+            group: "inline",
+        },
     },
     marks: {},
+    topNode: "A",
 });
 
 const stringify = (tokens: Token[]) =>

@@ -1,27 +1,26 @@
-import { ProsemirrorNode, PandocNode, ProsemirrorMark } from "types";
+import { ProsemirrorNode, PandocNode } from "types";
 
 import { asArray, flatten, makeCounter } from "../util";
-import {
-    getTransformRuleForElements,
-    RuleSet,
-    TransformConfig,
-    TransformContext,
-} from "../transformer";
-import { PandocFluent, pandocFluent } from "../fluent";
+import { getTransformRuleForElements } from "../transformerJunk";
+import { Fluent, fluent } from "../fluent";
 
 import { createWrapperNodeForMarks, splitNodesByMarks } from "./marks";
+import {
+    FromProsemirrorTransformConfig,
+    FromProsemirrorTransformContext,
+} from "transform/typesNew";
 
 const matchProsemirrorNode = (identifier: string) => (node: ProsemirrorNode) =>
     identifier === node.type;
 
 export const fromProsemirrorInner = (
     elementOrArray: ProsemirrorNode | ProsemirrorNode[],
-    context: TransformContext<ProsemirrorNode, PandocNode>
-) => {
+    context: FromProsemirrorTransformContext
+): Fluent<PandocNode> => {
     if (!elementOrArray) {
-        return pandocFluent([]);
+        return fluent([]);
     }
-    const { rules } = context;
+    const { ruleset } = context;
     const nodesAndAssociatedMarks = splitNodesByMarks(asArray(elementOrArray));
     const transformed: PandocNode[] = [];
     for (const { nodes, marks } of nodesAndAssociatedMarks) {
@@ -29,8 +28,9 @@ export const fromProsemirrorInner = (
         const innerTransformed = [];
         while (ptr < nodes.length) {
             const remaining = nodes.slice(ptr);
+            ruleset.
             const { rule, acceptedCount } = getTransformRuleForElements(
-                rules,
+                ruleset,
                 remaining,
                 matchProsemirrorNode
             );
@@ -57,17 +57,19 @@ export const fromProsemirrorInner = (
             transformed.push(maybeWrappedNodes);
         }
     }
-    return pandocFluent(transformed);
+    return fluent(transformed);
 };
 
 export const fromProsemirror = (
     elementOrArray: ProsemirrorNode | ProsemirrorNode[],
-    rules: RuleSet<PandocNode, ProsemirrorNode>,
-    config: TransformConfig = {}
-): PandocFluent => {
-    const context = {
-        rules: rules.fromProsemirror,
-        resource: config.resource || ((x) => x),
+    ruleset: RuleSet<PandocNode, ProsemirrorNode>,
+    config: Partial<FromProsemirrorTransformConfig> = {}
+): Fluent<PandocNode> => {
+    const { resource = (x) => x, prosemirrorDocWidth = 1000 } = config;
+    const context: FromProsemirrorTransformContext = {
+        ruleset,
+        resource,
+        prosemirrorDocWidth,
         count: makeCounter(),
         transform: (element) => fromProsemirrorInner(element, context),
     };

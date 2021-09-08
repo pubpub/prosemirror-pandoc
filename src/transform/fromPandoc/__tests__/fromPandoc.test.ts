@@ -75,7 +75,7 @@ describe("fromPandoc", () => {
     });
 
     it("transforms a Null into an empty array", () => {
-        expect(fromPandoc({ type: "Null" }, rules)).toEqual([]);
+        expect(fromPandoc({ type: "Null" }, rules).asArray()).toEqual([]);
     });
 
     it("transforms a simple string", () => {
@@ -121,7 +121,7 @@ describe("fromPandoc", () => {
                     },
                 ],
                 rules
-            )
+            ).asArray()
         ).toEqual([
             {
                 type: "paragraph",
@@ -449,7 +449,7 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        expect(fromPandoc(input, rules)).toMatchSnapshot();
+        expect(fromPandoc(input, rules).asArray()).toMatchSnapshot();
     });
 
     it("transforms an BulletList into an bullet_list", () => {
@@ -1236,7 +1236,7 @@ describe("fromPandoc", () => {
                 },
                 rules,
                 { prosemirrorDocWidth: 800 }
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1909,7 +1909,7 @@ describe("fromPandoc", () => {
                     },
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot());
 
     it("transforms Math (mathType=InlineMath) into an equation", () => {
@@ -1921,7 +1921,7 @@ describe("fromPandoc", () => {
                     content: "e^{i\\pi} = -1",
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1934,7 +1934,7 @@ describe("fromPandoc", () => {
                     content: "e^{i\\pi} = -1",
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1964,7 +1964,7 @@ describe("fromPandoc", () => {
                     ],
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1995,7 +1995,7 @@ describe("fromPandoc", () => {
                 },
                 rules,
                 { useSmartQuotes: true }
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 });

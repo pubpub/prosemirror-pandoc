@@ -36,13 +36,13 @@ export const bareContentTransformer = (
         toProsemirrorNode: (node, { transform }) => {
             return {
                 type: pmNodeType,
-                content: transform(node.content),
+                content: transform(node.content).asArray(),
             };
         },
         fromProsemirrorNode: (node, { transform }) => {
             return {
                 type: pdNodeType,
-                content: transform(node.content),
+                content: transform(node.content).asArray(),
             };
         },
     };

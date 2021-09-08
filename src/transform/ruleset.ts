@@ -1,5 +1,10 @@
-import { PandocNode, ProsemirrorSchema } from "types";
-import { parseExpr, exprAcceptsMultiple, acceptItems } from "expression";
+import { PandocNode, PANDOC_NODE_TYPES, ProsemirrorSchema } from "types";
+import {
+    parseExpr,
+    exprAcceptsMultiple,
+    exprWillAlwaysMatchSingleIdentifier,
+    acceptItems,
+} from "expression";
 
 import {
     InferPandocPattern,
@@ -61,14 +66,36 @@ const throwMarkMatchingError = (pattern: string) => {
     );
 };
 
+const warnAboutMissingMatchesForRules = (
+    matchNoun: string,
+    requiredTypes: string[],
+    rules: Rule<any>[]
+) => {
+    const matchingExpressions = rules.map((rule) => rule.expression);
+    const missingTypes = requiredTypes.filter(
+        (type) =>
+            !matchingExpressions.some((expr) =>
+                exprWillAlwaysMatchSingleIdentifier(expr, type)
+            )
+    );
+    if (missingTypes.length > 0) {
+        console.warn(
+            `Cannot find rules that are guaranteed to match on a ${matchNoun} of these types: ` +
+                `${missingTypes.join(", ")}.` +
+                " You may want to add or modify rules so that the transformer does not break" +
+                ` if it encounters one of these ${matchNoun}s.`
+        );
+    }
+};
+
 export class RuleSet<Schema extends ProsemirrorSchema> {
-    private pandocNodeToProsemirrorRules: (
+    readonly pandocNodeToProsemirrorRules: (
         | Rule<PandocNodeToProsemirrorMarkTransformer>
         | Rule<PandocNodeToProsemirrorNodeTransformer>
     )[] = [];
-    private prosemirrorNodeToPandocNodeRules: Rule<ProsemirrorNodeToPandocNodeTransformer>[] =
+    readonly prosemirrorNodeToPandocNodeRules: Rule<ProsemirrorNodeToPandocNodeTransformer>[] =
         [];
-    private prosemirrorMarkToPandocNodeRules: Rule<ProsemirrorMarkToPandocNodeTransformer>[] =
+    readonly prosemirrorMarkToPandocNodeRules: Rule<ProsemirrorMarkToPandocNodeTransformer>[] =
         [];
     readonly prosemirrorSchema: Schema;
 
@@ -185,6 +212,30 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             const { fromProsemirrorMark } = bidirectionalTransformer;
             this.fromProsemirrorMark(prosemirrorPattern, fromProsemirrorMark);
         }
+    }
+
+    validate() {
+        const {
+            pandocNodeToProsemirrorRules,
+            prosemirrorMarkToPandocNodeRules,
+            prosemirrorNodeToPandocNodeRules,
+            prosemirrorSchema,
+        } = this;
+        warnAboutMissingMatchesForRules(
+            "Pandoc node",
+            PANDOC_NODE_TYPES,
+            pandocNodeToProsemirrorRules
+        );
+        warnAboutMissingMatchesForRules(
+            "Prosemirror node",
+            Object.keys(prosemirrorSchema.spec.nodes),
+            prosemirrorNodeToPandocNodeRules
+        );
+        warnAboutMissingMatchesForRules(
+            "Pandoc node",
+            Object.keys(prosemirrorSchema.spec.marks),
+            prosemirrorMarkToPandocNodeRules
+        );
     }
 
     acceptPandocNodes(nodes: PandocNode[]): {

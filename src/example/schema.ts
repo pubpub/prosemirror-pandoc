@@ -68,6 +68,8 @@ const nodes = {
         group: "inline",
     },
     equation: {
+        atom: true,
+        inline: true,
         attrs: {
             value: { default: "" },
             html: { default: "" },
@@ -127,4 +129,4 @@ const marks = {
     code: {},
 };
 
-export const prosemirrorSchema = new Schema({ nodes, marks });
+export const prosemirrorSchema = new Schema({ nodes, marks, topNode: "doc" });

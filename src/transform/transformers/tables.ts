@@ -3,34 +3,22 @@ import {
     Caption,
     Cell,
     ColSpec,
-    PandocNode,
     ProsemirrorNode,
     Row,
     Table,
 } from "types";
-import { TransformContext, TransformParentContext } from "../types";
+
+import { FromPandocTransformContext } from "transform/typesNew";
 
 const resolveCaption = (
     caption: Caption,
-    context: TransformContext<PandocNode, ProsemirrorNode>
+    context: FromPandocTransformContext
 ): ProsemirrorNode[] => {
     const { shortCaption, content } = caption;
     return [
         ...context.transform(content).asArray(),
         ...(shortCaption ? context.transform(shortCaption).asArray() : []),
     ];
-};
-
-const resolveParentContextFromTextAlignment = (
-    colSpec: ColSpec
-): Partial<TransformParentContext> => {
-    if (colSpec.alignment === "AlignCenter") {
-        return { textAlign: "center" };
-    }
-    if (colSpec.alignment === "AlignRight") {
-        return { textAlign: "right" };
-    }
-    return {};
 };
 
 const resolveCellAttrs = (
@@ -56,9 +44,8 @@ const cellFromPandoc = (
     cell: Cell,
     colSpecs: ColSpec[],
     isHead: boolean,
-    context: TransformContext<PandocNode, ProsemirrorNode>
+    context: FromPandocTransformContext
 ): ProsemirrorNode<"table_cell" | "table_header"> => {
-    const parentContext = resolveParentContextFromTextAlignment(colSpecs[0]);
     // Don't pass empty content into table_header or table_cell, which expect block+
     const contentToTransform: Block[] =
         cell.content.length > 0
@@ -67,9 +54,7 @@ const cellFromPandoc = (
     return {
         type: isHead ? "table_header" : "table_cell",
         attrs: resolveCellAttrs(cell, colSpecs, context.prosemirrorDocWidth),
-        content: context
-            .transform(contentToTransform, { context: parentContext })
-            .asArray(),
+        content: context.transform(contentToTransform).asArray(),
     };
 };
 
@@ -77,7 +62,7 @@ const rowFromPandoc = (
     row: Row,
     colSpecs: ColSpec[],
     headColumns: number | "all",
-    context: TransformContext<PandocNode, ProsemirrorNode>
+    context: FromPandocTransformContext
 ): ProsemirrorNode<"table_row"> => {
     const headCutoff = headColumns === "all" ? Infinity : headColumns;
     return {
@@ -95,7 +80,7 @@ const rowFromPandoc = (
 
 export const pandocTableTransformer = (
     node: Table,
-    context: TransformContext<PandocNode, ProsemirrorNode>
+    context: FromPandocTransformContext
 ):
     | ProsemirrorNode<"table">
     | [ProsemirrorNode<"table">, ...ProsemirrorNode[]] => {

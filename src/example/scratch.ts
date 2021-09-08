@@ -11,6 +11,7 @@ import {
     definitionListTransformer,
     bareLeafTransformer,
     pandocQuotedTransformer,
+    pandocTableTransformer,
 } from "transform/transformers";
 import {
     createAttr,
@@ -136,7 +137,8 @@ const bareMarkTransformPairs = [
     ["Emph", "em"],
     ["Strikeout", "strike"],
     ["Superscript", "sup"],
-    ["Code", "sub"],
+    ["Subscript", "sub"],
+    ["Code", "code"],
 ] as const;
 
 bareMarkTransformPairs.forEach(([from, to]) =>
@@ -301,5 +303,25 @@ rules.transform("Note", "footnote", {
         };
     },
 });
+
+rules.toProsemirrorNode("Math", (node) => {
+    const { mathType, content } = node;
+    const isDisplay = mathType === "DisplayMath";
+    const prosemirrorType = isDisplay ? "block_equation" : "equation";
+    return {
+        type: prosemirrorType,
+        attrs: {
+            value: content,
+            html: katex.renderToString(content, {
+                displayMode: isDisplay,
+                throwOnError: false,
+            }),
+        },
+    };
+});
+
+rules.toProsemirrorNode("Table", pandocTableTransformer);
+
+rules.validate();
 
 export { rules };

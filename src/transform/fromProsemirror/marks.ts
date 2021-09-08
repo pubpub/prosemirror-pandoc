@@ -1,6 +1,10 @@
+import {
+    PandocNode,
+    ProsemirrorNode,
+    ProsemirrorElement,
+    ProsemirrorMark,
+} from "types";
 import { TransformContext } from "transform/types";
-import { PandocNode, ProsemirrorElement, ProsemirrorMark } from "types";
-
 
 export const createWrapperNodeFromMarks = (
     innerNode: PandocNode,
@@ -8,8 +12,8 @@ export const createWrapperNodeFromMarks = (
     context: TransformContext<ProsemirrorElement, PandocNode>
 ): PandocNode | PandocNode[] => {
     return marks.reduce((node, mark) => {
-        return context.transform(mark)
-    }
+        return context.transform(mark);
+    });
 };
 
 export const splitNodesByMarks = (

@@ -1,6 +1,5 @@
+import Heap from "./heap";
 import { Expr, IdentifierMatch } from "./types";
-
-import Heap from "../heap";
 
 interface State<Item> {
     addSuccessor: (s: State<Item>) => void;
@@ -327,7 +326,7 @@ export const acceptItems = <Item>(
     matchTest: IdentifierMatch<Item>
 ): number => {
     const quickAcceptedItems = quickAcceptItems(expr, items, matchTest);
-    if (quickAcceptItems.length > 0) {
+    if (quickAcceptedItems > 0) {
         return quickAcceptedItems;
     }
     const { startState, acceptState } = createAcceptanceMachine(

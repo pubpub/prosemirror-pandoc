@@ -1,8 +1,4 @@
 /* global describe, it, expect */
-import { rules } from "../../../example/scratch";
-
-import { fromPandoc } from "../fromPandoc";
-import { createAttr } from "../../util";
 import {
     Header,
     OrderedList,
@@ -12,10 +8,14 @@ import {
     Plain,
     DefinitionList,
     Link,
-} from "../../../types";
+} from "types";
+import { rules } from "example/scratch";
+import { createAttr } from "transform/util";
+
+import { fromPandoc } from "../fromPandoc";
 
 describe("fromPandoc", () => {
-    it("transforms a Document into a doc", () => {
+    it("transforms a Doc into a doc", () => {
         expect(
             fromPandoc(
                 {

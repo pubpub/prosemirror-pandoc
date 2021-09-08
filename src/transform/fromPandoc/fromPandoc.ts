@@ -31,7 +31,7 @@ const fromPandocInner = (
     let ptr = 0;
     while (ptr < elements.length) {
         const remaining = elements.slice(ptr);
-        const { rule, acceptedCount } = ruleset.acceptPandocNodes(remaining);
+        const { rule, acceptedCount } = ruleset.matchPandocNodes(remaining);
         if (rule.isMarksRule) {
             const accepted = elements[ptr];
             const marks = asArray(rule.transformer(accepted, context));

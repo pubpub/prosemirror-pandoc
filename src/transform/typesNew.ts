@@ -11,7 +11,7 @@ import { Fluent } from "./fluent";
 import { InferPandocNodeType, InferProsemirrorElementType } from "./inference";
 import { RuleSet } from "./ruleset";
 
-type OneOrMany<T> = T | T[];
+export type OneOrMany<T> = T | T[];
 
 // Function type that allows rules to transform their child nodes and pass appropriate context
 // into this sub-transformation

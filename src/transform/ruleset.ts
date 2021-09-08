@@ -1,4 +1,10 @@
-import { PandocNode, PANDOC_NODE_TYPES, ProsemirrorSchema } from "types";
+import {
+    PandocNode,
+    PANDOC_NODE_TYPES,
+    ProsemirrorMark,
+    ProsemirrorNode,
+    ProsemirrorSchema,
+} from "types";
 import {
     parseExpr,
     exprAcceptsMultiple,
@@ -23,10 +29,15 @@ import {
     Rule,
 } from "./typesNew";
 
-const matchPandocNode =
+type AcceptResult<Rule> = {
+    acceptedCount: number;
+    rule: Rule;
+};
+
+const matchItemWithType =
     (identifier: string) =>
-    (node: PandocNode): boolean =>
-        identifier === node.type;
+    (item: { type: string }): boolean =>
+        identifier === item.type;
 
 const assertExpressionsSafeForParameterizedTransformer = (
     pandocPattern: string,
@@ -51,7 +62,7 @@ const throwFailedMatchError = <WithType extends { type: string }>(
     items: WithType[]
 ) => {
     throw new Error(
-        `Could not find transform rule for nodes: ${
+        `Could not find transform rule for items: ${
             items
                 .map((item) => item.type)
                 .slice(0, 3)
@@ -239,17 +250,15 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         );
     }
 
-    acceptPandocNodes(nodes: PandocNode[]): {
-        acceptedCount: number;
-        rule:
-            | Rule<PandocNodeToProsemirrorMarkTransformer>
-            | Rule<PandocNodeToProsemirrorNodeTransformer>;
-    } {
-        for (const rule of this.pandocNodeToProsemirrorRules) {
+    private matchItems<
+        ItemType extends { type: string },
+        RuleType extends Rule<any>
+    >(items: ItemType[], rules: RuleType[]): AcceptResult<RuleType> {
+        for (const rule of rules) {
             const acceptedCount = acceptItems(
                 rule.expression,
-                nodes,
-                matchPandocNode
+                items,
+                matchItemWithType
             );
             if (acceptedCount > 0) {
                 return {
@@ -258,6 +267,18 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
                 };
             }
         }
-        throwFailedMatchError(nodes);
+        throwFailedMatchError(items);
+    }
+
+    matchPandocNodes(nodes: PandocNode[]) {
+        return this.matchItems(nodes, this.pandocNodeToProsemirrorRules);
+    }
+
+    matchProsemirrorNodes(nodes: ProsemirrorNode[]) {
+        return this.matchItems(nodes, this.prosemirrorNodeToPandocNodeRules);
+    }
+
+    matchProsemirrorMarks(marks: ProsemirrorMark[]) {
+        return this.matchItems(marks, this.prosemirrorMarkToPandocNodeRules);
     }
 }

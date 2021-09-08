@@ -18,6 +18,7 @@ export type ProsemirrorNode<Type = string> = {
     content?: ProsemirrorNode[];
     text?: string;
     attrs?: Record<string, ProsemirrorAttr>;
+    marks?: ProsemirrorMark[];
 };
 
 export type ProsemirrorMark<Type = string> = {

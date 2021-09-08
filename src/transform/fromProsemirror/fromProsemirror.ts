@@ -1,19 +1,16 @@
 import { ProsemirrorNode, PandocNode } from "types";
 
-import { asArray, flatten, makeCounter } from "../util";
-import { getTransformRuleForElements } from "../transformerJunk";
-import { Fluent, fluent } from "../fluent";
-
-import { createWrapperNodeForMarks, splitNodesByMarks } from "./marks";
+import { asArray, flatten, makeCounter } from "transform/util";
+import { RuleSet } from "transform/ruleset";
+import { Fluent, fluent } from "transform/fluent";
 import {
     FromProsemirrorTransformConfig,
     FromProsemirrorTransformContext,
 } from "transform/typesNew";
 
-const matchProsemirrorNode = (identifier: string) => (node: ProsemirrorNode) =>
-    identifier === node.type;
+import { createWrapperNodeFromMarks, splitNodesByMarks } from "./marks";
 
-export const fromProsemirrorInner = (
+const fromProsemirrorInner = (
     elementOrArray: ProsemirrorNode | ProsemirrorNode[],
     context: FromProsemirrorTransformContext
 ): Fluent<PandocNode> => {
@@ -28,41 +25,32 @@ export const fromProsemirrorInner = (
         const innerTransformed = [];
         while (ptr < nodes.length) {
             const remaining = nodes.slice(ptr);
-            ruleset.
-            const { rule, acceptedCount } = getTransformRuleForElements(
-                ruleset,
-                remaining,
-                matchProsemirrorNode
-            );
+            const { rule, acceptedCount } =
+                ruleset.matchProsemirrorNodes(remaining);
             const addition: PandocNode[] = flatten(
                 rule.acceptsMultiple
-                    ? rule.transform(
+                    ? rule.transformer(
                           nodes.slice(ptr, ptr + acceptedCount),
                           context
                       )
-                    : rule.transform(nodes[ptr], context)
+                    : rule.transformer(nodes[ptr], context)
             );
-            for (const element of addition) {
-                innerTransformed.push(element);
-            }
+            innerTransformed.push(...addition);
             ptr += acceptedCount;
         }
-        const maybeWrappedNodes = createWrapperNodeForMarks(
+        const maybeWrappedNodes = createWrapperNodeFromMarks(
             innerTransformed,
-            marks
+            marks,
+            context
         );
-        if (Array.isArray(maybeWrappedNodes)) {
-            transformed.push(...maybeWrappedNodes);
-        } else {
-            transformed.push(maybeWrappedNodes);
-        }
+        transformed.push(...asArray(maybeWrappedNodes));
     }
     return fluent(transformed);
 };
 
 export const fromProsemirror = (
     elementOrArray: ProsemirrorNode | ProsemirrorNode[],
-    ruleset: RuleSet<PandocNode, ProsemirrorNode>,
+    ruleset: RuleSet<any>,
     config: Partial<FromProsemirrorTransformConfig> = {}
 ): Fluent<PandocNode> => {
     const { resource = (x) => x, prosemirrorDocWidth = 1000 } = config;

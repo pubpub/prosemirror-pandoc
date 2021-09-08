@@ -24,7 +24,7 @@ const fromPandocInner = (
     if (!elementOrArray) {
         return fluent([] as ProsemirrorNode[]);
     }
-    const { ruleset } = context;
+    const { ruleset, marksMap } = context;
     const elements = asArray(elementOrArray);
     const transformed: ProsemirrorNode[] = [];
     const localMarksMap = new Map<ProsemirrorNode, ProsemirrorMark[]>();
@@ -57,6 +57,10 @@ const fromPandocInner = (
             transformed.push(...asArray(addition));
         }
         ptr += acceptedCount;
+    }
+    for (const [node, localMarks] of localMarksMap.entries()) {
+        const currentMarks = marksMap.get(node) || [];
+        marksMap.set(node, [...currentMarks, ...localMarks]);
     }
     return fluent(transformed);
 };

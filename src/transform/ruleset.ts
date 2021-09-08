@@ -221,6 +221,7 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             prosemirrorNodeToPandocNodeRules,
             prosemirrorSchema,
         } = this;
+
         warnAboutMissingMatchesForRules(
             "Pandoc node",
             PANDOC_NODE_TYPES,
@@ -228,12 +229,12 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         );
         warnAboutMissingMatchesForRules(
             "Prosemirror node",
-            Object.keys(prosemirrorSchema.spec.nodes),
+            Object.keys(prosemirrorSchema.nodes),
             prosemirrorNodeToPandocNodeRules
         );
         warnAboutMissingMatchesForRules(
-            "Pandoc node",
-            Object.keys(prosemirrorSchema.spec.marks),
+            "Prosemirror mark",
+            Object.keys(prosemirrorSchema.marks),
             prosemirrorMarkToPandocNodeRules
         );
     }

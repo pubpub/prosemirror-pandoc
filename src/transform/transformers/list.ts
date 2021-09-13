@@ -38,7 +38,7 @@ export const createListTransformer =
             },
             fromProsemirrorNode: (node, { transform }): SimpleList => {
                 const content = node.content.map((listItem) =>
-                    transform(listItem).asArray()
+                    transform(listItem.content).asArray()
                 );
                 if (pdNodeType === "OrderedList") {
                     return {

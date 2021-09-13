@@ -56,6 +56,7 @@ export const createListTransformer =
                     content,
                 };
             },
+            assertCapturedProsemirrorNodes: [pmInnerNodeType],
         };
     };
 

@@ -1,6 +1,6 @@
 import {
-    PandocNode,
     PANDOC_NODE_TYPES,
+    PandocNode,
     ProsemirrorMark,
     ProsemirrorNode,
     ProsemirrorSchema,
@@ -82,7 +82,9 @@ const warnAboutMissingMatchesForRules = (
     requiredTypes: string[],
     rules: Rule<any>[]
 ) => {
-    const matchingExpressions = rules.map((rule) => rule.expression);
+    const matchingExpressions = rules
+        .map((rule) => [rule.expression, ...rule.capturedExpressions])
+        .reduce((a, b) => [...a, ...b]);
     const missingTypes = requiredTypes.filter(
         (type) =>
             !matchingExpressions.some((expr) =>
@@ -118,14 +120,19 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         pattern: PandocNodePattern,
         transformer: PandocNodeToProsemirrorNodeTransformer<
             InferPandocPattern<PandocNodePattern>
-        >
+        >,
+        assertCapturedPandocNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
+        const capturedExpressions = assertCapturedPandocNodes.map((type) =>
+            parseExpr(type)
+        );
         this.pandocNodeToProsemirrorRules.push({
             isMarksRule: false,
             acceptsMultiple: exprAcceptsMultiple(expression),
             expression,
             transformer,
+            capturedExpressions,
         });
     }
 
@@ -133,9 +140,13 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         pattern: PandocNodePattern,
         transformer: PandocNodeToProsemirrorMarkTransformer<
             InferPandocPattern<PandocNodePattern>
-        >
+        >,
+        assertCapturedPandocNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
+        const capturedExpressions = assertCapturedPandocNodes.map((type) =>
+            parseExpr(type)
+        );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         if (acceptsMultiple) {
             throwMarkMatchingError(pattern);
@@ -145,6 +156,7 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             acceptsMultiple: false,
             expression,
             transformer,
+            capturedExpressions,
         });
     }
 
@@ -152,15 +164,20 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         pattern: ProsemirrorNodePattern,
         transformer: ProsemirrorNodeToPandocNodeTransformer<
             InferProsemirrorNodePattern<ProsemirrorNodePattern, Schema>
-        >
+        >,
+        assertCapturedProsemirrorNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
+        const capturedExpressions = assertCapturedProsemirrorNodes.map((type) =>
+            parseExpr(type)
+        );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         this.prosemirrorNodeToPandocNodeRules.push({
             isMarksRule: false,
             acceptsMultiple,
             expression,
             transformer,
+            capturedExpressions,
         });
     }
 
@@ -168,9 +185,13 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         pattern: ProsemirrorMarkPattern,
         transformer: ProsemirrorMarkToPandocNodeTransformer<
             InferProsemirrorMarkType<ProsemirrorMarkPattern, Schema>
-        >
+        >,
+        assertCapturedProsemirrorNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
+        const capturedExpressions = assertCapturedProsemirrorNodes.map((type) =>
+            parseExpr(type)
+        );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         if (acceptsMultiple) {
             throwMarkMatchingError(pattern);
@@ -180,6 +201,7 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             acceptsMultiple: false,
             expression,
             transformer,
+            capturedExpressions,
         });
     }
 
@@ -208,20 +230,40 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             );
         }
         if ("toProsemirrorNode" in bidirectionalTransformer) {
-            const { toProsemirrorNode } = bidirectionalTransformer;
-            this.toProsemirrorNode(pandocPattern, toProsemirrorNode);
+            const { toProsemirrorNode, assertCapturedPandocNodes = [] } =
+                bidirectionalTransformer;
+            this.toProsemirrorNode(
+                pandocPattern,
+                toProsemirrorNode,
+                assertCapturedPandocNodes
+            );
         }
         if ("toProsemirrorMark" in bidirectionalTransformer) {
-            const { toProsemirrorMark } = bidirectionalTransformer;
-            this.toProsemirrorMark(pandocPattern, toProsemirrorMark);
+            const { toProsemirrorMark, assertCapturedPandocNodes = [] } =
+                bidirectionalTransformer;
+            this.toProsemirrorMark(
+                pandocPattern,
+                toProsemirrorMark,
+                assertCapturedPandocNodes
+            );
         }
         if ("fromProsemirrorNode" in bidirectionalTransformer) {
-            const { fromProsemirrorNode } = bidirectionalTransformer;
-            this.fromProsemirrorNode(prosemirrorPattern, fromProsemirrorNode);
+            const { fromProsemirrorNode, assertCapturedProsemirrorNodes = [] } =
+                bidirectionalTransformer;
+            this.fromProsemirrorNode(
+                prosemirrorPattern,
+                fromProsemirrorNode,
+                assertCapturedProsemirrorNodes
+            );
         }
         if ("fromProsemirrorMark" in bidirectionalTransformer) {
-            const { fromProsemirrorMark } = bidirectionalTransformer;
-            this.fromProsemirrorMark(prosemirrorPattern, fromProsemirrorMark);
+            const { fromProsemirrorMark, assertCapturedProsemirrorNodes = [] } =
+                bidirectionalTransformer;
+            this.fromProsemirrorMark(
+                prosemirrorPattern,
+                fromProsemirrorMark,
+                assertCapturedProsemirrorNodes
+            );
         }
     }
 

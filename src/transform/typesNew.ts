@@ -97,14 +97,16 @@ export type Rule<Transformer extends AnyTransformer> =
               ? Transformer
               : never;
           expression: Expr;
+          capturedExpressions: Expr[];
           acceptsMultiple: boolean;
-          readonly isMarksRule: false;
+          isMarksRule: false;
       }>
     | Readonly<{
           transformer: Transformer extends MarksTransformer
               ? Transformer
               : never;
           expression: Expr;
+          capturedExpressions: Expr[];
           acceptsMultiple: false;
           isMarksRule: true;
       }>;
@@ -112,7 +114,7 @@ export type Rule<Transformer extends AnyTransformer> =
 export type BidirectionalTransformer<
     PandocType extends PandocNode,
     ProsemirrorType extends ProsemirrorElement
-> =
+> = (
     | {
           fromProsemirrorNode: ProsemirrorNodeToPandocNodeTransformer<
               Extract<ProsemirrorType, ProsemirrorNode>,
@@ -132,7 +134,11 @@ export type BidirectionalTransformer<
               PandocType,
               Extract<ProsemirrorType, ProsemirrorMark>
           >;
-      };
+      }
+) & {
+    assertCapturedProsemirrorNodes?: string[];
+    assertCapturedPandocNodes?: string[];
+};
 
 export type ParameterizedBidirectionalTransformer<
     PandocPattern extends string,

@@ -2,8 +2,8 @@ import { Attr, Str, Space } from "../types";
 
 export const createAttr = (
     identifier: string = "",
-    classes?: string[],
-    properties?: Record<string, any>
+    classes: string[] = [],
+    properties: Record<string, any> = {}
 ): Attr => {
     return { identifier, classes, properties };
 };

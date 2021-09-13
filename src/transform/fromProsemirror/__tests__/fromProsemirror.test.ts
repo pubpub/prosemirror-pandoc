@@ -409,6 +409,43 @@ describe("fromProsemirror", () => {
         expect(fromProsemirror(input, rules).asNode()).toEqual(output);
     });
 
+    it("transforms an equation into a Math (mathType=InlineMath)", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "equation",
+                    attrs: { value: "e^{i\\pi} = -1" },
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "Math",
+            mathType: "InlineMath",
+            content: "e^{i\\pi} = -1",
+        });
+    });
+
+    it("transforms a block_equation into a Plain wrapping a Math (mathType=DisplayMath)", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "block_equation",
+                    attrs: { value: "e^{i\\pi} = -1" },
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "Plain",
+            content: [
+                {
+                    type: "Math",
+                    mathType: "DisplayMath",
+                    content: "e^{i\\pi} = -1",
+                },
+            ],
+        });
+    });
+
     it("transforms links", () => {
         const link = {
             type: "text",

@@ -320,6 +320,27 @@ rules.toProsemirrorNode("Math", (node) => {
     };
 });
 
+rules.fromProsemirrorNode("equation", (node) => {
+    return {
+        type: "Math",
+        mathType: "InlineMath",
+        content: node.attrs.value.toString(),
+    };
+});
+
+rules.fromProsemirrorNode("block_equation", (node) => {
+    return {
+        type: "Plain",
+        content: [
+            {
+                type: "Math",
+                mathType: "DisplayMath",
+                content: node.attrs.value.toString(),
+            },
+        ],
+    };
+});
+
 rules.toProsemirrorNode("Table", pandocTableTransformer);
 
 rules.validate();

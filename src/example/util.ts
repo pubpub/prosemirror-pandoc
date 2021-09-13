@@ -4,23 +4,52 @@ import { emitPandocJson } from "../emit";
 import { parsePandocJson } from "../parse";
 import { flatten } from "../transform/util";
 
-const getHtmlStringForPandocDoc = (document: Doc): string =>
-    callPandoc(JSON.stringify(emitPandocJson(document)), "json", "html");
+export const getOutputStringForPandocDoc = (
+    document: Doc,
+    format: string
+): string =>
+    callPandoc(JSON.stringify(emitPandocJson(document)), "json", format).trim();
 
-const getPandocDocForHtmlString = (htmlString: string): Doc =>
-    parsePandocJson(JSON.parse(callPandoc(htmlString, "html", "json")));
+export const getPandocDocForInputString = (
+    input: string,
+    format: string
+): Doc => {
+    if (!input) {
+        return { type: "Doc", blocks: [], meta: {} };
+    }
+    return parsePandocJson(JSON.parse(callPandoc(input, format, "json")));
+};
 
-export const pandocInlineToHtmlString = (nodes: Inline[]) => {
-    if (nodes.length === 0) {
+export const getHtmlStringForPandocDoc = (document: Doc): string =>
+    getOutputStringForPandocDoc(document, "html");
+
+export const getPandocDocForHtmlString = (htmlString: string): Doc =>
+    getPandocDocForInputString(htmlString, "html");
+
+export const pandocBlocksToOutputString = (blocks: Block[], format: string) => {
+    if (blocks.length === 0) {
         return "";
     }
     const document: Doc = {
         type: "Doc",
-        blocks: [{ type: "Para", content: nodes }],
+        blocks,
         meta: {},
     };
-    return getHtmlStringForPandocDoc(document);
+    return getOutputStringForPandocDoc(document, format);
 };
+
+export const pandocInlineToOutputString = (
+    content: Inline[],
+    format: string
+) => {
+    return pandocBlocksToOutputString([{ type: "Para", content }], format);
+};
+
+export const pandocInlineToHtmlString = (nodes: Inline[]) =>
+    pandocInlineToOutputString(nodes, "html");
+
+export const pandocInlineToPlainString = (nodes: Inline[]) =>
+    pandocInlineToOutputString(nodes, "plain");
 
 export const pandocBlocksToHtmlString = (blocks: Block[]) => {
     if (blocks.length === 0) {
@@ -35,7 +64,7 @@ export const pandocBlocksToHtmlString = (blocks: Block[]) => {
 };
 
 export const htmlStringToPandocInline = (htmlString: string): Inline[] => {
-    if (htmlString.length === 0) {
+    if (!htmlString) {
         return [];
     }
     const pandocAst = getPandocDocForHtmlString(htmlString);
@@ -49,7 +78,7 @@ export const htmlStringToPandocInline = (htmlString: string): Inline[] => {
 };
 
 export const htmlStringToPandocBlocks = (htmlString: string): Block[] => {
-    if (htmlString.length === 0) {
+    if (!htmlString) {
         return [];
     }
     const pandocAst = getPandocDocForHtmlString(htmlString);

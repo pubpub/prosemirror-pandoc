@@ -879,7 +879,7 @@ describe("fromPandoc", () => {
         });
     });
 
-    it("handles an Image with a caption that needs to be converted to HTML by Pandoc", () => {
+    it("handles an Image with alt text that needs to be converted by Pandoc", () => {
         expect(
             fromPandoc(
                 {
@@ -894,7 +894,7 @@ describe("fromPandoc", () => {
                             type: "Strong",
                             content: [{ type: "Str", content: "Very" }],
                         },
-                        { type: "LineBreak" },
+                        { type: "Space" },
                         { type: "Str", content: "cool." },
                     ],
                 },
@@ -903,7 +903,7 @@ describe("fromPandoc", () => {
         ).toEqual({
             type: "image",
             attrs: {
-                caption: "<p><strong>Very</strong><br />\ncool.</p>\n",
+                altText: "Very cool.",
                 url: "https://pubpub.org/logo.png",
             },
         });

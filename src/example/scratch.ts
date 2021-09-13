@@ -1,6 +1,6 @@
 import * as katex from "katex";
 
-import { Inline } from "types";
+import { Inline, Para, Plain } from "types";
 import {
     bareMarkTransformer,
     docTransformer,
@@ -24,10 +24,12 @@ import { RuleSet } from "transform/ruleset";
 
 import { prosemirrorSchema } from "./schema";
 import {
+    getPandocDocForHtmlString,
     htmlStringToPandocBlocks,
     htmlStringToPandocInline,
     pandocBlocksToHtmlString,
     pandocInlineToHtmlString,
+    pandocInlineToPlainString,
 } from "./util";
 
 const rules = new RuleSet(prosemirrorSchema);
@@ -218,26 +220,33 @@ rules.toProsemirrorNode("RawInline", (node) => {
 });
 
 // These next rules for images don't use transform() because they're not inverses of each other --
-// the Prosemirror->Pandoc direction wraps an Image in a Plain to make it block-level
+// the Prosemirror->Pandoc direction wraps an Image in a Para to make it block-level
 
 rules.toProsemirrorNode("Image", (node, { resource }) => {
     return {
         type: "image",
         attrs: {
             url: resource(node.target.url),
-            caption: pandocInlineToHtmlString(node.content),
+            altText: pandocInlineToPlainString(node.content),
             // TODO(ian): is there anything we can do about the image size here?
         },
     };
 });
 
 rules.fromProsemirrorNode("image", (node) => {
-    return {
+    const maybeAltTextDoc = getPandocDocForHtmlString(
+        node.attrs.altText as string
+    );
+    const altTextInlines = (maybeAltTextDoc.blocks[0] as Para)?.content ?? [];
+    const captionBlocks = htmlStringToPandocBlocks(
+        node.attrs.caption as string
+    );
+    const imageWrappedInPlain: Plain = {
         type: "Plain",
         content: [
             {
                 type: "Image",
-                content: [],
+                content: altTextInlines,
                 target: {
                     url: node.attrs.url.toString(),
                     title: "",
@@ -246,6 +255,10 @@ rules.fromProsemirrorNode("image", (node) => {
             },
         ],
     };
+    if (captionBlocks.length > 0) {
+        return [imageWrappedInPlain, ...captionBlocks];
+    }
+    return imageWrappedInPlain;
 });
 
 rules.transform("Cite", "citation", {

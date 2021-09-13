@@ -430,4 +430,109 @@ describe("fromProsemirror", () => {
             content: [{ type: "Str", content: "Hey!" }],
         });
     });
+
+    it("handles an image with no alt text", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "image",
+                    attrs: {
+                        url: "https://pubpub.org/logo.png",
+                    },
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "Plain",
+            content: [
+                {
+                    type: "Image",
+                    target: {
+                        title: "",
+                        url: "https://pubpub.org/logo.png",
+                    },
+                    attr: createAttr(""),
+                    content: [],
+                },
+            ],
+        });
+    });
+
+    it("handles an image with alt text", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "image",
+                    attrs: {
+                        url: "https://pubpub.org/logo.png",
+                        altText: "Very cool.",
+                    },
+                },
+                rules
+            ).asNode()
+        ).toEqual({
+            type: "Plain",
+            content: [
+                {
+                    type: "Image",
+                    target: {
+                        title: "",
+                        url: "https://pubpub.org/logo.png",
+                    },
+                    attr: createAttr(""),
+                    content: [
+                        { type: "Str", content: "Very" },
+                        { type: "Space" },
+                        { type: "Str", content: "cool." },
+                    ],
+                },
+            ],
+        });
+    });
+
+    it("handles an image with a caption", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "image",
+                    attrs: {
+                        url: "https://pubpub.org/logo.png",
+                        altText: "Very cool.",
+                        caption: "<b>Even</b> cooler.",
+                    },
+                },
+                rules
+            ).asArray()
+        ).toEqual([
+            {
+                type: "Plain",
+                content: [
+                    {
+                        type: "Image",
+                        target: {
+                            title: "",
+                            url: "https://pubpub.org/logo.png",
+                        },
+                        attr: createAttr(""),
+                        content: [
+                            { type: "Str", content: "Very" },
+                            { type: "Space" },
+                            { type: "Str", content: "cool." },
+                        ],
+                    },
+                ],
+            },
+            {
+                type: "Plain",
+                content: [
+                    {
+                        type: "Strong",
+                        content: [{ type: "Str", content: "Even" }],
+                    },
+                    { type: "Space" },
+                    { type: "Str", content: "cooler." },
+                ],
+            },
+        ]);
+    });
 });

@@ -38,6 +38,7 @@ const nodes = {
             size: { default: 50 }, // number as percentage
             align: { default: "center" },
             caption: { default: "" },
+            altText: { default: "" },
         },
         inline: false,
         group: "block",

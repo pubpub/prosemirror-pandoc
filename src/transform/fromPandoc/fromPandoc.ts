@@ -11,7 +11,7 @@ import { fluent, Fluent } from "transform/fluent";
 import {
     FromPandocTransformContext,
     FromPandocTransformConfig,
-} from "transform/typesNew";
+} from "transform/types";
 import { RuleSet } from "transform/ruleset";
 
 import { applyMarksToNodes } from "./marks";

@@ -6,7 +6,7 @@ import { Fluent, fluent } from "transform/fluent";
 import {
     FromProsemirrorTransformConfig,
     FromProsemirrorTransformContext,
-} from "transform/typesNew";
+} from "transform/types";
 
 import { createWrapperNodeFromMarks, splitNodesByMarks } from "./marks";
 

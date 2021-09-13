@@ -27,7 +27,7 @@ import {
     ProsemirrorMarkToPandocNodeTransformer,
     ProsemirrorNodeToPandocNodeTransformer,
     Rule,
-} from "./typesNew";
+} from "./types";
 
 type AcceptResult<Rule> = {
     acceptedCount: number;

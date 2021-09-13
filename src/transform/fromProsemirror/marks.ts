@@ -1,5 +1,5 @@
 import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "types";
-import { FromProsemirrorTransformContext, OneOrMany } from "transform/typesNew";
+import { FromProsemirrorTransformContext, OneOrMany } from "transform/types";
 import { asArray } from "transform/util";
 
 type NodesAndMarksBucket = {

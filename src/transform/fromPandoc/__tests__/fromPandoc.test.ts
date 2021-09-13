@@ -452,7 +452,7 @@ describe("fromPandoc", () => {
         expect(fromPandoc(input, rules).asArray()).toMatchSnapshot();
     });
 
-    it("transforms an BulletList into an bullet_list", () => {
+    it("transforms a BulletList into a bullet_list", () => {
         const input: BulletList = {
             type: "BulletList",
             content: [

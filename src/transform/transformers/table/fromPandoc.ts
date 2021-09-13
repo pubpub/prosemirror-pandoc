@@ -7,8 +7,7 @@ import {
     Row,
     Table,
 } from "types";
-
-import { FromPandocTransformContext } from "transform/typesNew";
+import { FromPandocTransformContext } from "transform/types";
 
 const resolveCaption = (
     caption: Caption,
@@ -102,7 +101,7 @@ export const pandocTableTransformer = (
     const prosemirrorCaption = resolveCaption(caption, context);
 
     const table: ProsemirrorNode<"table"> = {
-        type: "table",
+        type: "table" as const,
         content: [...headRows, ...bodyRows, ...footRows],
     };
 

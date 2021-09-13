@@ -1,5 +1,5 @@
 export * from "./common";
-export * from "./tables";
+export * from "./table";
 export * from "./bare";
 export * from "./doc";
 export * from "./list";

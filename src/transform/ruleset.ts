@@ -10,6 +10,7 @@ import {
     exprAcceptsMultiple,
     exprWillAlwaysMatchSingleIdentifier,
     acceptItems,
+    Expr,
 } from "expression";
 
 import {
@@ -28,6 +29,7 @@ import {
     ProsemirrorNodeToPandocNodeTransformer,
     Rule,
 } from "./types";
+import { flatten } from "./util";
 
 type AcceptResult<Rule> = {
     acceptedCount: number;
@@ -38,6 +40,16 @@ const matchItemWithType =
     (identifier: string) =>
     (item: { type: string }): boolean =>
         identifier === item.type;
+
+const gatherExpressionsForCapturedNodeAssertions = (
+    ...items: (string[] | undefined)[]
+): Expr[] => {
+    return flatten(
+        items
+            .filter((x): x is string[] => !!x)
+            .map((strs) => strs.map((str) => parseExpr(str)))
+    );
+};
 
 const assertExpressionsSafeForParameterizedTransformer = (
     pandocPattern: string,
@@ -124,8 +136,9 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         assertCapturedPandocNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
-        const capturedExpressions = assertCapturedPandocNodes.map((type) =>
-            parseExpr(type)
+        const capturedExpressions = gatherExpressionsForCapturedNodeAssertions(
+            assertCapturedPandocNodes,
+            transformer.assertCapturedPandocNodes
         );
         this.pandocNodeToProsemirrorRules.push({
             isMarksRule: false,
@@ -144,8 +157,9 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         assertCapturedPandocNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
-        const capturedExpressions = assertCapturedPandocNodes.map((type) =>
-            parseExpr(type)
+        const capturedExpressions = gatherExpressionsForCapturedNodeAssertions(
+            assertCapturedPandocNodes,
+            transformer.assertCapturedPandocNodes
         );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         if (acceptsMultiple) {
@@ -168,8 +182,9 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         assertCapturedProsemirrorNodes: string[] = []
     ) {
         const expression = parseExpr(pattern);
-        const capturedExpressions = assertCapturedProsemirrorNodes.map((type) =>
-            parseExpr(type)
+        const capturedExpressions = gatherExpressionsForCapturedNodeAssertions(
+            assertCapturedProsemirrorNodes,
+            transformer.assertCapturedProsemirrorNodes
         );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         this.prosemirrorNodeToPandocNodeRules.push({
@@ -185,13 +200,9 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
         pattern: ProsemirrorMarkPattern,
         transformer: ProsemirrorMarkToPandocNodeTransformer<
             InferProsemirrorMarkType<ProsemirrorMarkPattern, Schema>
-        >,
-        assertCapturedProsemirrorNodes: string[] = []
+        >
     ) {
         const expression = parseExpr(pattern);
-        const capturedExpressions = assertCapturedProsemirrorNodes.map((type) =>
-            parseExpr(type)
-        );
         const acceptsMultiple = exprAcceptsMultiple(expression);
         if (acceptsMultiple) {
             throwMarkMatchingError(pattern);
@@ -201,7 +212,7 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             acceptsMultiple: false,
             expression,
             transformer,
-            capturedExpressions,
+            capturedExpressions: [],
         });
     }
 
@@ -257,13 +268,8 @@ export class RuleSet<Schema extends ProsemirrorSchema> {
             );
         }
         if ("fromProsemirrorMark" in bidirectionalTransformer) {
-            const { fromProsemirrorMark, assertCapturedProsemirrorNodes = [] } =
-                bidirectionalTransformer;
-            this.fromProsemirrorMark(
-                prosemirrorPattern,
-                fromProsemirrorMark,
-                assertCapturedProsemirrorNodes
-            );
+            const { fromProsemirrorMark } = bidirectionalTransformer;
+            this.fromProsemirrorMark(prosemirrorPattern, fromProsemirrorMark);
         }
     }
 

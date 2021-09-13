@@ -12,6 +12,7 @@ import {
     bareLeafTransformer,
     pandocQuotedTransformer,
     pandocTableTransformer,
+    prosemirrorTableTransformer,
 } from "transform/transformers";
 import {
     createAttr,
@@ -355,6 +356,7 @@ rules.fromProsemirrorNode("block_equation", (node) => {
 });
 
 rules.toProsemirrorNode("Table", pandocTableTransformer);
+rules.fromProsemirrorNode("table", prosemirrorTableTransformer);
 
 rules.validate();
 

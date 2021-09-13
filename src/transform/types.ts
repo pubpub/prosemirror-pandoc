@@ -60,17 +60,26 @@ export type FromProsemirrorTransformContext = FromProsemirrorTransformConfig &
 export type PandocNodeToProsemirrorNodeTransformer<
     From extends OneOrMany<PandocNode> = OneOrMany<PandocNode>,
     To extends ProsemirrorNode = ProsemirrorNode
-> = (node: From, context: FromPandocTransformContext) => OneOrMany<To>;
+> = ((node: From, context: FromPandocTransformContext) => OneOrMany<To>) & {
+    assertCapturedPandocNodes?: string[];
+};
 
 export type PandocNodeToProsemirrorMarkTransformer<
     From extends OneOrMany<PandocNode> = OneOrMany<PandocNode>,
     To extends ProsemirrorMark = ProsemirrorMark
-> = (node: From, context: FromPandocTransformContext) => OneOrMany<To>;
+> = ((node: From, context: FromPandocTransformContext) => OneOrMany<To>) & {
+    assertCapturedPandocNodes?: string[];
+};
 
 export type ProsemirrorNodeToPandocNodeTransformer<
     From extends OneOrMany<ProsemirrorNode> = OneOrMany<ProsemirrorNode>,
     To extends PandocNode = PandocNode
-> = (node: From, context: FromProsemirrorTransformContext) => OneOrMany<To>;
+> = ((
+    node: From,
+    context: FromProsemirrorTransformContext
+) => OneOrMany<To>) & {
+    assertCapturedProsemirrorNodes?: string[];
+};
 
 export type ProsemirrorMarkToPandocNodeTransformer<
     From extends ProsemirrorMark = ProsemirrorMark,

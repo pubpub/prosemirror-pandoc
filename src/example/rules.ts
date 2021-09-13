@@ -1,60 +1,44 @@
 import * as katex from "katex";
 
-import { nodes, marks } from "./schema";
+import { Inline, Para, Plain } from "types";
 import {
-    Image,
-    Header,
-    LineBlock,
-    ProsemirrorNode,
-    Inline,
-    Link,
-    Math,
-    Note,
-    Cite,
-    Code,
-    CodeBlock,
-    RawInline,
-    RawBlock,
-} from "../types";
-
-import {
-    textFromStrSpace,
-    textToStrSpace,
-    createAttr,
-    intersperse,
-    flatten,
-} from "../transform/util";
-
-import {
-    bareLeafTransformer,
-    bareContentTransformer,
-    definitionListTransformer,
+    bareMarkTransformer,
     docTransformer,
-    createListTransformer,
     nullTransformer,
+    bareContentTransformer,
     pandocPassThroughTransformer,
+    createListTransformer,
+    definitionListTransformer,
+    bareLeafTransformer,
     pandocQuotedTransformer,
     pandocTableTransformer,
-} from "../transform/transformers";
-import { buildRuleset } from "../transform/transformer";
-
+} from "transform/transformers";
 import {
-    pandocInlineToHtmlString,
+    createAttr,
+    flatten,
+    intersperse,
+    textFromStrSpace,
+    textToStrSpace,
+} from "transform/util";
+import { RuleSet } from "transform/ruleset";
+
+import { prosemirrorSchema } from "./schema";
+import {
+    getPandocDocForHtmlString,
+    htmlStringToPandocBlocks,
     htmlStringToPandocInline,
     pandocBlocksToHtmlString,
-    htmlStringToPandocBlocks,
+    pandocInlineToHtmlString,
+    pandocInlineToPlainString,
 } from "./util";
 
-const rules = buildRuleset({
-    nodes,
-    marks,
-});
+const rules = new RuleSet(prosemirrorSchema);
 
 // Top-level transformer for a doc
 rules.transform("Doc", "doc", docTransformer);
 
 // Do nothing with nothing
-rules.fromPandoc("Null", nullTransformer);
+rules.toProsemirrorNode("Null", nullTransformer);
 
 // Paragraphs are paragraphs. So are "Plain", until proven otherwise.
 rules.transform(
@@ -63,14 +47,13 @@ rules.transform(
     bareContentTransformer("Para", "paragraph")
 );
 
-rules.fromPandoc("Div", pandocPassThroughTransformer);
+// Divs are just boxes of other content
+rules.toProsemirrorNode("Div", pandocPassThroughTransformer);
 
 // I'm not really sure what a LineBlock is, but let's just call it a single paragraph
 // with some hard breaks thrown in.
-rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
-    const lines: ProsemirrorNode[][] = node.content.map((line) =>
-        transform(line).asArray()
-    );
+rules.toProsemirrorNode("LineBlock", (node, { transform }) => {
+    const lines = node.content.map((line) => transform(line).asArray());
     return {
         type: "paragraph",
         content: flatten(
@@ -82,13 +65,13 @@ rules.fromPandoc("LineBlock", (node: LineBlock, { transform }) => {
 });
 
 rules.transform("CodeBlock", "code_block", {
-    fromPandoc: (node: CodeBlock) => {
+    toProsemirrorNode: (node) => {
         return {
             type: "code_block",
             content: [{ type: "text", text: node.content }],
         };
     },
-    fromProsemirror: (node: ProsemirrorNode): CodeBlock => {
+    fromProsemirrorNode: (node) => {
         return {
             type: "CodeBlock",
             content: node.content.map((text) => text.text).join(""),
@@ -122,14 +105,14 @@ rules.transform(
     createListTransformer("list_item", ensureFirstElementIsParagraph)
 );
 
-rules.fromPandoc(
+rules.toProsemirrorNode(
     "DefinitionList",
     definitionListTransformer("bullet_list", "list_item")
 );
 
 // Tranform headers
 rules.transform("Header", "heading", {
-    fromPandoc: (node, { transform }) => {
+    toProsemirrorNode: (node, { transform }) => {
         return {
             type: "heading",
             attrs: {
@@ -139,7 +122,7 @@ rules.transform("Header", "heading", {
             content: transform(node.content).asArray(),
         };
     },
-    fromProsemirror: (node: ProsemirrorNode, { transform }): Header => {
+    fromProsemirrorNode: (node, { transform }) => {
         return {
             type: "Header",
             level: parseInt(node.attrs.level.toString()),
@@ -149,36 +132,49 @@ rules.transform("Header", "heading", {
     },
 });
 
-// Transform horizontal rules
 rules.transform("HorizontalRule", "horizontal_rule", bareLeafTransformer);
 
-// Specify all nodes that are equivalent to Prosemirror marks
-rules.transformToMark("Emph", "em");
-rules.transformToMark("Strong", "strong");
-rules.transformToMark("Strikeout", "strike");
-rules.transformToMark("Superscript", "sup");
-rules.transformToMark("Subscript", "sub");
+const bareMarkTransformPairs = [
+    ["Strong", "strong"],
+    ["Emph", "em"],
+    ["Strikeout", "strike"],
+    ["Superscript", "sup"],
+    ["Subscript", "sub"],
+    ["Code", "code"],
+] as const;
 
-rules.fromPandoc("Code", (node: Code) => {
-    return {
-        type: "text",
-        marks: [{ type: "code" }],
-        text: node.content,
-    };
-});
+bareMarkTransformPairs.forEach(([from, to]) =>
+    rules.transform(from, to, bareMarkTransformer)
+);
 
-rules.transformToMark("Link", "link", (link: Link) => {
-    return {
-        href: link.target.url,
-        title: link.target.title,
-    };
+rules.transform("Link", "link", {
+    toProsemirrorMark: (link) => {
+        return {
+            type: "link",
+            attrs: {
+                href: link.target.url,
+                title: link.target.title,
+            },
+        };
+    },
+    fromProsemirrorMark: (link, content) => {
+        return {
+            type: "Link",
+            attr: createAttr(),
+            content: content,
+            target: {
+                url: link.attrs.href.toString(),
+                title: link.attrs.title.toString(),
+            },
+        };
+    },
 });
 
 // We don't support small caps right now
-rules.fromPandoc("SmallCaps", pandocPassThroughTransformer);
+rules.toProsemirrorNode("SmallCaps", pandocPassThroughTransformer);
 
 // Tell the transformer how to deal with typical content-level nodes
-rules.fromPandoc("(Str | Space)+", (nodes) => {
+rules.toProsemirrorNode("(Str | Space)+", (nodes) => {
     return {
         type: "text",
         text: textFromStrSpace(nodes),
@@ -186,29 +182,27 @@ rules.fromPandoc("(Str | Space)+", (nodes) => {
 });
 
 // Tell the transformer how to turn Prosemirror text back into Pandoc
-rules.fromProsemirror("text", (node: ProsemirrorNode) =>
-    textToStrSpace(node.text)
-);
+rules.fromProsemirrorNode("text", (node) => textToStrSpace(node.text));
 
 // Deal with line breaks
 rules.transform("LineBreak", "hard_break", bareLeafTransformer);
-rules.fromPandoc("SoftBreak", nullTransformer);
+rules.toProsemirrorNode("SoftBreak", nullTransformer);
 
 // Stuff we don't have equivalents for
-rules.fromPandoc("Span", pandocPassThroughTransformer);
-rules.fromPandoc("Underline", pandocPassThroughTransformer);
+rules.toProsemirrorNode("Span", pandocPassThroughTransformer);
+rules.toProsemirrorNode("Underline", pandocPassThroughTransformer);
 
 // Anything in quotation marks is its own node, to Pandoc
-rules.fromPandoc("Quoted", pandocQuotedTransformer);
+rules.toProsemirrorNode("Quoted", pandocQuotedTransformer);
 
-rules.fromPandoc("RawBlock", (node: RawBlock) => {
+rules.toProsemirrorNode("RawBlock", (node) => {
     return {
         type: "paragraph",
         content: [{ type: "text", text: node.content }],
     };
 });
 
-rules.fromPandoc("RawInline", (node: RawInline) => {
+rules.toProsemirrorNode("RawInline", (node) => {
     const { format, content } = node;
     if (format === "tex") {
         return {
@@ -225,46 +219,34 @@ rules.fromPandoc("RawInline", (node: RawInline) => {
     return { type: "text", text: content };
 });
 
-// Tables
-rules.fromPandoc("Table", pandocTableTransformer);
+// These next rules for images don't use transform() because they're not inverses of each other --
+// the Prosemirror->Pandoc direction wraps an Image in a Para to make it block-level
 
-// Equations
-rules.fromPandoc("Math", (node: Math) => {
-    const { mathType, content } = node;
-    const isDisplay = mathType === "DisplayMath";
-    const prosemirrorType = isDisplay ? "block_equation" : "equation";
-    return {
-        type: prosemirrorType,
-        attrs: {
-            value: content,
-            html: katex.renderToString(content, {
-                displayMode: isDisplay,
-                throwOnError: false,
-            }),
-        },
-    };
-});
-
-// ~~~ Rules for images ~~~ //
-
-rules.fromPandoc("Image", (node: Image, { resource }) => {
+rules.toProsemirrorNode("Image", (node, { resource }) => {
     return {
         type: "image",
         attrs: {
             url: resource(node.target.url),
-            caption: pandocInlineToHtmlString(node.content),
+            altText: pandocInlineToPlainString(node.content),
             // TODO(ian): is there anything we can do about the image size here?
         },
     };
 });
 
-rules.fromProsemirror("image", (node: ProsemirrorNode) => {
-    return {
+rules.fromProsemirrorNode("image", (node) => {
+    const maybeAltTextDoc = getPandocDocForHtmlString(
+        node.attrs.altText as string
+    );
+    const altTextInlines = (maybeAltTextDoc.blocks[0] as Para)?.content ?? [];
+    const captionBlocks = htmlStringToPandocBlocks(
+        node.attrs.caption as string
+    );
+    const imageWrappedInPlain: Plain = {
         type: "Plain",
         content: [
             {
                 type: "Image",
-                content: [],
+                content: altTextInlines,
                 target: {
                     url: node.attrs.url.toString(),
                     title: "",
@@ -273,12 +255,14 @@ rules.fromProsemirror("image", (node: ProsemirrorNode) => {
             },
         ],
     };
+    if (captionBlocks.length > 0) {
+        return [imageWrappedInPlain, ...captionBlocks];
+    }
+    return imageWrappedInPlain;
 });
 
-// ~~~ Rules for citations and footnotes ~~~ //
-
 rules.transform("Cite", "citation", {
-    fromPandoc: (node: Cite, { count }) => {
+    toProsemirrorNode: (node, { count }) => {
         const { content } = node;
         const unstructuredValue = pandocInlineToHtmlString(content);
         return {
@@ -289,7 +273,7 @@ rules.transform("Cite", "citation", {
             },
         };
     },
-    fromProsemirror: (node: ProsemirrorNode) => {
+    fromProsemirrorNode: (node) => {
         const inputHtml = (node.attrs.html ||
             node.attrs.unstructuredValue) as string;
         const citationNumber =
@@ -314,7 +298,7 @@ rules.transform("Cite", "citation", {
 });
 
 rules.transform("Note", "footnote", {
-    fromPandoc: (node: Note, { count }) => {
+    toProsemirrorNode: (node, { count }) => {
         const { content } = node;
         return {
             type: "footnote",
@@ -324,7 +308,7 @@ rules.transform("Note", "footnote", {
             },
         };
     },
-    fromProsemirror: (node: ProsemirrorNode) => {
+    fromProsemirrorNode: (node) => {
         const noteContent = (node.attrs.unstructuredValue || "") as string;
         return {
             type: "Note",
@@ -333,4 +317,45 @@ rules.transform("Note", "footnote", {
     },
 });
 
-export default rules.finish();
+rules.toProsemirrorNode("Math", (node) => {
+    const { mathType, content } = node;
+    const isDisplay = mathType === "DisplayMath";
+    const prosemirrorType = isDisplay ? "block_equation" : "equation";
+    return {
+        type: prosemirrorType,
+        attrs: {
+            value: content,
+            html: katex.renderToString(content, {
+                displayMode: isDisplay,
+                throwOnError: false,
+            }),
+        },
+    };
+});
+
+rules.fromProsemirrorNode("equation", (node) => {
+    return {
+        type: "Math",
+        mathType: "InlineMath",
+        content: node.attrs.value.toString(),
+    };
+});
+
+rules.fromProsemirrorNode("block_equation", (node) => {
+    return {
+        type: "Plain",
+        content: [
+            {
+                type: "Math",
+                mathType: "DisplayMath",
+                content: node.attrs.value.toString(),
+            },
+        ],
+    };
+});
+
+rules.toProsemirrorNode("Table", pandocTableTransformer);
+
+rules.validate();
+
+export { rules };

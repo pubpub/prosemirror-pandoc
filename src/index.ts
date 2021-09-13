@@ -3,7 +3,7 @@ import * as transformers from "./transform/transformers";
 
 export { transformUtil, transformers };
 export { fromPandoc } from "./transform/fromPandoc";
-export { buildRuleset } from "./transform/transformerJunk";
+export { RuleSet } from "./transform/ruleset";
 export { emitPandocJson } from "./emit";
 export { parsePandocJson } from "./parse";
 export { metaValueToString, metaValueToJsonSerializable } from "./meta";

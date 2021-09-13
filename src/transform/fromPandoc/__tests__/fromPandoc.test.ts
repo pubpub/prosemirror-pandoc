@@ -9,7 +9,7 @@ import {
     DefinitionList,
     Link,
 } from "types";
-import { rules } from "example/scratch";
+import { rules } from "example/rules";
 import { createAttr } from "transform/util";
 
 import { fromPandoc } from "../fromPandoc";

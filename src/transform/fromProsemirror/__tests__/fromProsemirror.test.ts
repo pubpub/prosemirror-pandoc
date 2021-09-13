@@ -1,4 +1,4 @@
-import { rules } from "example/scratch";
+import { rules } from "example/rules";
 import { createAttr } from "transform/util";
 
 import { fromProsemirror } from "../fromProsemirror";

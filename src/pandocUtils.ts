@@ -1,8 +1,8 @@
-import { Inline, Doc, Plain, Para, Block } from "../types";
-import { callPandoc } from "../util";
-import { emitPandocJson } from "../emit";
-import { parsePandocJson } from "../parse";
-import { flatten } from "../transform/util";
+import { Inline, Doc, Plain, Para, Block } from "./types";
+import { callPandoc } from "./util";
+import { emitPandocJson } from "./emit";
+import { parsePandocJson } from "./parse";
+import { flatten } from "./transform/util";
 
 export const getOutputStringForPandocDoc = (
     document: Doc,

@@ -31,7 +31,7 @@ import {
     pandocBlocksToHtmlString,
     pandocInlineToHtmlString,
     pandocInlineToPlainString,
-} from "./util";
+} from "../pandocUtils";
 
 const rules = new RuleSet(prosemirrorSchema);
 

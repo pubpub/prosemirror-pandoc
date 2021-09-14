@@ -7,6 +7,15 @@
         "lib": ["es6", "dom"],
         "baseUrl": "src",
         "noErrorTruncation": true,
+        "paths": {
+            "transform/": ["transform/index.ts"],
+            "transform/*": ["transform/*"],
+            "expression": ["expression/index.ts"],
+            "expression/*": ["expression/*"],
+            "example": ["example/index.ts"],
+            "example/*": ["example/*"],
+            "types": ["types.ts"],
+        }
     },
     "include": ["src"],
     "exclude": ["node_modules"]

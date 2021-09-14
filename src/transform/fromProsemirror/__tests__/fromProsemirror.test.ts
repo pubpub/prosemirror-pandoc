@@ -572,4 +572,343 @@ describe("fromProsemirror", () => {
             },
         ]);
     });
+
+    it("converts a table", () => {
+        expect(
+            fromProsemirror(
+                {
+                    type: "table",
+                    content: [
+                        {
+                            type: "table_row",
+                            content: [
+                                {
+                                    type: "table_header",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [134],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nnbagxoadui",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [333],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nlqg7398ode",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "He-Man",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [269],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "n29gzcvua5p",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Skeletor",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: "table_row",
+                            content: [
+                                {
+                                    type: "table_header",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [134],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nvt96w89tmm",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                { type: "text", text: "Role" },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [333],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nv0eioahc5d",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                { type: "text", text: "Hero" },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [269],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "ndfs47q3sp4",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Villain",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: "table_row",
+                            content: [
+                                {
+                                    type: "table_header",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [134],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "njy6g19emna",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Weapon",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [333],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nhp0euqi7j9",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Power Sword",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [269],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nfif0x4mhfd",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Havoc Staff",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: "table_row",
+                            content: [
+                                {
+                                    type: "table_header",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [134],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nm0w3am87hj",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Dark secret",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [333],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "ne2rjff3y09",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Expert florist",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 1,
+                                        rowspan: 1,
+                                        colwidth: [269],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "nj0u47p9psl",
+                                                class: null,
+                                                textAlign: null,
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Cries at romcoms",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: "table_row",
+                            content: [
+                                {
+                                    type: "table_cell",
+                                    attrs: {
+                                        colspan: 3,
+                                        rowspan: 1,
+                                        colwidth: [134, 333, 269],
+                                    },
+                                    content: [
+                                        {
+                                            type: "paragraph",
+                                            attrs: {
+                                                id: "n6nffgb8rbn",
+                                                class: null,
+                                                textAlign: "center",
+                                            },
+                                            content: [
+                                                {
+                                                    type: "text",
+                                                    text: "Some stuff at the bottom",
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                rules,
+                { prosemirrorDocWidth: 675 }
+            ).asNode()
+        ).toMatchSnapshot();
+    });
 });

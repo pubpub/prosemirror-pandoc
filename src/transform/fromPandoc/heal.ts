@@ -1,21 +1,21 @@
 import { ProsemirrorNode, ProsemirrorSchema } from "types";
 import { parseExpr, Expr, createItemAcceptor } from "expression";
 
-interface OpenToken {
+type OpenToken = {
     type: "open";
     node: ProsemirrorNode;
     createdFromSplit?: boolean;
-}
+};
 
-interface CloseToken {
+type CloseToken = {
     type: "close";
     node: ProsemirrorNode;
-}
+};
 
-interface AcceptedState {
+type AcceptedState = {
     consumeNode: (node: ProsemirrorNode) => boolean;
     acceptedNodes: ProsemirrorNode[];
-}
+};
 
 export type Token = OpenToken | CloseToken;
 

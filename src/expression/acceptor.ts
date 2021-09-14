@@ -1,31 +1,26 @@
 import Heap from "./heap";
 import { Expr, IdentifierMatch } from "./types";
 
-interface State<Item> {
+type State<Item> = {
     addSuccessor: (s: State<Item>) => void;
     getSuccessors: (n: Item) => State<Item>[];
     consumesItem: () => boolean;
-}
+};
 
-interface Machine<Item> {
+type Machine<Item> = {
     startState: State<Item>;
     acceptState: State<Item>;
-}
+};
 
-interface SearchPosition<Item> {
+type SearchPosition<Item> = {
     state: State<Item>;
     consumedItems: number;
-}
+};
 
-interface SearchPosition<Item> {
-    state: State<Item>;
-    consumedItems: number;
-}
-
-interface DiscoveryState<Item> {
+type DiscoveryState<Item> = {
     discoveredPositions: SearchPosition<Item>[];
     positionsHeap: Heap<SearchPosition<Item>>;
-}
+};
 
 const state = <Item>(guard?: (n: Item) => boolean): State<Item> => {
     const successors: Set<State<Item>> = new Set();

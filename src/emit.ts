@@ -53,7 +53,11 @@ const wrapEnum = <T>(instance: T): { t: T } => {
 
 const wrapAttr = (attr: Attr) => {
     const { identifier, classes, properties } = attr;
-    return [identifier, classes, Object.entries(properties)];
+    return [
+        identifier ?? "",
+        classes ?? [],
+        properties ? Object.entries(properties) : [],
+    ];
 };
 
 const wrapTarget = (target: Target) => {
@@ -126,7 +130,7 @@ const emitCite = (cite: Cite) => {
                     citationMode: wrapEnum<CitationMode>(citationMode),
                     citationNoteNum,
                     citationPrefix: citationPrefix.map(emitInline),
-                    citationSuffic: citationSuffix.map(emitInline),
+                    citationSuffix: citationSuffix.map(emitInline),
                 };
             }),
             content.map(emitInline),

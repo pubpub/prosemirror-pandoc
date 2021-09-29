@@ -92,7 +92,7 @@ export const prosemirrorTableTransformer = (
     const [header, ...body] = table.content as ProsemirrorNode<"table_row">[];
     return {
         type: "Table",
-        attr: createAttr(),
+        attr: createAttr("id" in table.attrs ? String(table.attrs.id) : ""),
         caption: getDefaultCaption(),
         colSpecs: getColSpecsForTable(header, context),
         head: {

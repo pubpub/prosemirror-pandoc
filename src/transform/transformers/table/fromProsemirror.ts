@@ -34,11 +34,11 @@ const getColSpecsForTable = (
 ) => {
     const { prosemirrorDocWidth } = context;
     const columnCount = getColumnCountFromRow(header);
-    const colSpecs: ColSpec[] = new Array(columnCount).map(() =>
-        getDefaultColSpec()
-    );
+    const colSpecs: ColSpec[] = new Array(columnCount)
+        .fill(0)
+        .map(() => getDefaultColSpec());
     header.content.forEach((cell, index) => {
-        if ("colwidth" in cell.attrs) {
+        if ("colwidth" in cell.attrs && cell.attrs.colwidth) {
             const colWidth = cell.attrs.colwidth as (number | null)[];
             colWidth.forEach((width, cellIndex) => {
                 const realColumnIndex = index + cellIndex;

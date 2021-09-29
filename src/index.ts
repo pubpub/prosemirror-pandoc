@@ -1,9 +1,11 @@
-import * as transformUtil from "./transform/util";
+import * as transformUtils from "./transform/util";
 import * as transformers from "./transform/transformers";
+import * as pandocUtils from "./pandocUtils";
 
-export { transformUtil, transformers };
+export { transformUtils, transformers, pandocUtils };
 export { fromPandoc } from "./transform/fromPandoc";
-export { buildRuleset } from "./transform/transformer";
+export { fromProsemirror } from "./transform/fromProsemirror";
+export { RuleSet } from "./transform/ruleset";
 export { emitPandocJson } from "./emit";
 export { parsePandocJson } from "./parse";
 export { metaValueToString, metaValueToJsonSerializable } from "./meta";

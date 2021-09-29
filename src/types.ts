@@ -1,21 +1,9 @@
 /**
  * Definitions for the Pandoc AST
- * See https://hackage.haskell.org/package/pandoc-types-1.17.6/docs/Text-Pandoc-Definition.html
+ * See https://hackage.haskell.org/package/pandoc-types-1.22/docs/Text-Pandoc-Definition.html
  */
 
-interface ProsemirrorNodeDefinition {
-    content?: string;
-    attrs?: { [key: string]: any };
-    group?: string;
-    defining?: boolean;
-}
-
-interface ProsemirrorMarkDefinition {}
-
-export type ProsemirrorSchema = {
-    nodes: { [name: string]: ProsemirrorNodeDefinition };
-    marks: { [name: string]: ProsemirrorMarkDefinition };
-};
+export { Schema as ProsemirrorSchema } from "prosemirror-model";
 
 export type ProsemirrorAttr =
     | undefined
@@ -25,13 +13,16 @@ export type ProsemirrorAttr =
     | ProsemirrorAttr[];
 
 export type ProsemirrorNode<Type = string> = {
+    __isMark?: false;
     type: Type;
     content?: ProsemirrorNode[];
     text?: string;
     attrs?: Record<string, ProsemirrorAttr>;
+    marks?: ProsemirrorMark[];
 };
 
 export type ProsemirrorMark<Type = string> = {
+    __isMark?: true;
     type: Type;
     attrs?: Record<string, ProsemirrorAttr>;
 };
@@ -467,7 +458,7 @@ export type Inline =
     | Note
     | Span;
 
-export type PandocNode = Doc | Block | Inline | MetaValue;
+export type PandocNode = Doc | Block | Inline;
 
 export const PANDOC_NODE_TYPES = [
     "BlockQuote",

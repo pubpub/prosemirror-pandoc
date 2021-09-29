@@ -540,7 +540,7 @@ const parseMetaValue = (n: { t: string; c: any }): MetaValue => {
 };
 
 const parseMeta = (meta: PandocJson["meta"]) => {
-    const parsedMeta: { [key: string]: MetaValue } = {};
+    const parsedMeta: Record<string, MetaValue> = {};
     Object.entries(meta).forEach(([key, value]) => {
         parsedMeta[key] = parseMetaValue(value);
     });

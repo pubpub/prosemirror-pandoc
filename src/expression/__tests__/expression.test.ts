@@ -1,11 +1,11 @@
 /* global describe, it, expect */
-import { acceptItems, parseExpr } from "../nodeExpression";
+import { acceptItems, parseExpr } from "expression";
 
-interface Node {
+type Node = {
     type: string;
-}
+};
 
-const n = (s: string): Node => ({ type: s });
+const n = (type: string): Node => ({ type });
 
 describe("parseRegexp", () => {
     it("handles a simple identifier", () => {

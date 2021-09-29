@@ -1,8 +1,4 @@
-import {
-    ProsemirrorNode,
-    ProsemirrorMark,
-    ProsemirrorSchema,
-} from "../../types";
+import { ProsemirrorNode, ProsemirrorMark, ProsemirrorSchema } from "types";
 
 const compareMarks = (first: ProsemirrorMark, second: ProsemirrorMark) =>
     // Tell no one what you saw here
@@ -25,7 +21,7 @@ const nodeAcceptsMarks = (node: ProsemirrorNode, schema: ProsemirrorSchema) => {
     if (!definition) {
         throw new Error(`No Prosemirror schema entry for node ${node.type}`);
     }
-    return definition.group === "inline";
+    return definition.spec.group === "inline";
 };
 
 export const applyMarksToNodes = (

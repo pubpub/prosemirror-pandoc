@@ -1,0 +1,467 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fromProsemirror converts a table 1`] = `
+Object {
+  "attr": Object {
+    "classes": Array [],
+    "identifier": "",
+    "properties": Object {},
+  },
+  "bodies": Array [
+    Object {
+      "attr": Object {
+        "classes": Array [],
+        "identifier": "",
+        "properties": Object {},
+      },
+      "bodyRows": Array [
+        Object {
+          "attr": Object {
+            "classes": Array [],
+            "identifier": "",
+            "properties": Object {},
+          },
+          "cells": Array [
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Role",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Hero",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Villain",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+          ],
+          "type": "Row",
+        },
+        Object {
+          "attr": Object {
+            "classes": Array [],
+            "identifier": "",
+            "properties": Object {},
+          },
+          "cells": Array [
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Weapon",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Power",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "Sword",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Havoc",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "Staff",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+          ],
+          "type": "Row",
+        },
+        Object {
+          "attr": Object {
+            "classes": Array [],
+            "identifier": "",
+            "properties": Object {},
+          },
+          "cells": Array [
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Dark",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "secret",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Expert",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "florist",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 1,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Cries",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "at",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "romcoms",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+          ],
+          "type": "Row",
+        },
+        Object {
+          "attr": Object {
+            "classes": Array [],
+            "identifier": "",
+            "properties": Object {},
+          },
+          "cells": Array [
+            Object {
+              "alignment": "AlignDefault",
+              "attr": Object {
+                "classes": Array [],
+                "identifier": "",
+                "properties": Object {},
+              },
+              "colSpan": 3,
+              "content": Array [
+                Object {
+                  "content": Array [
+                    Object {
+                      "content": "Some",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "stuff",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "at",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "the",
+                      "type": "Str",
+                    },
+                    Object {
+                      "type": "Space",
+                    },
+                    Object {
+                      "content": "bottom",
+                      "type": "Str",
+                    },
+                  ],
+                  "type": "Para",
+                },
+              ],
+              "rowSpan": 1,
+              "type": "Cell",
+            },
+          ],
+          "type": "Row",
+        },
+      ],
+      "headRows": Array [],
+      "rowHeadColumns": 1,
+      "type": "TableBody",
+    },
+  ],
+  "caption": Object {
+    "content": Array [],
+    "type": "Caption",
+  },
+  "colSpecs": Array [
+    Object {
+      "alignment": "AlignDefault",
+      "type": "ColSpec",
+      "width": 0.1985185185185185,
+    },
+    Object {
+      "alignment": "AlignDefault",
+      "type": "ColSpec",
+      "width": 0.49333333333333335,
+    },
+    Object {
+      "alignment": "AlignDefault",
+      "type": "ColSpec",
+      "width": 0.3985185185185185,
+    },
+  ],
+  "foot": Object {
+    "attr": Object {
+      "classes": Array [],
+      "identifier": "",
+      "properties": Object {},
+    },
+    "rows": Array [],
+    "type": "TableFoot",
+  },
+  "head": Object {
+    "attr": Object {
+      "classes": Array [],
+      "identifier": "",
+      "properties": Object {},
+    },
+    "rows": Array [
+      Object {
+        "attr": Object {
+          "classes": Array [],
+          "identifier": "",
+          "properties": Object {},
+        },
+        "cells": Array [
+          Object {
+            "alignment": "AlignDefault",
+            "attr": Object {
+              "classes": Array [],
+              "identifier": "",
+              "properties": Object {},
+            },
+            "colSpan": 1,
+            "content": Array [
+              Object {
+                "content": Array [],
+                "type": "Para",
+              },
+            ],
+            "rowSpan": 1,
+            "type": "Cell",
+          },
+          Object {
+            "alignment": "AlignDefault",
+            "attr": Object {
+              "classes": Array [],
+              "identifier": "",
+              "properties": Object {},
+            },
+            "colSpan": 1,
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "content": "He-Man",
+                    "type": "Str",
+                  },
+                ],
+                "type": "Para",
+              },
+            ],
+            "rowSpan": 1,
+            "type": "Cell",
+          },
+          Object {
+            "alignment": "AlignDefault",
+            "attr": Object {
+              "classes": Array [],
+              "identifier": "",
+              "properties": Object {},
+            },
+            "colSpan": 1,
+            "content": Array [
+              Object {
+                "content": Array [
+                  Object {
+                    "content": "Skeletor",
+                    "type": "Str",
+                  },
+                ],
+                "type": "Para",
+              },
+            ],
+            "rowSpan": 1,
+            "type": "Cell",
+          },
+        ],
+        "type": "Row",
+      },
+    ],
+    "type": "TableHead",
+  },
+  "type": "Table",
+}
+`;

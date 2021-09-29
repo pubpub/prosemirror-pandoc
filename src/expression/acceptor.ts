@@ -1,174 +1,25 @@
-/**
- * Implements a regular expression-like language parser, and a finite state machine generator
- * for evaluating lists of items against such an expression. For example:
- *
- * const expr = parseExpr("(A | B)+ C")
- * const acceptedItemsCount = <string>acceptItems(
- *    expr,
- *    ['A', 'B', 'A', 'C', 'A'],
- *    id => str => id === str
- * ) // === 4 because only the first four elements of the input array match the expression.
- */
 import Heap from "./heap";
+import { Expr, IdentifierMatch } from "./types";
 
-interface Identifier {
-    type: "identifier";
-    identifier: string;
-}
-interface OneOrMore {
-    type: "oneOrMore";
-    child: Expr;
-}
-interface ZeroOrMore {
-    type: "zeroOrMore";
-    child: Expr;
-}
-interface Range {
-    type: "range";
-    lowerBound: number;
-    upperBound: number | null;
-    child: Expr;
-}
-
-interface Sequence {
-    type: "sequence";
-    children: Expr[];
-}
-interface Choice {
-    type: "choice";
-    children: Expr[];
-}
-
-export type IdentifierMatch<Item> = (id: string) => (item: Item) => boolean;
-
-export type Expr =
-    | Identifier
-    | OneOrMore
-    | ZeroOrMore
-    | Sequence
-    | Choice
-    | Range;
-
-interface State<Item> {
+type State<Item> = {
     addSuccessor: (s: State<Item>) => void;
     getSuccessors: (n: Item) => State<Item>[];
     consumesItem: () => boolean;
-}
+};
 
-interface Machine<Item> {
+type Machine<Item> = {
     startState: State<Item>;
     acceptState: State<Item>;
-}
+};
 
-interface SearchPosition<Item> {
+type SearchPosition<Item> = {
     state: State<Item>;
     consumedItems: number;
-}
+};
 
-interface SearchPosition<Item> {
-    state: State<Item>;
-    consumedItems: number;
-}
-
-interface DiscoveryState<Item> {
+type DiscoveryState<Item> = {
     discoveredPositions: SearchPosition<Item>[];
     positionsHeap: Heap<SearchPosition<Item>>;
-}
-
-// A simple recursive-descent parser to turn expressions like `(Space | Str)+` into syntax trees
-export const parseExpr = (str: string): Expr => {
-    str = str.trim();
-    // Remove spaces around choice separators
-    str = str.replace(/\s*\|\s*/g, "|");
-    // Remove extraneous spaces
-    str = str.replace(/\s+/g, " ");
-
-    // Keep track of the separator type we have at this level. It should either be choice separators
-    // ("|") or sequential separators (" ").
-    let separator;
-    // Find separators
-    const separators = [];
-    // Keep track of open and close parens
-    let parenCount = 0;
-    // Keep track of open and close curlies
-    let curlyCount = 0;
-    for (let ptr = 0; ptr < str.length; ++ptr) {
-        const char = str.charAt(ptr);
-        if (char === "(") {
-            ++parenCount;
-        } else if (char === ")") {
-            --parenCount;
-        } else if (char === "{") {
-            ++curlyCount;
-        } else if (char === "}") {
-            --curlyCount;
-        } else if (
-            parenCount === 0 &&
-            curlyCount === 0 &&
-            (char === "|" || char === " ")
-        ) {
-            if (separator && separator !== char) {
-                throw new Error(
-                    "Please surround mixed separators with parentheses!" +
-                        ` e.g. prefer '(Foo | Bar) Baz' over 'Foo | Bar Baz'. (at ${ptr}, parsing '${str}')`
-                );
-            } else {
-                separator = char;
-                separators.push(ptr);
-            }
-        }
-    }
-    if (separators.length > 0) {
-        const separated: string[] = [];
-        let substring = "";
-        for (let ptr = 0; ptr < str.length; ++ptr) {
-            if (separators.includes(ptr)) {
-                separated.push(substring);
-                substring = "";
-            } else {
-                substring += str.charAt(ptr);
-            }
-        }
-        if (substring.length > 0) {
-            separated.push(substring);
-        }
-        return {
-            type: separator === " " ? "sequence" : "choice",
-            children: separated.map(parseExpr),
-        };
-    } else if (str.endsWith("}")) {
-        let ptr = str.length - 1;
-        while (str.charAt(ptr) !== "{") {
-            ptr--;
-        }
-        const rangeStrs = str.slice(ptr + 1, str.length - 1).split(",");
-        const hasTwo = rangeStrs.length === 2;
-        const range = rangeStrs.map((str) => parseInt(str.trim()));
-        const [lowerBound, upperBound] = range;
-        return {
-            type: "range",
-            lowerBound,
-            upperBound: hasTwo
-                ? isNaN(upperBound)
-                    ? null
-                    : upperBound
-                : lowerBound,
-            child: parseExpr(str.slice(0, ptr)),
-        };
-    } else if (str.endsWith("+")) {
-        return {
-            type: "oneOrMore",
-            child: parseExpr(str.slice(0, str.length - 1)),
-        };
-    } else if (str.endsWith("*")) {
-        return {
-            type: "zeroOrMore",
-            child: parseExpr(str.slice(0, str.length - 1)),
-        };
-    } else if (str.startsWith("(") && str.endsWith(")")) {
-        return parseExpr(str.slice(1, str.length - 1));
-    }
-    return { type: "identifier", identifier: str };
 };
 
 const state = <Item>(guard?: (n: Item) => boolean): State<Item> => {
@@ -438,9 +289,10 @@ export const createItemAcceptor = <Item>(
     };
 };
 
-export const quickAcceptChoice = <Item extends { type: string }>(
+const quickAcceptItems = <Item>(
     expr: Expr,
-    items: Item[]
+    items: Item[],
+    matchTest: IdentifierMatch<Item>
 ): number => {
     if (
         expr.type === "oneOrMore" &&
@@ -454,7 +306,7 @@ export const quickAcceptChoice = <Item extends { type: string }>(
         let ptr = 0;
         while (
             ptr < items.length &&
-            validIdentifiers.includes(items[ptr].type)
+            validIdentifiers.some((id) => matchTest(id)(items[ptr]))
         ) {
             ++ptr;
         }
@@ -468,6 +320,10 @@ export const acceptItems = <Item>(
     items: Item[],
     matchTest: IdentifierMatch<Item>
 ): number => {
+    const quickAcceptedItems = quickAcceptItems(expr, items, matchTest);
+    if (quickAcceptedItems > 0) {
+        return quickAcceptedItems;
+    }
     const { startState, acceptState } = createAcceptanceMachine(
         expr,
         matchTest
@@ -510,39 +366,4 @@ export const acceptItems = <Item>(
     }
 
     return maxConsumedItems;
-};
-
-export const expressionAcceptsMultiple = (expr: Expr): boolean => {
-    if (expr.type === "identifier") {
-        return false;
-    } else if (expr.type === "sequence") {
-        return true;
-    } else if (expr.type === "oneOrMore") {
-        return true;
-    } else if (expr.type === "zeroOrMore") {
-        return true;
-    } else if (expr.type === "range") {
-        return expr.upperBound === null || expr.upperBound > 1;
-    } else if (expr.type === "choice") {
-        return expr.children.some((child) => expressionAcceptsMultiple(child));
-    }
-};
-
-export const willAlwaysMatchSingleIdentifier = (expr: Expr, id: string) => {
-    if (expr.type === "identifier") {
-        return expr.identifier === id;
-    } else if (expr.type === "sequence") {
-        return false;
-    } else if (expr.type === "choice") {
-        return expr.children.some((child) =>
-            willAlwaysMatchSingleIdentifier(child, id)
-        );
-    } else if (expr.type === "range") {
-        return (
-            expr.lowerBound === 1 &&
-            willAlwaysMatchSingleIdentifier(expr.child, id)
-        );
-    } else {
-        return willAlwaysMatchSingleIdentifier(expr.child, id);
-    }
 };

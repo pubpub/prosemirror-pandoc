@@ -1,8 +1,4 @@
 /* global describe, it, expect */
-import rules from "../../../example/rules";
-
-import { fromPandoc } from "../fromPandoc";
-import { createAttr } from "../../util";
 import {
     Header,
     OrderedList,
@@ -12,10 +8,14 @@ import {
     Plain,
     DefinitionList,
     Link,
-} from "../../../types";
+} from "types";
+import { rules } from "example/rules";
+import { createAttr } from "transform/util";
+
+import { fromPandoc } from "../fromPandoc";
 
 describe("fromPandoc", () => {
-    it("transforms a Document into a doc", () => {
+    it("transforms a Doc into a doc", () => {
         expect(
             fromPandoc(
                 {
@@ -75,7 +75,7 @@ describe("fromPandoc", () => {
     });
 
     it("transforms a Null into an empty array", () => {
-        expect(fromPandoc({ type: "Null" }, rules)).toEqual([]);
+        expect(fromPandoc({ type: "Null" }, rules).asArray()).toEqual([]);
     });
 
     it("transforms a simple string", () => {
@@ -121,7 +121,7 @@ describe("fromPandoc", () => {
                     },
                 ],
                 rules
-            )
+            ).asArray()
         ).toEqual([
             {
                 type: "paragraph",
@@ -449,10 +449,10 @@ describe("fromPandoc", () => {
                 },
             ],
         };
-        expect(fromPandoc(input, rules)).toMatchSnapshot();
+        expect(fromPandoc(input, rules).asArray()).toMatchSnapshot();
     });
 
-    it("transforms an BulletList into an bullet_list", () => {
+    it("transforms a BulletList into a bullet_list", () => {
         const input: BulletList = {
             type: "BulletList",
             content: [
@@ -879,7 +879,7 @@ describe("fromPandoc", () => {
         });
     });
 
-    it("handles an Image with a caption that needs to be converted to HTML by Pandoc", () => {
+    it("handles an Image with alt text that needs to be converted by Pandoc", () => {
         expect(
             fromPandoc(
                 {
@@ -894,7 +894,7 @@ describe("fromPandoc", () => {
                             type: "Strong",
                             content: [{ type: "Str", content: "Very" }],
                         },
-                        { type: "LineBreak" },
+                        { type: "Space" },
                         { type: "Str", content: "cool." },
                     ],
                 },
@@ -903,7 +903,7 @@ describe("fromPandoc", () => {
         ).toEqual({
             type: "image",
             attrs: {
-                caption: "<p><strong>Very</strong><br />\ncool.</p>\n",
+                altText: "Very cool.",
                 url: "https://pubpub.org/logo.png",
             },
         });
@@ -1236,7 +1236,7 @@ describe("fromPandoc", () => {
                 },
                 rules,
                 { prosemirrorDocWidth: 800 }
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1909,7 +1909,7 @@ describe("fromPandoc", () => {
                     },
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot());
 
     it("transforms Math (mathType=InlineMath) into an equation", () => {
@@ -1921,7 +1921,7 @@ describe("fromPandoc", () => {
                     content: "e^{i\\pi} = -1",
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1934,7 +1934,7 @@ describe("fromPandoc", () => {
                     content: "e^{i\\pi} = -1",
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1964,7 +1964,7 @@ describe("fromPandoc", () => {
                     ],
                 },
                 rules
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 
@@ -1995,7 +1995,7 @@ describe("fromPandoc", () => {
                 },
                 rules,
                 { useSmartQuotes: true }
-            )
+            ).asArray()
         ).toMatchSnapshot();
     });
 });

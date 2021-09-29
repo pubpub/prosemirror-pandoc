@@ -1,6 +1,8 @@
 import { argv } from "yargs";
+
 import { loadAndTransformFromPandoc } from "../util";
-import rules from "./rules";
+
+import { rules } from "./rules";
 
 const main = async () => {
     const {

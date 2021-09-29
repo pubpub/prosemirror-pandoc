@@ -1,46 +1,27 @@
 import { asNode, asArray } from "./util";
 import { ProsemirrorNode, PandocNode } from "../types";
 
-const commonFluent = { asNode, asArray };
+const FLUENT_SYMBOL = Symbol();
 
-type FluentType<T> = T extends PandocNode ? PandocFluent : ProsemirrorFluent;
-
-type CommonFluent<T> = T & {
+export type Fluent<T> = {
     asArray: () => T[];
     asNode: () => T;
+    fluent: typeof FLUENT_SYMBOL;
 };
 
-export type ProsemirrorFluent<T extends ProsemirrorNode = ProsemirrorNode> =
-    CommonFluent<T>;
+const isFluent = <T>(item: any): item is Fluent<T> =>
+    "fluent" in item && item.fluent === FLUENT_SYMBOL;
 
-export type PandocFluent<T extends PandocNode = PandocNode> = CommonFluent<T>;
-
-const assignFluent = <T>(
-    target: T | FluentType<T>,
-    fluentizer: (target: T | FluentType<T>) => FluentType<T>,
-    methods: { [key: string]: (target: any) => any }
-): FluentType<T> => {
-    Object.keys(methods).forEach((key) => {
-        const method = methods[key];
-        Object.defineProperty(target, key, {
-            value: () => fluentizer(method(target)),
-            configurable: true,
-            writable: false,
-        });
-    });
-    return target as FluentType<T>;
-};
-
-export const pandocFluent = (node: PandocNode | PandocNode[]): PandocFluent => {
-    return assignFluent<PandocFluent>(node as PandocFluent, pandocFluent, {
-        ...commonFluent,
-    });
-};
-
-export const prosemirrorFluent = (
-    node: ProsemirrorNode | ProsemirrorNode[]
-): ProsemirrorFluent => {
-    return assignFluent(node, prosemirrorFluent, {
-        ...commonFluent,
-    });
+export const fluent = <T extends ProsemirrorNode | PandocNode>(
+    item: T | T[] | Fluent<T>
+): Fluent<T> => {
+    if (isFluent<T>(item)) {
+        return item;
+    } else {
+        return {
+            asArray: () => asArray(item),
+            asNode: () => asNode(item),
+            fluent: FLUENT_SYMBOL,
+        };
+    }
 };

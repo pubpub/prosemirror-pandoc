@@ -84,9 +84,7 @@ export const metaValueToString = (m: MetaValue): string => {
     return "";
 };
 
-export const metaValueToJsonSerializable = (
-    m: MetaValue
-): object | any[] | string | boolean => {
+export const metaValueToJsonSerializable = (m: MetaValue) => {
     if (m.type === "MetaBool") {
         return m.content;
     }

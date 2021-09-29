@@ -1,9 +1,9 @@
 import { Attr, Str, Space } from "../types";
 
 export const createAttr = (
-    identifier: string,
-    classes?: string[],
-    properties?: Record<string, any>
+    identifier: string = "",
+    classes: string[] = [],
+    properties: Record<string, any> = {}
 ): Attr => {
     return { identifier, classes, properties };
 };
@@ -75,4 +75,13 @@ export const getQuoteChar = (
     } else {
         return single ? "'" : '"';
     }
+};
+
+export const makeCounter = () => {
+    const countMap: Map<string, number> = new Map();
+    return (type: string) => {
+        const count = countMap.get(type) || 0;
+        countMap.set(type, count + 1);
+        return count;
+    };
 };

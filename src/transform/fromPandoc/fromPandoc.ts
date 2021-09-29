@@ -1,98 +1,98 @@
-import { flatten, asArray } from "../util";
+import {
+    PandocNode,
+    ProsemirrorNode,
+    ProsemirrorMark,
+    Inline,
+    Block,
+} from "types";
 
-import { PandocNode, ProsemirrorNode, ProsemirrorMark } from "../../types";
-import { ProsemirrorFluent, prosemirrorFluent } from "../fluent";
-import { getTransformRuleForElements } from "../transformer";
-import { RuleSet, TransformConfig, TransformContext } from "../types";
+import { asArray, makeCounter } from "transform/util";
+import { fluent, Fluent } from "transform/fluent";
+import {
+    FromPandocTransformContext,
+    FromPandocTransformConfig,
+} from "transform/types";
+import { RuleSet } from "transform/ruleset";
 
 import { applyMarksToNodes } from "./marks";
 import { heal } from "./heal";
 
-const matchPandocNode =
-    (identifier: string) =>
-    (node: PandocNode): boolean => {
-        return identifier === node.type;
-    };
-
 const fromPandocInner = (
     elementOrArray: PandocNode | PandocNode[],
-    context: TransformContext<PandocNode, ProsemirrorNode>,
-    marks: ProsemirrorMark[]
-): ProsemirrorFluent => {
+    context: FromPandocTransformContext
+): Fluent<ProsemirrorNode> => {
     if (!elementOrArray) {
-        return prosemirrorFluent([]);
+        return fluent([] as ProsemirrorNode[]);
     }
-    const { rules, marksMap } = context;
+    const { ruleset, marksMap } = context;
     const elements = asArray(elementOrArray);
     const transformed: ProsemirrorNode[] = [];
+    const localMarksMap = new Map<ProsemirrorNode, ProsemirrorMark[]>();
     let ptr = 0;
     while (ptr < elements.length) {
         const remaining = elements.slice(ptr);
-        const { rule, acceptedCount } = getTransformRuleForElements(
-            rules,
-            remaining,
-            matchPandocNode
-        );
-        const addition: ProsemirrorNode[] = flatten(
-            rule.acceptsMultiple
-                ? rule.transform(
-                      elements.slice(ptr, ptr + acceptedCount),
-                      context
-                  )
-                : rule.transform(elements[ptr], context)
-        );
-        for (const element of addition) {
-            marksMap.set(element, [...(marksMap.get(element) || []), ...marks]);
-            transformed.push(element);
+        const { rule, acceptedCount } = ruleset.matchPandocNodes(remaining);
+        if (rule.isMarksRule) {
+            const accepted = elements[ptr];
+            const marks = asArray(rule.transformer(accepted, context));
+            if ("content" in accepted) {
+                const innerTransformed = fromPandocInner(
+                    // This cast works around the fact that some Pandoc nodes have nested arrays
+                    // as their content property (e.g. OrderedList has Block[][]). This shouldn't
+                    // be a problem in practice unless you're trying to do something very stupid
+                    // like turn an OrderedList node into an em mark.
+                    accepted.content as Block[] | Inline[],
+                    context
+                ).asArray();
+                for (const node of innerTransformed) {
+                    localMarksMap.set(node, marks);
+                }
+                transformed.push(...innerTransformed);
+            }
+        } else if (rule.isMarksRule === false) {
+            const accepted = rule.acceptsMultiple
+                ? elements.slice(ptr, ptr + acceptedCount)
+                : elements[ptr];
+            const addition = rule.transformer(accepted, context);
+            transformed.push(...asArray(addition));
         }
         ptr += acceptedCount;
     }
-    return prosemirrorFluent(transformed);
-};
-
-const makeCounter = () => {
-    const countMap: Map<string, number> = new Map();
-    return (type: string) => {
-        const count = countMap.get(type) || 0;
-        countMap.set(type, count + 1);
-        return count;
-    };
+    for (const [node, localMarks] of localMarksMap.entries()) {
+        const currentMarks = marksMap.get(node) || [];
+        marksMap.set(node, [...currentMarks, ...localMarks]);
+    }
+    return fluent(transformed);
 };
 
 export const fromPandoc = (
     elementOrArray: PandocNode | PandocNode[],
-    rules: RuleSet,
-    config: Partial<TransformConfig> = {}
-): ProsemirrorFluent => {
+    ruleset: RuleSet<any>,
+    config: Partial<FromPandocTransformConfig> = {}
+): Fluent<ProsemirrorNode> => {
     const {
         resource = (x) => x,
         useSmartQuotes = false,
-        prosemirrorTextAlignAttr = null,
         prosemirrorDocWidth = 1000,
     } = config;
-    const context: TransformContext<PandocNode, ProsemirrorNode> = {
-        rules: rules.fromPandoc,
-        prosemirrorSchema: rules.prosemirrorSchema,
+    const context: FromPandocTransformContext = {
+        ruleset,
         resource,
         useSmartQuotes,
-        prosemirrorTextAlignAttr,
         count: makeCounter(),
-        transform: (
-            element,
-            { marks = [], context: parentContext = {} } = {}
-        ) => fromPandocInner(element, { ...context, ...parentContext }, marks),
+        transform: (element, parentContext = {}) =>
+            fromPandocInner(element, { ...context, ...parentContext }),
         marksMap: new Map(),
         prosemirrorDocWidth,
-        textAlign: "left",
     };
     const nodes = context.transform(elementOrArray);
     const nodesWithMarks = applyMarksToNodes(
         nodes.asArray(),
-        rules.prosemirrorSchema,
+        ruleset.prosemirrorSchema,
         context.marksMap
     );
     const healed = nodesWithMarks.map((node) =>
-        heal(node, rules.prosemirrorSchema)
+        heal(node, ruleset.prosemirrorSchema)
     );
-    return prosemirrorFluent(healed);
+    return fluent(healed);
 };

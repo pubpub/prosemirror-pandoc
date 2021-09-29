@@ -1,6 +1,7 @@
+import { Schema } from "prosemirror-model";
 import { tableNodes } from "prosemirror-tables";
 
-export const nodes = {
+const nodes = {
     doc: {
         content: "block+",
         attrs: {
@@ -37,6 +38,7 @@ export const nodes = {
             size: { default: 50 }, // number as percentage
             align: { default: "center" },
             caption: { default: "" },
+            altText: { default: "" },
         },
         inline: false,
         group: "block",
@@ -67,6 +69,8 @@ export const nodes = {
         group: "inline",
     },
     equation: {
+        atom: true,
+        inline: true,
         attrs: {
             value: { default: "" },
             html: { default: "" },
@@ -109,7 +113,7 @@ export const nodes = {
     }),
 };
 
-export const marks = {
+const marks = {
     em: {},
     strong: {},
     link: {
@@ -125,3 +129,5 @@ export const marks = {
     strike: {},
     code: {},
 };
+
+export const prosemirrorSchema = new Schema({ nodes, marks, topNode: "doc" });

@@ -26,6 +26,13 @@ import {
     ListNumberStyle,
     Math,
     MathType,
+    MetaBlocks,
+    MetaBool,
+    MetaInlines,
+    MetaList,
+    MetaMap,
+    MetaString,
+    MetaValue,
     Note,
     OrderedList,
     PandocJson,
@@ -431,11 +438,82 @@ export const emitBlock = (n: Block): { t: string; c?: any[] } => {
     }
 };
 
+const emitMetaMap = (n: MetaMap) => {
+    const mappedValues: Record<string, any> = {};
+    Object.entries(n.values).forEach(([key, value]) => {
+        mappedValues[key] = emitMetaValue(value);
+    });
+    return {
+        t: "MetaMap",
+        c: mappedValues,
+    };
+};
+
+const emitMetaBlocks = (n: MetaBlocks) => {
+    return {
+        t: "MetaBlocks",
+        c: n.content.map((block) => emitBlock(block)),
+    };
+};
+
+const emitMetaInlines = (n: MetaInlines) => {
+    return {
+        t: "MetaInlines",
+        c: n.content.map((inline) => emitInline(inline)),
+    };
+};
+
+const emitMetaList = (n: MetaList) => {
+    return {
+        t: "MetaList",
+        c: n.content.map((item) => emitMetaValue(item)),
+    };
+};
+
+const emitMetaString = (n: MetaString) => {
+    return {
+        t: "MetaString",
+        c: n.content,
+    };
+};
+
+const emitMetaBool = (n: MetaBool) => {
+    return {
+        t: "MetaBool",
+        c: n.content,
+    };
+};
+
+const emitMetaValue = (n: MetaValue) => {
+    switch (n.type) {
+        case "MetaMap":
+            return emitMetaMap(n);
+        case "MetaList":
+            return emitMetaList(n);
+        case "MetaBool":
+            return emitMetaBool(n);
+        case "MetaString":
+            return emitMetaString(n);
+        case "MetaInlines":
+            return emitMetaInlines(n);
+        case "MetaBlocks":
+            return emitMetaBlocks(n);
+    }
+};
+
+const emitMeta = (n: Doc["meta"]) => {
+    const res: Record<string, MetaValue> = {};
+    Object.entries(n).forEach(([key, value]) => {
+        res[key] = emitMetaValue(value);
+    });
+    return res;
+};
+
 export const emitPandocJson = (doc: Doc): PandocJson => {
     const { blocks, meta } = doc;
     return {
         "pandoc-api-version": PANDOC_API_VERSION,
         blocks: blocks.map(emitBlock),
-        meta,
+        meta: emitMeta(meta),
     };
 };

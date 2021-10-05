@@ -71,13 +71,13 @@ export const fromPandoc = (
     config: Partial<FromPandocTransformConfig> = {}
 ): Fluent<ProsemirrorNode> => {
     const {
-        resource = (x) => x,
+        resources = {},
         useSmartQuotes = false,
         prosemirrorDocWidth = 1000,
     } = config;
     const context: FromPandocTransformContext = {
         ruleset,
-        resource,
+        resources,
         useSmartQuotes,
         count: makeCounter(),
         transform: (element, parentContext = {}) =>

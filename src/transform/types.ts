@@ -26,7 +26,7 @@ type TransformCallback<
 
 // Options passed into the transform process in both directions
 type SharedTransformConfig = {
-    resource: (input: string, context?: any) => string;
+    resources: Record<string, any>;
     prosemirrorDocWidth: number;
 };
 

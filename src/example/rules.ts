@@ -223,11 +223,11 @@ rules.toProsemirrorNode("RawInline", (node) => {
 // These next rules for images don't use transform() because they're not inverses of each other --
 // the Prosemirror->Pandoc direction wraps an Image in a Para to make it block-level
 
-rules.toProsemirrorNode("Image", (node, { resource }) => {
+rules.toProsemirrorNode("Image", (node, { resources }) => {
     return {
         type: "image",
         attrs: {
-            url: resource(node.target.url),
+            url: resources.image(node.target.url),
             altText: pandocInlineToPlainString(node.content),
             // TODO(ian): is there anything we can do about the image size here?
         },

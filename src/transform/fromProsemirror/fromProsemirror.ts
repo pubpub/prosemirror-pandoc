@@ -53,10 +53,10 @@ export const fromProsemirror = (
     ruleset: RuleSet<any>,
     config: Partial<FromProsemirrorTransformConfig> = {}
 ): Fluent<PandocNode> => {
-    const { resource = (x) => x, prosemirrorDocWidth = 1000 } = config;
+    const { resources = {}, prosemirrorDocWidth = 1000 } = config;
     const context: FromProsemirrorTransformContext = {
         ruleset,
-        resource,
+        resources,
         prosemirrorDocWidth,
         count: makeCounter(),
         transform: (element) => fromProsemirrorInner(element, context),

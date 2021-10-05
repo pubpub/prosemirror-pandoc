@@ -898,13 +898,14 @@ describe("fromPandoc", () => {
                         { type: "Str", content: "cool." },
                     ],
                 },
-                rules
+                rules,
+                { resources: { image: (x) => x.replace("pubpub", "duqduq") } }
             ).asNode()
         ).toEqual({
             type: "image",
             attrs: {
                 altText: "Very cool.",
-                url: "https://pubpub.org/logo.png",
+                url: "https://duqduq.org/logo.png",
             },
         });
     });

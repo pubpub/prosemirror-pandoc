@@ -36,14 +36,17 @@ const fromPandocInner = (
             const accepted = elements[ptr];
             const marks = asArray(rule.transformer(accepted, context));
             if ("content" in accepted) {
-                const innerTransformed = fromPandocInner(
-                    // This cast works around the fact that some Pandoc nodes have nested arrays
-                    // as their content property (e.g. OrderedList has Block[][]). This shouldn't
-                    // be a problem in practice unless you're trying to do something very stupid
-                    // like turn an OrderedList node into an em mark.
-                    accepted.content as Block[] | Inline[],
-                    context
-                ).asArray();
+                const innerTransformed =
+                    typeof accepted.content === "string"
+                        ? [{ type: "text", text: accepted.content }]
+                        : fromPandocInner(
+                              // This cast works around the fact that some Pandoc nodes have nested arrays
+                              // as their content property (e.g. OrderedList has Block[][]). This shouldn't
+                              // be a problem in practice unless you're trying to do something very stupid
+                              // like turn an OrderedList node into an em mark.
+                              accepted.content as Block[] | Inline[],
+                              context
+                          ).asArray();
                 for (const node of innerTransformed) {
                     localMarksMap.set(node, marks);
                 }

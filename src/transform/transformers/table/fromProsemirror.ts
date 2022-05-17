@@ -81,7 +81,10 @@ const transformRow = (
     return {
         type: "Row",
         attr: createAttr(),
-        cells: cells.map((cell) => transformCell(cell, context)),
+        // Table rows may be devoid of content, for example phantom rows that
+        // are automatically added to satisfy a row where each element has
+        // rowspan >1
+        cells: cells?.map((cell) => transformCell(cell, context)) ?? [] ,
     };
 };
 

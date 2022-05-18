@@ -75,7 +75,7 @@ const transformRow = (
     row: ProsemirrorNode<"table_row">,
     context: FromProsemirrorTransformContext
 ): Row => {
-    const cells = row.content as ProsemirrorNode<
+    const cells = row.content as undefined | ProsemirrorNode<
         "table_cell" | "table_header"
     >[];
     return {

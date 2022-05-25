@@ -15,7 +15,15 @@ export const callPandoc = (
 ) => {
     return spawnSync(
         "pandoc",
-        ["-f", inputFormat, "-t", outputFormat, "--quiet", "--wrap=none", ...extraArgs],
+        [
+            "-f",
+            inputFormat,
+            "-t",
+            outputFormat,
+            "--quiet",
+            "--wrap=none",
+            ...extraArgs,
+        ],
         { input: source, maxBuffer: MAX_BUFFER }
     ).stdout.toString();
 };

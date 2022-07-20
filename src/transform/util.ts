@@ -37,7 +37,10 @@ export const intersperse = (
 
 export const textToStrSpace = (text: string): (Str | Space)[] =>
     intersperse(
-        text.split(" ").map((word) => ({ type: "Str", content: word })),
+        text
+            .split(" ")
+            .filter((word) => word.length > 0)
+            .map((word) => ({ type: "Str", content: word })),
         () => ({ type: "Space" })
     );
 

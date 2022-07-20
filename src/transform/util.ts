@@ -37,12 +37,14 @@ export const intersperse = (
 
 export const textToStrSpace = (text: string): (Str | Space)[] =>
     intersperse(
-        text
-            .split(" ")
-            .filter((word) => word.length > 0)
-            .map((word) => ({ type: "Str", content: word })),
+        text.split(" ").map((word) => ({ type: "Str", content: word })),
         () => ({ type: "Space" })
-    );
+    ).filter((node) => {
+        if (node.type === "Str" && node.content.length === 0) {
+            return false;
+        }
+        return true;
+    });
 
 export const asArray = <T>(item: T | T[]): T[] => {
     return Array.isArray(item) ? item : [item];

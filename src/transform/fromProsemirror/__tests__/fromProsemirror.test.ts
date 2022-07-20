@@ -79,6 +79,21 @@ describe("fromProsemirror", () => {
         ]);
     });
 
+    it("transforms a string with trailing spaces", () => {
+        expect(
+            fromProsemirror(
+                { type: "text", text: "Hello world " },
+                rules
+            ).asArray()
+        ).toEqual([
+            { type: "Str", content: "Hello" },
+            { type: "Space" },
+            { type: "Str", content: "world" },
+            { type: "Space" },
+        ]);
+    });
+
+
     it("performs a simple transformation from Prosemirror marks to nodes", () => {
         expect(
             fromProsemirror(

@@ -93,7 +93,6 @@ describe("fromProsemirror", () => {
         ]);
     });
 
-
     it("performs a simple transformation from Prosemirror marks to nodes", () => {
         expect(
             fromProsemirror(
